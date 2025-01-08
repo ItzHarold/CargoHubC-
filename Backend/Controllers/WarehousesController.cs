@@ -11,7 +11,7 @@ namespace Backend.Controllers.Warehouses
         private readonly IWarehouseService _warehouseService;
 
         public WarehousesController(IWarehouseService warehouseService)
-        {
+        { 
             _warehouseService = warehouseService;
         }
 
