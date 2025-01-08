@@ -79,13 +79,6 @@ jobs:
           output: both
           thresholds: '80 100'
 
-      # Add the coverage report to the GitHub Actions summary
-      - name: Add Coverage to Summary
-        if: always()
-        run: |
-          echo '### Code Coverage Summary' >> $GITHUB_STEP_SUMMARY
-          cat coverage-summary.md >> $GITHUB_STEP_SUMMARY
-
       # Add coverage report as a PR comment (only on pull requests)
       - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2
@@ -98,3 +91,31 @@ jobs:
         with:
           name: TestResults
           path: ./TestResults/coverage-html
+
+  # deploy:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   environment: production
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         token: ${{ secrets.DEPLOY_TOKEN }}
+
+  #     - name: Setup .NET
+  #       uses: actions/setup-dotnet@v4
+  #       with:
+  #         dotnet-version: 8.0.x
+
+  #     - name: Publish
+  #       run: dotnet publish Backend/Backend.csproj -c Release -o ./publish
+
+  #     - name: Deploy
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+  #       run: |
+  #         git config --global user.name "GitHub Actions"
+  #         git config --global user.email "actions@github.com"
+  #         git add ./publish
+  #         git commit -m "Deploy application"
+  #         git push
