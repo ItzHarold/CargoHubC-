@@ -10,6 +10,7 @@ namespace Backend.Infrastructure.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<LoggingMiddleware> _logger;
+
         private static readonly Action<ILogger, string, string, string?, Exception?> _logExecutingAction;
         private static readonly Action<ILogger, string, string, string?, Exception?> _logExecutedAction;
 
@@ -39,10 +40,20 @@ namespace Backend.Infrastructure.Middleware
 
             if (request.Method != HttpMethods.Get)
             {
-                requestBody = " and body: " + await ReadRequestBodyAsync(request);
+                requestBody = await ReadRequestBodyAsync(request);
             }
 
+            // Extract API key from the headers
+            var apiKey = context.Request.Headers["x-api-key"].FirstOrDefault() ?? "Unknown";
+
             _logExecutingAction(_logger, request.Path, request.Method, requestBody ?? string.Empty, null);
+
+            // Resolve the scoped service
+            using (var scope = context.RequestServices.CreateScope())
+            {
+                var logService = scope.ServiceProvider.GetRequiredService<Backend.Features.Logs.ILogService>();
+                logService.LogRequest(apiKey, request.Method, requestBody);
+            }
 
             await _next(context);
 

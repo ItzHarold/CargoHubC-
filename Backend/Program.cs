@@ -10,7 +10,7 @@ using Backend.Features.Orders;
 using Backend.Features.Shipments;
 using Backend.Features.Suppliers;
 using Backend.Features.Transfers;
-
+using Backend.Features.Logs;
 using Backend.Features.Warehouses;
 using Backend.Infrastructure.Database;
 using Backend.Infrastructure.Middleware;
@@ -71,5 +71,7 @@ public static class Program
         services.AddTransient<IShipmentService,ShipmentService>();
         services.AddTransient<IOrderService,OrderService>();
         services.AddTransient<ISupplierService,SupplierService>();
+        services.AddTransient<ILogService, LogService>();
+
     }
 }

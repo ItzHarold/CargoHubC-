@@ -12,6 +12,7 @@ using Backend.Features.Shipments;
 using Backend.Features.Suppliers;
 using Backend.Features.Transfers;
 using Backend.Features.Warehouses;
+using Backend.Features.Logs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Infrastructure.Database;
@@ -31,6 +32,8 @@ public class CargoHubDbContext(DbContextOptions<CargoHubDbContext> options) : Db
     public virtual DbSet<Supplier>? Suppliers { get; set; }
     public virtual DbSet<Transfer>? Transfers { get; set; }
     public virtual DbSet<Warehouse>? Warehouses { get; set; }
+
+    public virtual DbSet<Log>? Logs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
