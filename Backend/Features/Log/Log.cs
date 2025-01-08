@@ -19,6 +19,9 @@ namespace Backend.Features.Logs
         [Required]
         public string? RequestType { get; set; }
 
+        [Required]
+        public string? ResponeType { get; set; }
+
         public string? RequestBody { get; set; }
     }
 }

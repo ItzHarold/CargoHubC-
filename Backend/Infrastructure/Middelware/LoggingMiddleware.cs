@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,10 +53,10 @@ namespace Backend.Infrastructure.Middleware
             using (var scope = context.RequestServices.CreateScope())
             {
                 var logService = scope.ServiceProvider.GetRequiredService<Backend.Features.Logs.ILogService>();
-                logService.LogRequest(apiKey, request.Method, requestBody);
+                await _next(context);
+                var responseType = context.Response.StatusCode.ToString(CultureInfo.InvariantCulture);
+                logService.LogRequest(apiKey, request.Method, responseType, requestBody);
             }
-
-            await _next(context);
 
             _logExecutedAction(_logger, request.Path, request.Method, requestBody ?? string.Empty, null);
         }
