@@ -76,15 +76,8 @@ jobs:
           hide_branch_rate: false
           hide_complexity: true
           indicators: true
-          output: markdown
+          output: both
           thresholds: '80 100'
-
-      # Add the coverage report to the GitHub Actions summary
-      - name: Add Coverage to Summary
-        if: always()
-        run: |
-          echo '### Code Coverage Summary' >> $GITHUB_STEP_SUMMARY
-          cat coverage-summary.md >> $GITHUB_STEP_SUMMARY
 
       # Add coverage report as a PR comment (only on pull requests)
       - name: Add Coverage PR Comment
@@ -98,7 +91,6 @@ jobs:
         with:
           name: TestResults
           path: ./TestResults/coverage-html
-
 
   # deploy:
   #   needs: test
