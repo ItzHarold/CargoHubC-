@@ -14,8 +14,9 @@ namespace Backend.Features.Inventories
         public required int Id { get; set; }
 
         [Required]
-        [JsonPropertyName("item_code")]
-        [ForeignKey("Items")] public required string ItemCode { get; set; }
+        [JsonPropertyName("item_id")]
+        [ForeignKey("Items")]
+        public required int ItemId { get; set; }
 
         [JsonPropertyName("description")]
         public string? Description { get; set; }
@@ -24,7 +25,7 @@ namespace Backend.Features.Inventories
         public string? ItemReference { get; set; }
 
         [Required]
-        [JsonPropertyName("location_id")]
+        [JsonPropertyName("locations")]
         public required int[] LocationId { get; set; }
 
         [Required]

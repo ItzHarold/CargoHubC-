@@ -72,6 +72,5 @@ public static class Program
         services.AddTransient<IOrderService,OrderService>();
         services.AddTransient<ISupplierService,SupplierService>();
         services.AddTransient<ILogService, LogService>();
-
     }
 }

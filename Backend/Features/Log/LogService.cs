@@ -6,10 +6,7 @@ namespace Backend.Features.Logs
     {
         void LogRequest(string apiKey, string requestType, string responseType, string? requestBody, string? actionName);
     }
-}
 
-namespace Backend.Features.Logs
-{
     public class LogService : ILogService
     {
         private readonly CargoHubDbContext _dbContext;

@@ -35,17 +35,8 @@ namespace Backend.Features.Clients
         [JsonPropertyName("country")]
         public required string Country { get; set; }
 
-        [Required]
-        [JsonPropertyName("contact_name")]
-        public required string ContactName { get; set; }
-
-        [Required]
-        [JsonPropertyName("contact_phone")]
-        public required string ContactPhone { get; set; }
-
-        [Required]
-        [JsonPropertyName("contact_email")]
-        [EmailAddress]
-        public required string ContactEmail { get; set; }
+        [ForeignKey("Contacts")]
+        [JsonPropertyName("contact_id")]
+        public required string ContactId { get; set; }
     }
 }
