@@ -2,9 +2,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "main", "development", "workflow" ]  # Runs on pushes to main and development
+    branches: [ "main", "development" ]
   pull_request:
-    branches: [ "main", "development" ]  # Runs on PRs targeting main or development
+    branches: [ "main", "development" ]
 
 jobs:
   build:
@@ -24,6 +24,8 @@ jobs:
       - name: Build
         run: dotnet build --configuration Debug --no-restore
 
+      
+  
   test:
     needs: build
     runs-on: ubuntu-latest
@@ -37,7 +39,7 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
-
+      
       - name: Start API for Integration Tests
         run: |
           dotnet run --project Backend/Backend.csproj --urls "http://localhost:5031" &
@@ -58,28 +60,18 @@ jobs:
       - name: Generate Coverage Reports
         run: reportgenerator -reports:./TestResults/**/coverage.cobertura.xml -targetdir:./TestResults/coverage-html -reporttypes:Html
 
-      - name: Display Coverage Summary in Logs
+      - name: Display Coverage Summary
         run: |
           echo "Test Coverage Summary:"
           reportgenerator -reports:./TestResults/**/coverage.cobertura.xml -targetdir:./TestResults/coverage-text -reporttypes:TextSummary
           cat ./TestResults/coverage-text/Summary.txt
 
-      - name: Upload Coverage Report Artifact
+      - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
-          name: CodeCoverageReport
+          name: TestResults
           path: ./TestResults/coverage-html
-
-      - name: Post Coverage Summary to PR
-        if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          summary=$(cat ./TestResults/coverage-text/Summary.txt)
-          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-               -H "Content-Type: application/json" \
-               -d "{\"body\": \"### Test Coverage Summary\n\`\`\`\n$summary\n\`\`\`\"}" \
-               "${{ github.event.pull_request.comments_url }}"
+          
 
   deploy:
     needs: test
