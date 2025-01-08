@@ -23,5 +23,7 @@ namespace Backend.Features.Logs
         public string? ResponeType { get; set; }
 
         public string? RequestBody { get; set; }
+
+        public string? ActionName { get; set; }
     }
 }

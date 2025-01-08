@@ -4,7 +4,7 @@ namespace Backend.Features.Logs
 {
     public interface ILogService
     {
-        void LogRequest(string apiKey, string requestType, string responseType, string? requestBody);
+        void LogRequest(string apiKey, string requestType, string responseType, string? requestBody, string? actionName);
     }
 }
 
@@ -19,7 +19,7 @@ namespace Backend.Features.Logs
             _dbContext = dbContext;
         }
 
-        public void LogRequest(string apiKey, string requestType, string? responseType, string? requestBody)
+        public void LogRequest(string apiKey, string requestType, string? responseType, string? requestBody, string? actionName)
         {
             var log = new Log
             {
@@ -27,7 +27,8 @@ namespace Backend.Features.Logs
                 Timestamp = DateTime.UtcNow,
                 RequestType = requestType,
                 ResponeType = responseType,
-                RequestBody = requestBody
+                RequestBody = requestBody,
+                ActionName = actionName
             };
 
             _dbContext.Logs?.Add(log);

@@ -47,6 +47,9 @@ namespace Backend.Infrastructure.Middleware
             // Extract API key from the headers
             var apiKey = context.Request.Headers["x-api-key"].FirstOrDefault() ?? "Unknown";
 
+            // Extract action name from route data
+            var actionName = context.GetRouteData()?.Values["action"]?.ToString() ?? "Unknown";
+
             _logExecutingAction(_logger, request.Path, request.Method, requestBody ?? string.Empty, null);
 
             // Resolve the scoped service
@@ -55,7 +58,7 @@ namespace Backend.Infrastructure.Middleware
                 var logService = scope.ServiceProvider.GetRequiredService<Backend.Features.Logs.ILogService>();
                 await _next(context);
                 var responseType = context.Response.StatusCode.ToString(CultureInfo.InvariantCulture);
-                logService.LogRequest(apiKey, request.Method, responseType, requestBody);
+                logService.LogRequest(apiKey, request.Method, responseType, requestBody, actionName);
             }
 
             _logExecutedAction(_logger, request.Path, request.Method, requestBody ?? string.Empty, null);
