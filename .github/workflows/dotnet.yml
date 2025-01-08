@@ -58,14 +58,14 @@ jobs:
       - name: Generate Coverage Reports
         run: reportgenerator -reports:./TestResults/**/coverage.cobertura.xml -targetdir:./TestResults/coverage-html -reporttypes:Html
 
-      # Check if the file exists and output the contents for debugging
+      # Debugging to verify coverage file
       - name: List Test Results Directory
         run: ls -R ./TestResults/
 
       - name: Display Coverage Report Content
         run: cat ./TestResults/**/coverage.cobertura.xml
 
-      # Code Coverage Summary Generation
+      # Generate Code Coverage Summary
       - name: Code Coverage Report
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
@@ -79,6 +79,17 @@ jobs:
           output: both
           thresholds: '80 100'
 
+      # Display the generated coverage summary
+      - name: Display Generated Coverage Summary
+        run: cat $GITHUB_WORKSPACE/coverage-summary.md
+
+      # Add the coverage report to the GitHub Actions summary
+      - name: Add Coverage to Summary
+        if: always()
+        run: |
+          echo '### Code Coverage Summary' >> $GITHUB_STEP_SUMMARY
+          cat $GITHUB_WORKSPACE/coverage-summary.md >> $GITHUB_STEP_SUMMARY
+
       # Add coverage report as a PR comment (only on pull requests)
       - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2
@@ -86,18 +97,12 @@ jobs:
         with:
           recreate: true
 
-      # Add the coverage report to the summary
-      - name: Add Coverage to Summary
-        if: always()
-        run: |
-          echo '### Code Coverage Summary' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat $GITHUB_WORKSPACE/coverage-summary.md)" >> $GITHUB_STEP_SUMMARY
-
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
           name: TestResults
           path: ./TestResults/coverage-html
+
 
   # deploy:
   #   needs: test
