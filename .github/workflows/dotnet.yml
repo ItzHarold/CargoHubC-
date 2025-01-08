@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "main", "development", "workflow" ]
+    branches: [ "main", "development" ]
   pull_request:
     branches: [ "main", "development" ]
 
@@ -58,19 +58,39 @@ jobs:
       - name: Generate Coverage Reports
         run: reportgenerator -reports:./TestResults/**/coverage.cobertura.xml -targetdir:./TestResults/coverage-html -reporttypes:Html
 
-      # Verify if the coverage file exists
+      # Check if the file exists and output the contents for debugging
       - name: List Test Results Directory
         run: ls -R ./TestResults/
 
       - name: Display Coverage Report Content
         run: cat ./TestResults/**/coverage.cobertura.xml
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+      # Code Coverage Summary Generation
+      - name: Code Coverage Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          files: ./TestResults/**/coverage.cobertura.xml
-          token: ${{ secrets.CODECOV_TOKEN }}  # Optional: Add only if needed
-          fail_ci_if_error: true
+          filename: ./TestResults/**/coverage.cobertura.xml
+          badge: true
+          fail_below_min: true
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '60 80'
+
+      # Add coverage report as a PR comment (only on pull requests)
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults
+          path: ./TestResults/coverage-html
 
   # deploy:
   #   needs: test
