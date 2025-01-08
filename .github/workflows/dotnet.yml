@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "main", "development" ]
+    branches: [ "main", "development", "workflow" ]
   pull_request:
     branches: [ "main", "development" ]
 
@@ -63,6 +63,12 @@ jobs:
         with:
           name: TestResults
           path: ./TestResults/coverage-html
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./TestResults/**/coverage.cobertura.xml
+          fail_ci_if_error: true
 
   deploy:
     needs: test
