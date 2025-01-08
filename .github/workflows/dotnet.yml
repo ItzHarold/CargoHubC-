@@ -67,32 +67,32 @@ jobs:
           path: ./TestResults/coverage-html
           
 
-  # deploy:
-  #   runs-on: self-hosted
-  #   needs: build
-
-  #   steps:
-  #     - uses: actions/checkout@v4
+  deploy:
+    needs: test
+    runs-on: self-hosted
+    
+    steps:
+      - uses: actions/checkout@v4
       
-  #     - name: Setup .NET
-  #       uses: actions/setup-dotnet@v4
-  #       with:
-  #         dotnet-version: 8.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-  #     - name: Restore dependencies
-  #       run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
+        
+      - name: Build and Publish
+        run: dotnet publish Backend/Backend.csproj -c Release -o publish
 
-  #     - name: Publish Application
-  #       run: dotnet publish Backend/Backend.csproj -c Release -o ./publish
+      - name: Stop existing service (if running)
+        run: |
+          if service dotnet-app status > /dev/null 2>&1; then
+            sudo systemctl stop dotnet-app
+          fi
+        continue-on-error: true
 
-  #     - name: Deploy to Server
-  #       run: |
-  #         echo "Deploying application..."
-  #         # Example: Use rsync, scp, or other deployment tools to transfer files to your server
-  #         # scp -r ./publish/* user@server:/path/to/deploy/
-  #         echo "Deployment complete."
-
-  #     - name: Post-Deployment Validation
-  #       run: |
-  #         echo "Validating deployment..."
-  #         # Add deployment validation commands, e.g., call the API or run a health check.
+      - name: Deploy to server
+        run: |
+          sudo cp -r publish/* /var/www/dotnet-app/
+          sudo systemctl restart dotnet-app
