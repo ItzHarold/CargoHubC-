@@ -77,7 +77,7 @@ jobs:
           hide_complexity: true
           indicators: true
           output: markdown
-          thresholds: '0 100'
+          thresholds: '80 100'
 
       # Add the coverage report to the GitHub Actions summary
       - name: Add Coverage to Summary
