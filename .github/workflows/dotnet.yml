@@ -1,18 +1,16 @@
 name: .NET
-
 on:
   push:
-    branches: [ "main", "development", "workflow" ]
+    branches: [ "main", "development" ]
   pull_request:
     branches: [ "main", "development" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: self-hosted
 
     steps:
       - uses: actions/checkout@v4
-      
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -23,20 +21,6 @@ jobs:
 
       - name: Build
         run: dotnet build --configuration Debug --no-restore
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Restore dependencies
-        run: dotnet restore
 
       - name: Start API for Integration Tests
         run: |
@@ -58,58 +42,8 @@ jobs:
       - name: Generate Coverage Reports
         run: reportgenerator -reports:./TestResults/**/coverage.cobertura.xml -targetdir:./TestResults/coverage-html -reporttypes:Html
 
-      # Code Coverage Summary Generation
-      - name: Code Coverage Report
-        id: coverage_summary
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: ./TestResults/**/coverage.cobertura.xml
-          badge: true
-          fail_below_min: true
-          format: markdown
-          hide_branch_rate: false
-          hide_complexity: true
-          indicators: true
-          output: summary
-          thresholds: '60 80'
-
-      # Add the coverage report to the summary
-      - name: Add Coverage to Summary
-        if: always()
-        run: |
-          echo '### Code Coverage Summary' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat $GITHUB_WORKSPACE/coverage-summary.md)" >> $GITHUB_STEP_SUMMARY
-
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
           name: TestResults
           path: ./TestResults/coverage-html
-
-  # deploy:
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   environment: production
-
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         token: ${{ secrets.DEPLOY_TOKEN }}
-
-  #     - name: Setup .NET
-  #       uses: actions/setup-dotnet@v4
-  #       with:
-  #         dotnet-version: 8.0.x
-
-  #     - name: Publish
-  #       run: dotnet publish Backend/Backend.csproj -c Release -o ./publish
-
-  #     - name: Deploy
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-  #       run: |
-  #         git config --global user.name "GitHub Actions"
-  #         git config --global user.email "actions@github.com"
-  #         git add ./publish
-  #         git commit -m "Deploy application"
-  #         git push
