@@ -1,9 +1,8 @@
 name: .NET
 
 on:
-  workflow_dispatch:  # This makes it manual only
   push:
-    branches: [ "main", "development", "workflow" ]
+    branches: [ "main", "development" ]
   pull_request:
     branches: [ "main", "development" ]
 
@@ -101,5 +100,3 @@ jobs:
           git add ./publish
           git commit -m "Deploy application"
           git push
-
-
