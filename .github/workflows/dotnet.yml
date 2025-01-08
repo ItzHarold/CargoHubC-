@@ -24,8 +24,6 @@ jobs:
       - name: Build
         run: dotnet build --configuration Debug --no-restore
 
-      
-  
   test:
     needs: build
     runs-on: ubuntu-latest
@@ -39,7 +37,7 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
-      
+
       - name: Start API for Integration Tests
         run: |
           dotnet run --project Backend/Backend.csproj --urls "http://localhost:5031" &
@@ -60,37 +58,30 @@ jobs:
       - name: Generate Coverage Reports
         run: reportgenerator -reports:./TestResults/**/coverage.cobertura.xml -targetdir:./TestResults/coverage-html -reporttypes:Html
 
-      - name: Display Coverage Summary
-        run: |
-          echo "Test Coverage Summary:"
-          reportgenerator -reports:./TestResults/**/coverage.cobertura.xml -targetdir:./TestResults/coverage-text -reporttypes:TextSummary
-          cat ./TestResults/coverage-text/Summary.txt
-
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
           name: TestResults
           path: ./TestResults/coverage-html
-          
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
     environment: production
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.DEPLOY_TOKEN }}
-      
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-          
+
       - name: Publish
         run: dotnet publish Backend/Backend.csproj -c Release -o ./publish
-        
+
       - name: Deploy
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
@@ -100,3 +91,46 @@ jobs:
           git add ./publish
           git commit -m "Deploy application"
           git push
+
+  # New job to publish the coverage report to GitHub Pages (gh-pages branch)
+  publish-coverage:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages  # Checkout the gh-pages branch to push the report
+
+      - name: Create gh-pages branch (if it doesn't exist)
+        run: |
+          git checkout --orphan gh-pages
+          git reset --hard
+          git clean -fdx
+
+      - name: Copy Coverage HTML to gh-pages
+        run: |
+          mkdir -p ./coverage
+          cp -r ./TestResults/coverage-html/* ./coverage/
+
+      - name: Commit and Push Coverage Report
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add ./coverage
+          git commit -m "Add coverage report"
+          git push --force origin gh-pages
+
+  post-coverage-comment:
+    needs: publish-coverage
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'  # Only run for pull requests
+    steps:
+      - name: Post Coverage Report Link
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_URL="https://github.com/${{ github.repository }}/tree/gh-pages/coverage"
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Content-Type: application/json" \
+               -d "{\"body\": \"[View Coverage Report](https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/coverage/index.html)\"}" \
+               "${{ github.event.pull_request.comments_url }}"
