@@ -69,24 +69,30 @@ jobs:
 
   deploy:
     needs: test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    environment: production
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEPLOY_TOKEN }}
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-
-      - name: Restore dependencies
-        run: dotnet restore
-        
-      - name: Build and Publish
+          
+      - name: Publish
         run: dotnet publish Backend/Backend.csproj -c Release -o ./publish
-
-      - name: Deploy to server
+        
+      - name: Deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
         run: |
-          cp -r publish/* /app/dotnet-app/
-          systemctl --user restart dotnet-app
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add ./publish
+          git commit -m "Deploy application"
+          git push
+
 
