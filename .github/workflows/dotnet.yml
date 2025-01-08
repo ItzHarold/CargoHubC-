@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "main", "development", "workflow" ]
+    branches: [ "main", "development" ]
   pull_request:
     branches: [ "main", "development" ]
 
@@ -85,13 +85,6 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           recreate: true
-
-      # Add the coverage report to the summary
-      - name: Add Coverage to Summary
-        if: always()
-        run: |
-          echo '### Code Coverage Summary' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat $GITHUB_WORKSPACE/coverage-summary.md)" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
