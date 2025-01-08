@@ -70,17 +70,6 @@ jobs:
           name: CodeCoverageReport
           path: ./TestResults/coverage-html
 
-      - name: Post Coverage Summary to PR
-        if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          summary=$(cat ./TestResults/coverage-text/Summary.txt)
-          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-               -H "Content-Type: application/json" \
-               -d "{\"body\": \"### Test Coverage Summary\n\`\`\`\n$summary\n\`\`\`\"}" \
-               "${{ github.event.pull_request.comments_url }}"
-
   deploy:
     needs: test
     runs-on: ubuntu-latest
