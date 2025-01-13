@@ -77,9 +77,6 @@ jobs:
           output: both
           thresholds: '0 100'
 
-      - name: Test with pytest
-        run: |
-          coverage run -m pytest
       - name: Run code coverage
         run: |
           # Run coverage report
@@ -90,6 +87,7 @@ jobs:
 
           # Report again and fail if under 100%.
           coverage report --fail-under=100
+          
       - name: Store coverage report
         uses: actions/upload-artifact@v4
         with:
