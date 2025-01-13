@@ -76,8 +76,26 @@ jobs:
           indicators: true
           output: both
           thresholds: '80 100'
+      - name: Test with pytest
+        run: |
+          coverage run -m pytest
+      - name: Run code coverage
+        run: |
+          # Run coverage report
+          #coverage xml
 
-      # Write the coverage report to GitHub Actions summary
+          # Report and write to summary.
+          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+
+          # Report again and fail if under 100%.
+          coverage report --fail-under=100
+      - name: Store coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          path: coverage.xml
+        if: ${{ failure() }}
+
+        # Write the coverage report to GitHub Actions summary
       - name: Write to Job Summary
         run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
@@ -90,8 +108,8 @@ jobs:
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
-          name: TestResults
-          path: ./TestResults/coverage-html
+            name: TestResults
+            path: ./TestResults/coverage-html
 
   # deploy:
   #   needs: test
