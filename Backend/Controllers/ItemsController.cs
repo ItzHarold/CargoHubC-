@@ -54,5 +54,12 @@ namespace Backend.Controllers.Items
             var items = _service.GetItemsByItemType(itemTypeId);
             return Ok(items);
         }
+
+        [HttpGet("by-item-group/{itemGroupId:int}")]
+        public IActionResult GetItemsByItemGroup(int itemGroupId)
+        {
+            var items = _service.GetItemsByItemGroup(itemGroupId);
+            return Ok(items);
+        }
+        }
     }
-}

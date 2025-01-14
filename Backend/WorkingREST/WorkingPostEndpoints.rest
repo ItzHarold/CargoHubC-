@@ -252,12 +252,12 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 }
 
 ### Add a new item group
-POST http://localhost:5031/api/itemgroups
+POST http://localhost:5031/api/item_groups
 Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "id": 1,
+    "id": 80,
     "name": "New Category",
     "description": "Description for new category"
 }
