@@ -47,5 +47,12 @@ namespace Backend.Controllers.Items
             _service.UpdateItem(uid, item);
             return NoContent();
         }
+
+        [HttpGet("by-item-type/{itemTypeId:int}")]
+        public IActionResult GetItemsByItemType(int itemTypeId)
+        {
+            var items = _service.GetItemsByItemType(itemTypeId);
+            return Ok(items);
+        }
     }
 }
