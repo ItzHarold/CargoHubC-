@@ -14,6 +14,7 @@ namespace Backend.Features.Items
         void DeleteItem(string uid);
         IEnumerable<Item> GetItemsByItemType(int itemTypeId);
         IEnumerable<Item> GetItemsByItemGroup(int itemGroupId);
+        IEnumerable<Item> GetItemsByItemLine(int itemLineId);
     }
 
     public class ItemService : IItemService
@@ -59,6 +60,11 @@ namespace Backend.Features.Items
         public IEnumerable<Item> GetItemsByItemGroup(int itemGroupId)
         {
             return Context.Where(item => item.ItemGroup == itemGroupId);
+        }
+
+        public IEnumerable<Item> GetItemsByItemLine(int itemLineId)
+        {
+            return Context.Where(item => item.ItemLine == itemLineId);
         }
     }
 }

@@ -6,6 +6,10 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 GET http://localhost:5031/api/items/by-item-group/80
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
+### Get all items of a specific item line
+GET http://localhost:5031/api/items/by-item-line/1
+X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+
 ### Get for all warehouses
 GET http://localhost:5031/api/warehouses
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
