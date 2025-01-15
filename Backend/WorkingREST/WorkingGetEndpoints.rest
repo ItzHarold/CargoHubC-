@@ -34,7 +34,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 GET http://localhost:5031/api/transfers/1
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
-### Get for items in transfer by ID
+### Get items for a transfer by transfer ID
 GET http://localhost:5031/api/transfers/1/items
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 

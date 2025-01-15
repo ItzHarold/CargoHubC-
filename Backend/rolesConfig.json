@@ -79,7 +79,8 @@
             "UpdateLocation",
             "AddLocation",
             "DeleteLocation",
-            "GetItemsBySupplierId"
+            "GetItemsBySupplierId",
+            "GetItemsInTransfer"
         ],
         "WarehouseManager": [
             "HealthCheck",

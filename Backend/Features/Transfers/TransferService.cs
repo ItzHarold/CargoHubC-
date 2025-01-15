@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using Backend.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,35 +17,32 @@ namespace Backend.Features.Transfers
     public class TransferService : ITransferService
     {
         private readonly CargoHubDbContext _dbContext;
+
         public TransferService(CargoHubDbContext dbContext)
         {
             _dbContext = dbContext;
         }
+
         public IEnumerable<Transfer> GetAllTransfers()
         {
-            if (_dbContext.Transfers != null)
-            {
-                return _dbContext.Transfers.ToList();
-            }
-            return new List<Transfer>();
+            return _dbContext.Transfers?.ToList() ?? new List<Transfer>();
         }
 
         public void AddTransfer(Transfer transfer)
         {
             transfer.CreatedAt = DateTime.Now;
-            if (transfer.TransferFrom == null)
-            {
-                transfer.TransferFrom = transfer.TransferTo;
-                transfer.TransferTo = null;
-            }
 
+            // Add transfer to DB
             _dbContext.Transfers?.Add(transfer);
             _dbContext.SaveChanges();
         }
 
         public Transfer? GetTransferById(int id)
         {
-            return _dbContext.Transfers?.Find(id);
+            // Use eager loading to load items along with the transfer
+            return _dbContext.Transfers?
+                .Include(t => t.Items)  // Eager load Items
+                .FirstOrDefault(t => t.Id == id);
         }
 
         public void UpdateTransfer(Transfer transfer)
