@@ -51,9 +51,9 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "uid": "P001201",
+  "uid": "P111111",
   "code": "sjQ23408K",
-  "description": "Item",
+  "description": "New Item",
   "short_description": "item",
   "upc_code": "6523523427122",
   "model_number": "44-9JeF0S",
