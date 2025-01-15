@@ -7,7 +7,7 @@ public abstract class BaseEntity
 {
     [Required]
     [JsonPropertyName("created_at")]
-    public required DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     [JsonPropertyName("updated_at")]
     public DateTime? UpdatedAt { get; set; }
