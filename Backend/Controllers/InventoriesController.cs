@@ -33,20 +33,22 @@ namespace Backend.Controllers.Inventories
             return Ok(inventory);
         }
 
-        public IActionResult AddInventory(Inventory inventory)
+        [HttpPost]
+        public async Task<IActionResult> AddInventory([FromBody] Inventory inventory)
         {
-            _inventoryService.AddInventory(inventory);
+            await _inventoryService.AddInventory(inventory);
             return CreatedAtAction(nameof(GetInventoryById), new { id = inventory.Id }, inventory);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateInventory(int id, Inventory inventory)
+        public async Task<IActionResult> UpdateInventory(int id, [FromBody] Inventory inventory)
         {
             if (id != inventory.Id)
             {
-                return BadRequest();
+                return BadRequest("Inventory ID in the path does not match the ID in the body.");
             }
-            _inventoryService.UpdateInventory(inventory);
+
+            await _inventoryService.UpdateInventory(inventory);
             return NoContent();
         }
 

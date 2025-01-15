@@ -11,7 +11,7 @@ namespace Backend.Features.Transfers
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [JsonPropertyName("reference")]
         public string? Reference { get; set; }

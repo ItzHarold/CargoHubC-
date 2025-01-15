@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using Backend.Infrastructure.Database;
+using FluentValidation;
 
 namespace Backend.Features.Contacts
 {
@@ -9,18 +9,20 @@ namespace Backend.Features.Contacts
     {
         IEnumerable<Contact> GetAllContacts();
         Contact? GetContactById(int id);
-        void AddContact(Contact contact);
-        void UpdateContact(Contact contact);
+        Task AddContact(Contact contact);
+        Task UpdateContact(Contact contact);
         void DeleteContact(int id);
     }
 
     public class ContactService : IContactService
     {
         private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<Contact> _validator;
 
-        public ContactService(CargoHubDbContext dbContext)
+        public ContactService(CargoHubDbContext dbContext, IValidator<Contact> validator)
         {
             _dbContext = dbContext;
+            _validator = validator;
         }
 
         public IEnumerable<Contact> GetAllContacts()
@@ -37,15 +39,28 @@ namespace Backend.Features.Contacts
             return _dbContext.Contacts?.Find(id);
         }
 
-        public void AddContact(Contact contact)
+        public async Task AddContact(Contact contact)
         {
+            var validationResult = await _validator.ValidateAsync(contact);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
             _dbContext.Contacts?.Add(contact);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
-        public void UpdateContact(Contact contact)
+
+        public async Task UpdateContact(Contact contact)
         {
+            var validationResult = await _validator.ValidateAsync(contact);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
             _dbContext.Contacts?.Update(contact);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteContact(int id)

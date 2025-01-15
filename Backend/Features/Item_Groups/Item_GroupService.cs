@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using Backend.Infrastructure.Database;
+using FluentValidation;
 
 namespace Backend.Features.ItemGroups
 {
@@ -17,10 +17,12 @@ namespace Backend.Features.ItemGroups
     public class ItemGroupService : IItemGroupService
     {
         private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<ItemGroup> _validator;
 
-        public ItemGroupService(CargoHubDbContext dbContext)
+        public ItemGroupService(CargoHubDbContext dbContext, IValidator<ItemGroup> validator)
         {
             _dbContext = dbContext;
+            _validator = validator;
         }
 
         public IEnumerable<ItemGroup> GetAllItemGroups()
@@ -39,6 +41,13 @@ namespace Backend.Features.ItemGroups
 
         public void AddItemGroup(ItemGroup itemGroup)
         {
+            var validationResult = _validator.Validate(itemGroup);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             itemGroup.CreatedAt = DateTime.Now;
             _dbContext.ItemGroups?.Add(itemGroup);
             _dbContext.SaveChanges();
@@ -46,6 +55,13 @@ namespace Backend.Features.ItemGroups
 
         public void UpdateItemGroup(ItemGroup itemGroup)
         {
+            var validationResult = _validator.Validate(itemGroup);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             itemGroup.UpdatedAt = DateTime.Now;
             _dbContext.ItemGroups?.Update(itemGroup);
             _dbContext.SaveChanges();
@@ -53,13 +69,12 @@ namespace Backend.Features.ItemGroups
 
         public void DeleteItemGroup(int id)
         {
-            var itemGroup = _dbContext.Inventories?.FirstOrDefault(c => c.Id == id);
+            var itemGroup = _dbContext.ItemGroups?.FirstOrDefault(c => c.Id == id);
             if (itemGroup != null)
             {
-                _dbContext.Inventories?.Remove(itemGroup);
+                _dbContext.ItemGroups?.Remove(itemGroup);
                 _dbContext.SaveChanges();
             }
         }
-
     }
 }

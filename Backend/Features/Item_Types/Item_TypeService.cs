@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using Backend.Infrastructure.Database;
+using FluentValidation;
 
 namespace Backend.Features.ItemTypes
 {
@@ -17,9 +17,12 @@ namespace Backend.Features.ItemTypes
     public class ItemTypeService : IItemTypeService
     {
         private readonly CargoHubDbContext _dbContext;
-        public ItemTypeService(CargoHubDbContext dbContext)
+        private readonly IValidator<ItemType> _validator;
+
+        public ItemTypeService(CargoHubDbContext dbContext, IValidator<ItemType> validator)
         {
             _dbContext = dbContext;
+            _validator = validator;
         }
 
         public IEnumerable<ItemType> GetAllItemTypes()
@@ -38,6 +41,13 @@ namespace Backend.Features.ItemTypes
 
         public void AddItemType(ItemType itemType)
         {
+            var validationResult = _validator.Validate(itemType);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             itemType.CreatedAt = DateTime.Now;
             _dbContext.ItemTypes?.Add(itemType);
             _dbContext.SaveChanges();
@@ -45,6 +55,18 @@ namespace Backend.Features.ItemTypes
 
         public void UpdateItemType(int id, ItemType itemType)
         {
+            if (id != itemType.Id)
+            {
+                throw new ValidationException("Item Type ID in the path does not match the ID in the body.");
+            }
+
+            var validationResult = _validator.Validate(itemType);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             itemType.UpdatedAt = DateTime.Now;
             _dbContext.ItemTypes?.Update(itemType);
             _dbContext.SaveChanges();

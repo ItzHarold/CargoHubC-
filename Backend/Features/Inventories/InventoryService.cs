@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using Backend.Infrastructure.Database;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Features.Inventories
 {
@@ -9,18 +10,20 @@ namespace Backend.Features.Inventories
     {
         IEnumerable<Inventory> GetAllInventories();
         Inventory? GetInventoryById(int id);
-        void AddInventory(Inventory inventory);
-        void UpdateInventory(Inventory inventory);
+        Task AddInventory(Inventory inventory);
+        Task UpdateInventory(Inventory inventory);
         void DeleteInventory(int id);
     }
 
     public class InventoryService : IInventoryService
     {
         private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<Inventory> _validator;
 
-        public InventoryService(CargoHubDbContext dbContext)
+        public InventoryService(CargoHubDbContext dbContext, IValidator<Inventory> validator)
         {
             _dbContext = dbContext;
+            _validator = validator;
         }
 
         public IEnumerable<Inventory> GetAllInventories()
@@ -31,23 +34,38 @@ namespace Backend.Features.Inventories
             }
             return new List<Inventory>();
         }
+
         public Inventory? GetInventoryById(int id)
         {
             return _dbContext.Inventories?.Find(id);
         }
 
-        public void AddInventory(Inventory inventory)
+        public async Task AddInventory(Inventory inventory)
         {
+            var validationResult = await _validator.ValidateAsync(inventory);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             inventory.CreatedAt = DateTime.Now;
             _dbContext.Inventories?.Add(inventory);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
-        public void UpdateInventory(Inventory inventory)
+        public async Task UpdateInventory(Inventory inventory)
         {
+            var validationResult = await _validator.ValidateAsync(inventory);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             inventory.UpdatedAt = DateTime.Now;
             _dbContext.Inventories?.Update(inventory);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteInventory(int id)

@@ -11,7 +11,7 @@ namespace Backend.Features.Inventories
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [JsonPropertyName("item_id")]

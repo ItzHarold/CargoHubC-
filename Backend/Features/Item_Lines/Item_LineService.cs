@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using Backend.Infrastructure.Database;
+using FluentValidation;
 
 namespace Backend.Features.ItemLines
 {
@@ -17,9 +17,12 @@ namespace Backend.Features.ItemLines
     public class ItemLineService : IItemLineService
     {
         private readonly CargoHubDbContext _dbContext;
-        public ItemLineService(CargoHubDbContext dbContext)
+        private readonly IValidator<ItemLine> _validator;
+
+        public ItemLineService(CargoHubDbContext dbContext, IValidator<ItemLine> validator)
         {
             _dbContext = dbContext;
+            _validator = validator;
         }
 
         public IEnumerable<ItemLine> GetAllItemLines()
@@ -31,8 +34,20 @@ namespace Backend.Features.ItemLines
             return new List<ItemLine>();
         }
 
+        public ItemLine? GetItemLineById(int id)
+        {
+            return _dbContext.ItemLines?.Find(id);
+        }
+
         public void AddItemLine(ItemLine itemLine)
         {
+            var validationResult = _validator.Validate(itemLine);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             itemLine.CreatedAt = DateTime.Now;
             _dbContext.ItemLines?.Add(itemLine);
             _dbContext.SaveChanges();
@@ -40,6 +55,18 @@ namespace Backend.Features.ItemLines
 
         public void UpdateItemLine(int id, ItemLine itemLine)
         {
+            if (id != itemLine.id)
+            {
+                throw new ValidationException("Item Line ID in the path does not match the ID in the body.");
+            }
+
+            var validationResult = _validator.Validate(itemLine);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             itemLine.UpdatedAt = DateTime.Now;
             _dbContext.ItemLines?.Update(itemLine);
             _dbContext.SaveChanges();
@@ -47,17 +74,12 @@ namespace Backend.Features.ItemLines
 
         public void DeleteItemLine(int id)
         {
-            var itemLine = _dbContext.Inventories?.FirstOrDefault(c => c.Id == id);
+            var itemLine = _dbContext.ItemLines?.FirstOrDefault(c => c.id == id);
             if (itemLine != null)
             {
-                _dbContext.Inventories?.Remove(itemLine);
+                _dbContext.ItemLines?.Remove(itemLine);
                 _dbContext.SaveChanges();
             }
-        }
-
-        public ItemLine? GetItemLineById(int id)
-        {
-            return _dbContext.ItemLines?.Find(id);
         }
     }
 }

@@ -14,6 +14,8 @@ using Backend.Features.Logs;
 using Backend.Features.Warehouses;
 using Backend.Infrastructure.Database;
 using Backend.Infrastructure.Middleware;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend;
@@ -60,6 +62,17 @@ public static class Program
         services.AddLogging();
         services.AddControllers();
 
+        // FluentValidation configuration
+        services.AddValidatorsFromAssemblyContaining<ClientValidator>();
+        services.AddValidatorsFromAssemblyContaining<ContactValidator>();
+        services.AddValidatorsFromAssemblyContaining<InventoryValidator>();
+        services.AddValidatorsFromAssemblyContaining<ItemGroupValidator>();
+        services.AddValidatorsFromAssemblyContaining<ItemLineValidator>();
+        services.AddValidatorsFromAssemblyContaining<ItemTypeValidator>();
+        services.AddValidatorsFromAssemblyContaining<LocationValidator>();
+
+
+
         services.AddTransient<IClientService, ClientService>();
         services.AddTransient<IWarehouseService, WarehouseService>();
         services.AddTransient<IContactService, ContactService>();
@@ -67,12 +80,12 @@ public static class Program
         services.AddTransient<ILocationService, LocationService>();
         services.AddTransient<IItemService, ItemService>();
         services.AddTransient<IInventoryService, InventoryService>();
-        services.AddTransient<IItemGroupService,ItemGroupService>();
-        services.AddTransient<IItemTypeService,ItemTypeService>();
-        services.AddTransient<IItemLineService,ItemLineService>();
-        services.AddTransient<IShipmentService,ShipmentService>();
-        services.AddTransient<IOrderService,OrderService>();
-        services.AddTransient<ISupplierService,SupplierService>();
+        services.AddTransient<IItemGroupService, ItemGroupService>();
+        services.AddTransient<IItemTypeService, ItemTypeService>();
+        services.AddTransient<IItemLineService, ItemLineService>();
+        services.AddTransient<IShipmentService, ShipmentService>();
+        services.AddTransient<IOrderService, OrderService>();
+        services.AddTransient<ISupplierService, SupplierService>();
         services.AddTransient<ILogService, LogService>();
     }
 }

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Backend.Features.Contacts;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Contacts
@@ -33,21 +35,37 @@ namespace Backend.Controllers.Contacts
             return Ok(contact);
         }
 
-        public IActionResult AddContact(Contact contact)
+        [HttpPost]
+        public async Task<IActionResult> AddContact([FromBody] Contact contact)
         {
-            _contactService.AddContact(contact);
-            return CreatedAtAction(nameof(GetContactById), new { id = contact.Id }, contact);
+            try
+            {
+                await _contactService.AddContact(contact);
+                return CreatedAtAction(nameof(GetContactById), new { id = contact.Id }, contact);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateContact(int id, Contact contact)
+        public async Task<IActionResult> UpdateContact(int id, [FromBody] Contact contact)
         {
             if (id != contact.Id)
             {
-                return BadRequest();
+                return BadRequest("Contact ID in the path does not match the ID in the body.");
             }
-            _contactService.UpdateContact(contact);
-            return NoContent();
+
+            try
+            {
+                await _contactService.UpdateContact(contact);
+                return NoContent();
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpDelete("{id}")]

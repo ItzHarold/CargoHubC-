@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
+using System.Threading.Tasks;
 using Backend.Infrastructure.Database;
+using FluentValidation;
 
 namespace Backend.Features.Suppliers
 {
@@ -9,25 +10,20 @@ namespace Backend.Features.Suppliers
     {
         IEnumerable<Supplier> GetAllSuppliers();
         Supplier? GetSupplierById(int id);
-        void AddSupplier(Supplier supplier);
-        void UpdateSupplier(Supplier supplier);
+        Task AddSupplier(Supplier supplier);
+        Task UpdateSupplier(Supplier supplier);
         void DeleteSupplier(int id);
     }
 
     public class SupplierService : ISupplierService
     {
         private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<Supplier> _validator;
 
-        public SupplierService(CargoHubDbContext dbContext)
+        public SupplierService(CargoHubDbContext dbContext, IValidator<Supplier> validator)
         {
             _dbContext = dbContext;
-        }
-
-        public void AddSupplier(Supplier supplier)
-        {
-            supplier.CreatedAt = DateTime.Now;
-            _dbContext.Suppliers?.Add(supplier);
-            _dbContext.SaveChanges();
+            _validator = validator;
         }
 
         public IEnumerable<Supplier> GetAllSuppliers()
@@ -44,25 +40,42 @@ namespace Backend.Features.Suppliers
             return _dbContext.Suppliers?.FirstOrDefault(s => s.Id == id);
         }
 
-        public void UpdateSupplier(Supplier supplier)
+        public async Task AddSupplier(Supplier supplier)
         {
+            // Validate the supplier object using FluentValidation
+            var validationResult = await _validator.ValidateAsync(supplier);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
+            supplier.CreatedAt = DateTime.Now;
+            _dbContext.Suppliers?.Add(supplier);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateSupplier(Supplier supplier)
+        {
+            // Validate the supplier object using FluentValidation
+            var validationResult = await _validator.ValidateAsync(supplier);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             supplier.UpdatedAt = DateTime.Now;
             _dbContext.Suppliers?.Update(supplier);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteSupplier(int id)
         {
-            if (_dbContext.Suppliers != null)
+            var supplier = _dbContext.Suppliers?.FirstOrDefault(s => s.Id == id);
+            if (supplier != null)
             {
-                var supplier = _dbContext.Suppliers.FirstOrDefault(s => s.Id == id);
-                if (supplier != null)
-                {
-                    _dbContext.Suppliers.Remove(supplier);
-                    _dbContext.SaveChanges();
-                }
+                _dbContext.Suppliers?.Remove(supplier);
+                _dbContext.SaveChanges();
             }
         }
-
     }
 }

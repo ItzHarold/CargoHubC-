@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -10,7 +11,7 @@ namespace Backend.Features.Locations
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [ForeignKey("Warehouse")]
@@ -32,5 +33,20 @@ namespace Backend.Features.Locations
         [Required]
         [JsonPropertyName("shelf")]
         public required string Shelf { get; set; }
+    }
+
+    public class IncomingLocation : BaseEntity
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("warehouse_id")]
+        public int WarehouseId { get; set; }
+
+        [JsonPropertyName("code")]
+        public required string Code { get; set; }
+
+        [JsonPropertyName("name")]
+        public required string Name { get; set; }
     }
 }

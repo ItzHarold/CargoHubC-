@@ -9,9 +9,9 @@ namespace Backend.Features.Contacts
     {
 
         [Key]
-        [JsonPropertyName("id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public required int Id { get; set; }
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
         [Required]
         [JsonPropertyName("contact_name")]

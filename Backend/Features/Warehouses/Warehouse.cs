@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Contacts;
+using Backend.Features.WarehouseContacts;
 
 namespace Backend.Features.Warehouses
 {
@@ -11,7 +12,7 @@ namespace Backend.Features.Warehouses
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [JsonPropertyName("code")]
@@ -43,6 +44,6 @@ namespace Backend.Features.Warehouses
 
         [Required]
         [JsonPropertyName("contact")]
-        public required Contact[] Contacts { get; set; }
+        public required List<Contact> Contacts { get; set; }
     }
 }

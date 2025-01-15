@@ -11,7 +11,7 @@ namespace Backend.Features.Shipments
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [ForeignKey("Order")]

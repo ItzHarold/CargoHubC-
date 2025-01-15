@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using Backend.Infrastructure.Database;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Features.Clients
@@ -10,18 +10,20 @@ namespace Backend.Features.Clients
     {
         IEnumerable<Client> GetAllClients();
         Client? GetClientById(int id);
-        void AddClient(Client client);
-        void UpdateClient(Client client);
+        Task AddClient(Client client);
+        Task UpdateClient(Client client);
         void DeleteClient(int id);
     }
 
     public class ClientService : IClientService
     {
         private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<Client> _validator;
 
-        public ClientService(CargoHubDbContext dbContext)
+        public ClientService(CargoHubDbContext dbContext, IValidator<Client> validator)
         {
             _dbContext = dbContext;
+            _validator = validator;
         }
 
         public IEnumerable<Client> GetAllClients()
@@ -38,18 +40,32 @@ namespace Backend.Features.Clients
             return _dbContext.Clients?.Find(id);
         }
 
-        public void AddClient(Client client)
+        public async Task AddClient(Client client)
         {
+            var validationResult = await _validator.ValidateAsync(client);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             client.CreatedAt = DateTime.Now;
             _dbContext.Clients?.Add(client);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
-        public void UpdateClient(Client client)
+        public async Task UpdateClient(Client client)
         {
+            var validationResult = await _validator.ValidateAsync(client);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             client.UpdatedAt = DateTime.Now;
             _dbContext.Clients?.Update(client);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteClient(int id)
@@ -60,7 +76,6 @@ namespace Backend.Features.Clients
                 _dbContext.Clients?.Remove(client);
                 _dbContext.SaveChanges();
             }
-
         }
     }
 }
