@@ -78,7 +78,8 @@
             "GetItemsByItemGroup",
             "GetItemsByItemLine",
             "GetItemsFilteredAndSorted",
-            "GetClientsFilteredAndSorted"
+            "GetClientsFilteredAndSorted",
+            "GetContactsFilteredAndSorted"
         ],
         "WarehouseManager": [
             "HealthCheck",
