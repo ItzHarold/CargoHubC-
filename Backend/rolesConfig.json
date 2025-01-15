@@ -80,7 +80,8 @@
             "AddLocation",
             "DeleteLocation",
             "GetItemsBySupplierId",
-            "GetItemsInTransfer"
+            "GetItemsInTransfer",
+            "GetItemsForOrder"
         ],
         "WarehouseManager": [
             "HealthCheck",
