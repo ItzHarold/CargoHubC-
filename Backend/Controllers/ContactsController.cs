@@ -16,10 +16,13 @@ namespace Backend.Controllers.Contacts
         }
 
         [HttpGet]
-        public IActionResult GetAllContacts()
+        public ActionResult<IEnumerable<Contact>> GetAllContacts(
+            [FromQuery] Dictionary<string, string?>? filters = null, 
+            [FromQuery] string? sortBy = null, 
+            [FromQuery] bool sortDescending = false)
         {
-            var contacts = _contactService.GetAllContacts();
-            return Ok(contacts);
+            var contact = _contactService.GetAllContacts(filters, sortBy, sortDescending);
+            return Ok(contact);
         }
 
         [HttpGet("{id}")]
@@ -55,22 +58,6 @@ namespace Backend.Controllers.Contacts
         {
             _contactService.DeleteContact(id);
             return NoContent();
-        }
-
-        [HttpGet("filtered-sorted")]
-        public IActionResult GetContactsFilteredAndSorted(
-            [FromQuery] string? name = null,
-            [FromQuery] string? email = null,
-            [FromQuery] string? phoneNumber = null,
-            [FromQuery] string? sortBy = null,
-            [FromQuery] bool sortDescending = false
-        )
-        {
-            var contacts = _contactService.GetContactFilteredAndSorted(
-                name, email, phoneNumber, sortBy, sortDescending
-            );
-
-            return Ok(contacts);
         }
     }
 }

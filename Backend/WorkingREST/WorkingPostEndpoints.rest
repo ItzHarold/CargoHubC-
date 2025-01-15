@@ -36,9 +36,9 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
   "id": "1",
-  "contactName": "Charlotte",
-  "contactPhone": "123123123",
-  "contactEmail": "test@test.nl"
+  "contactName": "Jurwin",
+  "contactPhone": "567453434",
+  "contactEmail": "een@test.nl"
 
 }
 

@@ -2,32 +2,29 @@
 using System.Linq;
 using System.Xml.Linq;
 using System.Globalization;
+using Backend.Features.FilterAndSort;
 
 namespace Backend.Features.Contacts
 {
     public interface IContactService
     {
-        IEnumerable<Contact> GetAllContacts();
+        IEnumerable<Contact> GetAllContacts(Dictionary<string, string?>? filters = null, string? sortBy = null, bool sortDescending = false);
         Contact? GetContactById(int id);
         void AddContact(Contact contact);
         void UpdateContact(Contact contact);
         void DeleteContact(int id);
-        IEnumerable<Contact> GetContactFilteredAndSorted(
-        string? name = null,
-        string? email = null,
-        string? phoneNumber = null,
-        string? sortBy = null,
-        bool sortDescending = false
-        );
     }
 
     public class ContactService : IContactService
     {
         private readonly List<Contact> _contacts = new();
 
-        public IEnumerable<Contact> GetAllContacts()
+        public IEnumerable<Contact> GetAllContacts(
+                Dictionary<string, string?>? filters = null, 
+                string? sortBy = null,
+                bool sortDescending = false)
         {
-            return _contacts;
+            return _contacts.AsEnumerable().FilterAndSort(filters, sortBy, sortDescending);
         }
 
         public Contact? GetContactById(int id)
@@ -63,42 +60,6 @@ namespace Backend.Features.Contacts
             {
                 _contacts.Remove(contact);
             }
-        }
-        public IEnumerable<Contact> GetContactFilteredAndSorted(
-        string? name = null,
-        string? email = null,
-        string? phoneNumber = null,
-        string? sortBy = null,
-        bool sortDescending = false
-        )
-        {
-            var query = _contacts.AsEnumerable();
-
-            // Apply filters
-            if (!string.IsNullOrEmpty(name))
-            {
-                query = query.Where(contact => contact.ContactName?.Contains(name, StringComparison.OrdinalIgnoreCase) == true);
-            }
-            if (!string.IsNullOrEmpty(email))
-            {
-                query = query.Where(contact => contact.ContactEmail?.Contains(email, StringComparison.OrdinalIgnoreCase) == true);
-            }
-            if (!string.IsNullOrEmpty(phoneNumber))
-            {
-                query = query.Where(contact => contact.ContactPhone?.Contains(phoneNumber, StringComparison.OrdinalIgnoreCase) == true);
-            }
-
-            // Apply sorting
-            query = sortBy?.ToLower(CultureInfo.InvariantCulture) switch
-            {
-                "id" => sortDescending ? query.OrderByDescending(contact => contact.Id) : query.OrderBy(contact => contact.Id),
-                "name" => sortDescending ? query.OrderByDescending(contact => contact.ContactName) : query.OrderBy(contact => contact.ContactName),
-                "email" => sortDescending ? query.OrderByDescending(contact => contact.ContactEmail) : query.OrderBy(contact => contact.ContactEmail),
-                "phonenumber" => sortDescending ? query.OrderByDescending(contact => contact.ContactPhone) : query.OrderBy(contact => contact.ContactPhone),
-                _ => query
-            };
-
-            return query;
         }
     }
 }
