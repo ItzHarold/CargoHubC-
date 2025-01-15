@@ -16,9 +16,12 @@ namespace Backend.Controllers.Clients
         }
 
         [HttpGet]
-        public IActionResult GetAllClients()
+        public ActionResult<IEnumerable<Client>> GetAllClients(
+            [FromQuery] Dictionary<string, string?>? filters = null, 
+            [FromQuery] string? sortBy = null, 
+            [FromQuery] bool sortDescending = false)
         {
-            var clients = _clientService.GetAllClients();
+            var clients = _clientService.GetAllClients(filters, sortBy, sortDescending);
             return Ok(clients);
         }
 
@@ -56,28 +59,6 @@ namespace Backend.Controllers.Clients
         {
             _clientService.DeleteClient(id);
             return NoContent();
-        }
-
-        [HttpGet("filtered-sorted")]
-        public IActionResult GetClientsFilteredAndSorted(
-            [FromQuery] string? name = null,
-            [FromQuery] string? address = null,
-            [FromQuery] string? city = null,
-            [FromQuery] string? zipCode = null,
-            [FromQuery] string? province = null,
-            [FromQuery] string? country = null,
-            [FromQuery] string? contactName = null,
-            [FromQuery] string? contactPhone = null,
-            [FromQuery] string? contactEmail = null,
-            [FromQuery] string? sortBy = null,
-            [FromQuery] bool sortDescending = false
-        )
-        {
-            var clients = _clientService.GetClientFilteredAndSorted(
-                name, address, city, zipCode, province, country, contactName, contactPhone, contactEmail, sortBy, sortDescending
-            );
-
-            return Ok(clients);
         }
     }
 }
