@@ -68,5 +68,22 @@ namespace Backend.Controllers.Items
             var items = _service.GetItemsByItemLine(itemLineId);
             return Ok(items);
         }
+
+        [HttpGet("filtered-sorted")]
+        public IActionResult GetItemsFilteredAndSorted(
+            [FromQuery] int? itemLineId,
+            [FromQuery] int? itemGroupId,
+            [FromQuery] int? itemTypeId,
+            [FromQuery] int? supplierId,
+            [FromQuery] string? sortBy,
+            [FromQuery] bool sortDescending = false
+        )
+        {
+            var items = _service.GetItemsFilteredAndSorted(
+                itemLineId, itemGroupId, itemTypeId, supplierId, sortBy, sortDescending
+            );
+            return Ok(items);
+        }
+
     }
 }

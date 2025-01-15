@@ -90,6 +90,10 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 GET http://localhost:5031/api/item_groups/1/items
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
+### Get all items from same id and sort by code
+GET http://localhost:5031/api/items/filtered-sorted?itemLineId=1&sortBy=code&sortDescending=true
+X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+
 ### Get for all item_types
 GET http://localhost:5031/api/item_types
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
