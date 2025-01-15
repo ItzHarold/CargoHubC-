@@ -5,14 +5,14 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
   "name": "Jurwin",
-  "address": "10 Wijnhaven",
+  "address": "Test 45",
   "city": "Rotterdam",
-  "zip_code": "2222JK",
+  "zipCode": "2222JK",
   "province": "Zuid-Holland",
   "country": "Netherlands",
-  "contact_name": "Jurwin",
-  "contact_phone": "123-123123",
-  "contact_email": "Jurwin@Wijnhaven.com"
+  "contactName": "Jurwin",
+  "contactPhone": "123-123123",
+  "contactEmail": "Jurwin@Wijnhaven.com"
 }
 
 ### Update an existing client entry using POST
