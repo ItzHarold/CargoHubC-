@@ -12,6 +12,7 @@ namespace Backend.Features.Items
         void AddItem(Item item);
         void UpdateItem(string uid, Item item);
         void DeleteItem(string uid);
+        IEnumerable<Item> GetItemsBySupplierId(int supplierId);
     }
 
     public class ItemService : IItemService
@@ -58,6 +59,12 @@ namespace Backend.Features.Items
                 _dbContext.Items?.Remove(item);
                 _dbContext.SaveChanges();
             }
+        }
+
+        public IEnumerable<Item> GetItemsBySupplierId(int supplierId)
+        {
+            // Fetch all items associated with a specific supplier
+            return _dbContext.Items?.Where(i => i.SupplierId == supplierId).ToList() ?? new List<Item>();
         }
     }
 }

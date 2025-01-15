@@ -149,3 +149,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 ### Get for items in shipments by ID
 GET http://localhost:5031/api/shipments/1/items
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+
+### Get all items for a specific supplier
+GET http://localhost:5031/api/items/supplier/79
+X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f

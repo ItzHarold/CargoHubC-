@@ -47,5 +47,12 @@ namespace Backend.Controllers.Items
             _service.UpdateItem(uid, item);
             return NoContent();
         }
+
+        [HttpGet("supplier/{supplierId}", Name = "GetItemsBySupplierId")]
+        public IActionResult GetItemsBySupplierId(int supplierId)
+        {
+            var items = _service.GetItemsBySupplierId(supplierId);
+            return Ok(items);
+        }
     }
 }
