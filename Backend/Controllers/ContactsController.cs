@@ -56,5 +56,21 @@ namespace Backend.Controllers.Contacts
             _contactService.DeleteContact(id);
             return NoContent();
         }
+
+        [HttpGet("filtered-sorted")]
+        public IActionResult GetContactsFilteredAndSorted(
+            [FromQuery] string? name = null,
+            [FromQuery] string? email = null,
+            [FromQuery] string? phoneNumber = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool sortDescending = false
+        )
+        {
+            var contacts = _contactService.GetContactFilteredAndSorted(
+                name, email, phoneNumber, sortBy, sortDescending
+            );
+
+            return Ok(contacts);
+        }
     }
 }
