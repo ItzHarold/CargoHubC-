@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Backend.Features.Contacts
 {
-    [Table("Contact")]
+    [Table("Contacts")]
     public class Contact
     {
 

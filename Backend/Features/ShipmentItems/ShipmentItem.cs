@@ -14,8 +14,8 @@ namespace Backend.Features.ShimpentItems
         public required int Id { get; set; }
 
         [ForeignKey("Items")]
-        [JsonPropertyName("item_id")]
-        public required int ItemId { get; set; }
+        [JsonPropertyName("ItemUid")]
+        public required string ItemUid { get; set; }
 
         [ForeignKey("Shipments")]
         [JsonPropertyName("shipment_id")]

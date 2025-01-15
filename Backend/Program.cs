@@ -47,6 +47,8 @@ public static class Program
 
         app.MapControllers();
 
+        app.Urls.Add("http://localhost:5031");
+
         app.Run();
     }
 

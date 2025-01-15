@@ -242,6 +242,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 {
     "id": 1,
     "name": "Item Line",
-    "description": "Description item line"
+    "description": "Description item line",
+    "created_at": "2024-09-17T10:00:00Z"
 }
 

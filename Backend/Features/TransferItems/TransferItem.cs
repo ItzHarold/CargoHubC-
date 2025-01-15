@@ -18,8 +18,8 @@ namespace Backend.Features.TransferItem
         public required int TransferId { get; set; }
 
         [ForeignKey("Items")]
-        [JsonPropertyName("item_id")]
-        public required int ItemId { get; set; }
+        [JsonPropertyName("ItemUid")]
+        public required string ItemUid { get; set; }
 
         [Required]
         [JsonPropertyName("amount")]
