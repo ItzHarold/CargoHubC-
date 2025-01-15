@@ -12,6 +12,9 @@ namespace Backend.Features.Items
         void AddItem(Item item);
         void UpdateItem(string uid, Item item);
         void DeleteItem(string uid);
+        IEnumerable<Item> GetItemsByItemType(int itemTypeId);
+        IEnumerable<Item> GetItemsByItemGroup(int itemGroupId);
+        IEnumerable<Item> GetItemsByItemLine(int itemLineId);
     }
 
     public class ItemService : IItemService
@@ -47,6 +50,21 @@ namespace Backend.Features.Items
                 Context.Remove(item);
                 break;
             }
+        }
+
+        public IEnumerable<Item> GetItemsByItemType(int itemTypeId)
+        {
+        return Context.Where(item => item.ItemType == itemTypeId);
+        }
+
+        public IEnumerable<Item> GetItemsByItemGroup(int itemGroupId)
+        {
+            return Context.Where(item => item.ItemGroup == itemGroupId);
+        }
+
+        public IEnumerable<Item> GetItemsByItemLine(int itemLineId)
+        {
+            return Context.Where(item => item.ItemLine == itemLineId);
         }
     }
 }
