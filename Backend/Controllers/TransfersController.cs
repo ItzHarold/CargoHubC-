@@ -44,5 +44,18 @@ namespace Backend.Controllers.Transfers
         {
             _transferService.DeleteTransfer(id);
         }
+        
+        [HttpGet("{id}/items", Name = "GetItemsInTransfer")]
+        public IActionResult GetItemsInTransfer(int id)
+        {
+            var transfer = _transferService.GetTransferById(id);
+            if (transfer == null)
+            {
+                return NotFound("Transfer not found");
+            }
+
+            // Return the items directly from the transfer object
+            return Ok(transfer.Items);
+        }
     }
 }
