@@ -45,5 +45,18 @@ namespace Backend.Controllers.Orders
             _orderService.DeleteOrder(id);
         }
 
+        [HttpGet("{id}/items")]
+        public IActionResult GetItemsForOrder(int id)
+        {
+            // Fetch the items for the given order ID
+            var items = _orderService.GetItemsByOrderId(id);
+
+            if (items.Any())
+            {
+                return Ok(items); // Return the list of items if found
+            }
+            return NotFound("No items found for this order."); // Return NotFound if no items exist
+        }
+
     }
 }

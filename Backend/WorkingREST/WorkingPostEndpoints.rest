@@ -88,18 +88,18 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
     "Id": 1,
-    "SourceId": 34,
-    "OrderDate": "2024-09-17T10:00:00Z",
+    "source_id": 34,
+    "order_date": "2024-09-17T10:00:00Z",
     "RequestDate": "2024-09-18T10:00:00Z",
     "Reference": "ORD00002",
     "ReferenceExtra": "Example reference text.",
-    "OrderStatus": "Pending",
+    "order_status": "Pending",
     "Notes": "Additional notes for the order.",
     "ShippingNotes": "Please deliver to the main office.",
     "PickingNotes": "Ensure items are picked in the correct order.",
-    "WarehouseId": 19,
+    "warehouse_id": 19,
     "ShipTo": "null",
-    "BillTo": "null",
+    "bill_to": "null",
     "ShipmentId": 2,
     "TotalAmount": 1234.56,
     "TotalDiscount": 50.00,
@@ -107,7 +107,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "TotalSurcharge": 15.00,
     "Items": [
         {
-            "Uid": "P00001",
+            "Uid": "P213132",
             "Code": "P00001",
             "Description": "Product 1",
             "ShortDescription": "Prod 1",
@@ -117,8 +117,24 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
             "item_line": 1,
             "item_group": 1,
             "item_type": 1,
-            "supplier_id": 1
+            "supplier_id": 1,
+            "supplier_part_number": "asdf"
+        },
+        {
+            "Uid": "P034985",
+            "Code": "P22222",
+            "Description": "Product 2",
+            "ShortDescription": "Prod 2",
+            "UpcCode": "123123123",
+            "ModelNumber": "122333",
+            "CommodityCode": "123123",
+            "item_line": 1,
+            "item_group": 1,
+            "item_type": 1,
+            "supplier_id": 1,
+            "supplier_part_number": "asdf"
         }
+
     ]
 }
 
