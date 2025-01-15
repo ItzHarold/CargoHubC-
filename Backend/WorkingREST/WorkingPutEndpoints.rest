@@ -235,3 +235,25 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "name": "updated Item Line",
     "description": "updated description item line"
 }
+
+### Update an item in a specific order
+PUT http://localhost:5031/api/orders/1/items/P213132
+Content-Type: application/json
+X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+
+{
+    "uid": "P213132",
+    "code": "12345",
+    "description": "Updated Item Description",
+    "short_description": "Updated Short Description",
+    "upc_code": "UpdatedUPC123",
+    "model_number": "UpdatedModel123",
+    "commodity_code": "UpdatedCommodity123",
+    "unit_purchase_quantity": 20,
+    "unit_order_quantity": 15,
+    "pack_order_quantity": 10,
+    "supplier_id": 1,
+    "supplier_code": "UpdatedSUP123",
+    "supplier_part_number": "Updated-SPN12345"
+}
+
