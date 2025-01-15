@@ -81,7 +81,8 @@
             "DeleteLocation",
             "GetItemsBySupplierId",
             "GetItemsInTransfer",
-            "GetItemsForOrder"
+            "GetItemsForOrder",
+            "UpdateItemInOrder"
         ],
         "WarehouseManager": [
             "HealthCheck",
