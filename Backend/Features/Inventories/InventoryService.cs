@@ -7,7 +7,7 @@ namespace Backend.Features.Inventories
 {
     public interface IInventoryService
     {
-        IEnumerable<Inventory> GetAllContacts(Dictionary<string, string?>? filters = null, string? sortBy = null, bool sortDescending = false);
+        IEnumerable<Inventory> GetAllInventories(Dictionary<string, string?>? filters = null, string? sortBy = null, bool sortDescending = false);
         Inventory? GetInventoryById(int id);
         void AddInventory(Inventory inventory);
         void UpdateInventory(Inventory inventory);
@@ -18,7 +18,7 @@ namespace Backend.Features.Inventories
     {
         private readonly List<Inventory> _inventories = new();
 
-        public IEnumerable<Inventory> GetAllContacts(
+        public IEnumerable<Inventory> GetAllInventories(
                 Dictionary<string, string?>? filters = null, 
                 string? sortBy = null,
                 bool sortDescending = false)

@@ -16,12 +16,12 @@ namespace Backend.Controllers.Inventories
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Inventory>> GetAllContacts(
+        public ActionResult<IEnumerable<Inventory>> GetAllInventories(
             [FromQuery] Dictionary<string, string?>? filters = null, 
             [FromQuery] string? sortBy = null, 
             [FromQuery] bool sortDescending = false)
         {
-            var inventory = _inventoryService.GetAllContacts(filters, sortBy, sortDescending);
+            var inventory = _inventoryService.GetAllInventories(filters, sortBy, sortDescending);
             return Ok(inventory);
         }
 

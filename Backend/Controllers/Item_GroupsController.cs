@@ -16,10 +16,13 @@ namespace Backend.Controllers.ItemGroupsController
         }
 
         [HttpGet]
-        public IActionResult GetAllItemGroups()
+        public ActionResult<IEnumerable<ItemGroup>> GetAllItemGroups(
+            [FromQuery] Dictionary<string, string?>? filters = null, 
+            [FromQuery] string? sortBy = null, 
+            [FromQuery] bool sortDescending = false)
         {
-            var itemGroups = _itemGroupService.GetAllItemGroups();
-            return Ok(itemGroups);
+            var contact = _itemGroupService.GetAllItemGroups(filters, sortBy, sortDescending);
+            return Ok(contact);
         }
 
         [HttpGet("{id}")]

@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Backend.Features.FilterAndSort;
 
 namespace Backend.Features.ItemGroups
 {
     public interface IItemGroupService
     {
-        IEnumerable<ItemGroup> GetAllItemGroups();
+        IEnumerable<ItemGroup> GetAllItemGroups(Dictionary<string, string?>? filters = null, string? sortBy = null, bool sortDescending = false);
         ItemGroup? GetItemGroupById(int id);
         void AddItemGroup(ItemGroup itemGroup);
         void UpdateItemGroup(ItemGroup itemGroup);
@@ -17,9 +18,12 @@ namespace Backend.Features.ItemGroups
     {
         private readonly List<ItemGroup> _itemGroups = new();
 
-        public IEnumerable<ItemGroup> GetAllItemGroups()
+        public IEnumerable<ItemGroup> GetAllItemGroups(
+                Dictionary<string, string?>? filters = null, 
+                string? sortBy = null,
+                bool sortDescending = false)
         {
-            return _itemGroups;
+            return _itemGroups.AsEnumerable().FilterAndSort(filters, sortBy, sortDescending);
         }
 
         public ItemGroup? GetItemGroupById(int id)
