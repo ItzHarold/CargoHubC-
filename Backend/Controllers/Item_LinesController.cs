@@ -2,50 +2,54 @@ using System.Collections.Generic;
 using Backend.Features.ItemLines;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers.ItemLines
+namespace Backend.Controllers.ItemLinesController
 {
     [ApiController]
     [Route("api/item_lines")]
     public class ItemLinesController : ControllerBase
     {
-        private IItemLineService _service { get; set; }
+        private readonly IItemLineService _itemLineService;
 
-        public ItemLinesController(IItemLineService service)
+        public ItemLinesController(IItemLineService itemLineService)
         {
-            _service = service;
+            _itemLineService = itemLineService;
         }
 
         [HttpGet]
-        public IActionResult GetItemLines()
+        public ActionResult<IEnumerable<ItemLine>> GetAllItemLines(
+            [FromQuery] Dictionary<string, string?>? filters = null, 
+            [FromQuery] string? sortBy = null, 
+            [FromQuery] bool sortDescending = false)
         {
-            return Ok(_service.GetAllItemLines());
+            var itemLine = _itemLineService.GetAllItemLines(filters, sortBy, sortDescending);
+            return Ok(itemLine);
         }
 
         [HttpGet("{id:int}")]
         public IActionResult GetItemLineById(int id)
         {
-            var line = _service.GetItemLineById(id);
+            var line = _itemLineService.GetItemLineById(id);
             return line is not null ? Ok(line) : NotFound();
         }
 
         [HttpPost]
         public IActionResult AddItemLine([FromBody] ItemLine itemLine)
         {
-            _service.AddItemLine(itemLine);
+            _itemLineService.AddItemLine(itemLine);
             return Ok();
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult DeleteItemLine(int id)
         {
-            _service.DeleteItemLine(id);
+            _itemLineService.DeleteItemLine(id);
             return NoContent();
         }
 
         [HttpPut("{id:int}")]
         public IActionResult UpdateItemLine(int id, [FromBody] ItemLine itemLine)
         {
-            _service.UpdateItemLine(id, itemLine);
+            _itemLineService.UpdateItemLine(id, itemLine);
             return NoContent();
         }
     }

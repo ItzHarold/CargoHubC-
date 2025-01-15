@@ -77,7 +77,8 @@
             "GetItemsByItemType",
             "GetItemsByItemGroup",
             "GetItemsByItemLine",
-            "FilterAndSort"
+            "FilterAndSort",
+            "GetAllItemLines"
         ],
         "WarehouseManager": [
             "HealthCheck",

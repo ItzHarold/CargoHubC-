@@ -21,8 +21,8 @@ namespace Backend.Controllers.ItemGroupsController
             [FromQuery] string? sortBy = null, 
             [FromQuery] bool sortDescending = false)
         {
-            var contact = _itemGroupService.GetAllItemGroups(filters, sortBy, sortDescending);
-            return Ok(contact);
+            var itemGroup = _itemGroupService.GetAllItemGroups(filters, sortBy, sortDescending);
+            return Ok(itemGroup);
         }
 
         [HttpGet("{id}")]

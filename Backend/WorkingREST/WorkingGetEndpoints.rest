@@ -181,3 +181,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 ### Get All Item Groups with Filters and Sorting
 GET http://localhost:5031/api/item_groups?filters[Name]=New&sortBy=Name&sortDescending=true
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+
+### Get All Item Lines with Filters and Sorting
+GET http://localhost:5031/api/item_lines?filters[Name]=New&sortBy=Name&sortDescending=true
+X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
