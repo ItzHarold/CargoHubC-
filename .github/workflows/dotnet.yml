@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "main", "development", "workflow" ]
+    branches: [ "main", "development" ]
   pull_request:
     branches: [ "main", "development" ]
 
@@ -101,30 +101,30 @@ jobs:
         run: cat ./TestResults/coverage-html/index.html >> $GITHUB_STEP_SUMMARY
 
 
-  # deploy:
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   environment: production
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         token: ${{ secrets.DEPLOY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEPLOY_TOKEN }}
 
-  #     - name: Setup .NET
-  #       uses: actions/setup-dotnet@v4
-  #       with:
-  #         dotnet-version: 8.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-  #     - name: Publish
-  #       run: dotnet publish Backend/Backend.csproj -c Release -o ./publish
+      - name: Publish
+        run: dotnet publish Backend/Backend.csproj -c Release -o ./publish
 
-  #     - name: Deploy
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-  #       run: |
-  #         git config --global user.name "GitHub Actions"
-  #         git config --global user.email "actions@github.com"
-  #         git add ./publish
-  #         git commit -m "Deploy application"
-  #         git push
+      - name: Deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add ./publish
+          git commit -m "Deploy application"
+          git push
