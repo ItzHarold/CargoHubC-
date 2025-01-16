@@ -74,7 +74,7 @@ namespace Backend.Features.Warehouses
                 }).ToList()
             };
             warehouse.CreatedAt = DateTime.Now;
-
+            warehouse.UpdatedAt = warehouse.CreatedAt;
 
             _dbContext.Warehouses?.Add(warehouse);
             await _dbContext.SaveChangesAsync();
