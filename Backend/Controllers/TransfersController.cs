@@ -90,7 +90,7 @@ namespace Backend.Controllers.Transfers
             _transferService.DeleteTransfer(id);
             return NoContent();
         }
-        
+
         [HttpGet("{id}/items")]
         public IActionResult GetItemsInTransfer(int id)
         {
@@ -100,7 +100,7 @@ namespace Backend.Controllers.Transfers
                 return NotFound("Transfer not found");
             }
 
-            var items = transfer.TransferItems.Select(ti => new
+            var items = transfer.TransferItems?.Select(ti => new
             {
                 ItemUid = ti.ItemUid,
                 Amount = ti.Amount

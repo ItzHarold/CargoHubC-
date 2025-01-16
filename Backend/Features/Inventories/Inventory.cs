@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.Items;
 using Backend.Features.Locations;
 
 namespace Backend.Features.Inventories
@@ -15,8 +16,7 @@ namespace Backend.Features.Inventories
 
         [Required]
         [JsonPropertyName("item_id")]
-        [ForeignKey("Items")]
-        public required int ItemId { get; set; }
+        public required string ItemId { get; set; }
 
         [JsonPropertyName("description")]
         public string? Description { get; set; }
@@ -47,6 +47,9 @@ namespace Backend.Features.Inventories
         [Required]
         [JsonPropertyName("total_available")]
         public required int TotalAvailable { get; set; }
+
+        //Navigator principle
+        public Item? Item{get;set;}
 
     }
 }

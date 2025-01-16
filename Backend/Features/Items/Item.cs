@@ -1,7 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using Backend.Features.TransferItem;
+using Backend.Features.ItemLines;
+using Backend.Features.ItemGroups;
+using Backend.Features.ItemTypes;
+using Backend.Features.Suppliers;
+using Backend.Features.Inventories;
+using Backend.Features.TransferItems;
 
 namespace Backend.Features.Items
 {
@@ -33,17 +38,14 @@ namespace Backend.Features.Items
         [JsonPropertyName("commodity_code")]
         public string? CommodityCode { get; set; }
 
-        [ForeignKey("ItemLine")]
         [JsonPropertyName("item_line")]
-        public int? ItemLine { get; set; }
+        public int? ItemLineId { get; set; }
 
-        [ForeignKey("ItemGroup")]
         [JsonPropertyName("item_group")]
-        public  int? ItemGroup { get; set; }
+        public int? ItemGroupId { get; set; }
 
-        [ForeignKey("ItemType")]
         [JsonPropertyName("item_type")]
-        public int? ItemType { get; set; }
+        public int? ItemTypeId { get; set; }
 
         [Required]
         [JsonPropertyName("unit_purchase_quantity")]
@@ -58,7 +60,6 @@ namespace Backend.Features.Items
         public int PackOrderQuantity { get; set; }
 
         [Required]
-        [ForeignKey("Supplier")]
         [JsonPropertyName("supplier_id")]
         public required int SupplierId { get; set; }
 
@@ -69,7 +70,16 @@ namespace Backend.Features.Items
         [JsonPropertyName("supplier_part_number")]
         public required string SupplierPartNumber { get; set; }
 
+
+        // NAVIGATION PRINCEPLES
+        public ItemGroup? ItemGroup { get; set; }
+        public ItemLine? ItemLine { get; set; }
+        public ItemType? ItemType { get; set; }
+        public Supplier? Supplier { get; set; }
+        public Inventory? Inventory { get; set; }
+
         [JsonPropertyName("transfer_items")]
-        public virtual ICollection<TransferItems> TransferItems { get; set; } = new List<TransferItems>();
+        public ICollection<TransferItem>? TransferItems { get; set; } = new List<TransferItem>();
+
     }
 }

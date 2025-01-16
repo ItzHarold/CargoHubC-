@@ -17,9 +17,9 @@ using Backend.Features.InventoryLocations;
 using Microsoft.EntityFrameworkCore;
 using Backend.Features.OrderItem;
 using Backend.Features.ShimpentItems;
-using Backend.Features.TransferItem;
 using Backend.Features.WarehouseContacts;
 using Backend.Features.ShipmentOrders;
+using Backend.Features.TransferItems;
 
 namespace Backend.Infrastructure.Database;
 
@@ -45,12 +45,12 @@ public class CargoHubDbContext(DbContextOptions<CargoHubDbContext> options) : Db
 
     public virtual DbSet<ShipmentItem>? ShipmentItems { get; set; }
 
-    public virtual DbSet<TransferItems>? TransferItems { get; set; }
+    public virtual DbSet<TransferItem>? TransferItems { get; set; }
 
-    public virtual DbSet<WarehouseContacts>? WarehouseContacts { get; set; }
+    public virtual DbSet<WarehouseContact>? WarehouseContacts { get; set; }
 
     public virtual DbSet<Log>? Logs { get; set; }
-    
+
     public virtual DbSet<ShipmentOrder>? ShipmentOrders { get; set; }
 
 

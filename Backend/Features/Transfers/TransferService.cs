@@ -2,8 +2,8 @@
 using System.Linq;
 using Backend.Infrastructure.Database;
 using Backend.Features.Items;
-using Backend.Features.TransferItem;
 using Microsoft.EntityFrameworkCore;
+using Backend.Features.TransferItems;
 
 namespace Backend.Features.Transfers
 {
@@ -37,7 +37,7 @@ namespace Backend.Features.Transfers
         public void AddTransfer(Transfer transfer)
         {
             // Validate that all items in TransferItems exist
-            foreach (var transferItem in transfer.TransferItems)
+            foreach (var transferItem in transfer.TransferItems ?? [])
             {
                 var item = _itemService.GetItemById(transferItem.ItemUid);
 
@@ -53,15 +53,15 @@ namespace Backend.Features.Transfers
 
             // Now, add the transfer to the DB
             _dbContext.Transfers?.Add(transfer);
-            
+
             // Save to generate an ID for the transfer first
             _dbContext.SaveChanges();
 
             // Now, create TransferItems for the relation
-            foreach (var transferItem in transfer.TransferItems)
+            foreach (var transferItem in transfer.TransferItems ?? [])
             {
                 // Ensure TransferItem is linked with Transfer
-                var transferItemEntity = new TransferItems
+                var transferItemEntity = new TransferItem
                 {
                     ItemUid = transferItem.ItemUid, // Link to Item by UID
                     Amount = transferItem.Amount  // Set the amount for the item
@@ -82,7 +82,7 @@ namespace Backend.Features.Transfers
         public void UpdateTransfer(Transfer transfer)
         {
             // Validate that all items exist
-            foreach (var transferItem in transfer.TransferItems)
+            foreach (var transferItem in transfer.TransferItems ?? [] )
             {
                 var item = _itemService.GetItemById(transferItem.ItemUid);
                 if (item == null)

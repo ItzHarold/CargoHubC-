@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.Items;
 
 namespace Backend.Features.Suppliers
 {
@@ -53,5 +54,7 @@ namespace Backend.Features.Suppliers
 
         [JsonPropertyName("reference")]
         public string? Reference { get; set; }
+
+        public ICollection<Item>? Items{get; set;} = new List<Item>();
     }
 }

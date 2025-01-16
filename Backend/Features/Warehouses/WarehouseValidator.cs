@@ -40,7 +40,7 @@ namespace Backend.Features.Warehouses
                 .NotNull().WithMessage("Country is required.")
                 .NotEmpty().WithMessage("Country cannot be empty.");
 
-            RuleFor(warehouse => warehouse.Contacts)
+            RuleFor(warehouse => warehouse.WarehouseContacts)
                 .NotNull().WithMessage("Contacts is required.")
                 .NotEmpty().WithMessage("Contacts Phone cannot be empty.");
 

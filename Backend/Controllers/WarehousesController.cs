@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Backend.Features.Warehouses;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Requests;
+using Responses;
 
 namespace Backend.Controllers.Warehouses
 {
@@ -31,16 +33,36 @@ namespace Backend.Controllers.Warehouses
             {
                 return NotFound(new { message = "Warehouse not found." });
             }
-            return Ok(warehouse);
+
+            var response = new WarehouseResponse
+            {
+                Code = warehouse.Code,
+                Name = warehouse.Code,
+                City = warehouse.Code,
+                Zip = warehouse.Code,
+                Country = warehouse.Code,
+                Id = warehouse.Id,
+                Province = warehouse.Province,
+                Address = warehouse.Address,
+                Contacts = warehouse.WarehouseContacts.Select(c => new ContactRequest
+                {
+                    ContactName = c.Contact.ContactName,
+                    ContactEmail = c.Contact.ContactEmail,
+                    ContactPhone = c.Contact.ContactPhone,
+                }).ToList(),
+            };
+
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddWarehouse([FromBody] Warehouse warehouse)
+        public async Task<IActionResult> AddWarehouse([FromBody] WarehouseRequest warehouse)
         {
             try
             {
-                await _warehouseService.AddWarehouse(warehouse);
-                return CreatedAtAction(nameof(GetWarehouseById), new { id = warehouse.Id }, warehouse);
+                int newWarehouseId = await _warehouseService.AddWarehouse(warehouse);
+                return GetWarehouseById(newWarehouseId);
             }
             catch (ValidationException ex)
             {

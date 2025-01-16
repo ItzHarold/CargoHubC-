@@ -17,6 +17,8 @@ using Backend.Infrastructure.Middleware;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 namespace Backend;
 
@@ -31,23 +33,44 @@ public static class Program
         builder.Services.AddDbContext<CargoHubDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+         // Registering services with Newtonsoft.Json for reference loop handling
+        builder.Services.AddControllersWithViews()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore; // Optional: Avoid serializing null values
+            });
+        builder.Services.AddEndpointsApiExplorer();
+
+
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v2", new OpenApiInfo
+            {
+                Title = "CargoHub API",
+                Version = "v2"
+            });
+        });
+
+
         ConfigureServices(builder.Services);
 
         var app = builder.Build();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+
 
         app.UseHttpsRedirection();
 
         app.UseMiddleware<LoggingMiddleware>();
-        app.UseMiddleware<ApiKeyMiddleware>();
+        app.UseMiddleware<ApiKeyMiddleware>(); //While in development Comment out! to acces swagger
         app.UseAuthorization();
 
         app.MapControllers();
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v2/swagger.json", "CargoHub API V2");
+        });
 
         app.Urls.Add("http://localhost:5031");
 
@@ -57,10 +80,7 @@ public static class Program
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddAuthorization();
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
         services.AddLogging();
-        services.AddControllers();
 
         // FluentValidation configuration
         services.AddValidatorsFromAssemblyContaining<ClientValidator>();

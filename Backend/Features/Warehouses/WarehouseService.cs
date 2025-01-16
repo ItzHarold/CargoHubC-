@@ -4,6 +4,9 @@ using System.Xml.Linq;
 using Backend.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using Requests;
+using Backend.Features.WarehouseContacts;
+using Backend.Features.Contacts;
 
 namespace Backend.Features.Warehouses
 {
@@ -11,7 +14,7 @@ namespace Backend.Features.Warehouses
     {
         IEnumerable<Warehouse> GetAllWarehouses();
         Warehouse? GetWarehouseById(int id);
-        Task AddWarehouse(Warehouse warehouse);
+        Task<int> AddWarehouse(WarehouseRequest warehouseRequest);
         Task UpdateWarehouse(Warehouse warehouse);
         void DeleteWarehouse(int id);
     }
@@ -37,20 +40,45 @@ namespace Backend.Features.Warehouses
 
         public Warehouse? GetWarehouseById(int id)
         {
-            return _dbContext.Warehouses?.Find(id);
+            return _dbContext?.Warehouses
+                ?.Include(w => w.WarehouseContacts) // Simply include the navigation property (no need for `??`)
+                ?.ThenInclude(c => c.Contact) // Include the related `Contact` for each `WarehouseContact`
+                ?.FirstOrDefault(w => w.Id == id);
         }
-        public async Task AddWarehouse(Warehouse warehouse)
+
+        public async Task<int> AddWarehouse(WarehouseRequest warehouseRequest)
         {
-            var validationResult = await _validator.ValidateAsync(warehouse);
+            // var validationResult = await _validator.ValidateAsync(warehouse);
 
-            if (!validationResult.IsValid)
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            var warehouse = new Warehouse()
             {
-                throw new ValidationException(validationResult.Errors);
-            }
-
+                Code = warehouseRequest.Code,
+                Address = warehouseRequest.Address,
+                Zip = warehouseRequest.Zip,
+                Name = warehouseRequest.Name,
+                City = warehouseRequest.City,
+                Province = warehouseRequest.Province,
+                Country = warehouseRequest.Country,
+                WarehouseContacts = warehouseRequest.Contacts.Select(c => new WarehouseContact
+                {
+                    Contact = new Contact {
+                        ContactName = c.ContactName,
+                        ContactEmail = c.ContactEmail,
+                        ContactPhone = c.ContactPhone,
+                    }
+                }).ToList()
+            };
             warehouse.CreatedAt = DateTime.Now;
+
+
             _dbContext.Warehouses?.Add(warehouse);
             await _dbContext.SaveChangesAsync();
+            return warehouse.Id;
         }
 
         public async Task UpdateWarehouse(Warehouse warehouse)

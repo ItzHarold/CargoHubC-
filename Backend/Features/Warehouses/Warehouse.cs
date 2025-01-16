@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Contacts;
+using Backend.Features.Locations;
 using Backend.Features.WarehouseContacts;
 
 namespace Backend.Features.Warehouses
@@ -42,8 +43,8 @@ namespace Backend.Features.Warehouses
         [JsonPropertyName("country")]
         public required string Country { get; set; }
 
-        [Required]
-        [JsonPropertyName("contact")]
-        public required List<Contact> Contacts { get; set; }
+        //Navigator
+        public ICollection<Location>? Locations { get; set; }
+        public ICollection<WarehouseContact> WarehouseContacts { get; set;} = null!;
     }
 }

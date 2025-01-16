@@ -13,8 +13,7 @@ namespace Backend.Features.Inventories
             _dbContext = dbContext;
 
             RuleFor(inventory => inventory.ItemId)
-                .NotNull().WithMessage("Item ID is required.")
-                .GreaterThan(0).WithMessage("Item ID must be greater than zero.");
+                .NotNull().WithMessage("Item ID is required.");
 
             RuleFor(inventory => inventory.LocationId)
                 .NotNull().WithMessage("Location ID array is required.")
