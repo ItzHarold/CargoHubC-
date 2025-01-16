@@ -11,18 +11,19 @@ namespace Backend.Features.TransferItem
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int Id { get; set; }
+        public int? Id { get; set; }
 
         [ForeignKey("Transfers")]
-        [JsonPropertyName("transfer_id")]
-        public required int TransferId { get; set; }
+        [JsonPropertyName("transfer_id")]  // Ensure this matches the JSON property name
+        public int? TransferId { get; set; }
 
         [ForeignKey("Items")]
-        [JsonPropertyName("ItemUid")]
+        [JsonPropertyName("item_uid")]  // Consistency in JSON property names (camelCase convention)
         public required string ItemUid { get; set; }
 
         [Required]
         [JsonPropertyName("amount")]
         public required int Amount { get; set; }
     }
+
 }

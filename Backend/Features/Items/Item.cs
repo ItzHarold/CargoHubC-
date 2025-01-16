@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.TransferItem;
 
 namespace Backend.Features.Items
 {
@@ -67,5 +68,8 @@ namespace Backend.Features.Items
         [Required]
         [JsonPropertyName("supplier_part_number")]
         public required string SupplierPartNumber { get; set; }
+
+        [JsonPropertyName("transfer_items")]
+        public virtual ICollection<TransferItems> TransferItems { get; set; } = new List<TransferItems>();
     }
 }

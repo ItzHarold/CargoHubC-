@@ -115,11 +115,11 @@ GET http://localhost:5031/api/orders
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for orders by ID
-GET http://localhost:5031/api/orders/1
+GET http://localhost:5031/api/orders/2
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for items in orders by ID
-GET http://localhost:5031/api/orders/1/items
+GET http://localhost:5031/api/orders/2/items
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for all clients

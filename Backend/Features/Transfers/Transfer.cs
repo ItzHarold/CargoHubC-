@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Items;
+using Backend.Features.TransferItem;
 
 namespace Backend.Features.Transfers
 {
@@ -29,7 +30,7 @@ namespace Backend.Features.Transfers
         public string? TransferStatus { get; set; }
 
         [Required]
-        [JsonPropertyName("items")]
-        public  required List<Item> Items { get; set; }
+        [JsonPropertyName("transfer_items")]
+        public virtual ICollection<TransferItems> TransferItems { get; set; } = new List<TransferItems>();
     }
 }
