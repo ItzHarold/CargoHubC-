@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Items;
+using Backend.Features.OrderItems;
 
 namespace Backend.Features.Orders
 {
@@ -73,6 +74,9 @@ namespace Backend.Features.Orders
 
         [JsonPropertyName("total_surcharge")]
         public float? TotalSurcharge { get; set; }
+
+        [JsonPropertyName("order_items")]
+        public ICollection<OrderItem>? OrderItems { get; set; }  = null!;
 
         [JsonPropertyName("items")]
         public List<Item>? Items { get; set; }

@@ -15,7 +15,7 @@ using Backend.Features.Warehouses;
 using Backend.Features.Logs;
 using Backend.Features.InventoryLocations;
 using Microsoft.EntityFrameworkCore;
-using Backend.Features.OrderItem;
+using Backend.Features.OrderItems;
 using Backend.Features.ShimpentItems;
 using Backend.Features.WarehouseContacts;
 using Backend.Features.ShipmentOrders;

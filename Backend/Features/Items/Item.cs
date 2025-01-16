@@ -7,6 +7,7 @@ using Backend.Features.ItemTypes;
 using Backend.Features.Suppliers;
 using Backend.Features.Inventories;
 using Backend.Features.TransferItems;
+using Backend.Features.OrderItems;
 
 namespace Backend.Features.Items
 {
@@ -80,6 +81,9 @@ namespace Backend.Features.Items
 
         [JsonPropertyName("transfer_items")]
         public ICollection<TransferItem>? TransferItems { get; set; } = new List<TransferItem>();
+
+        [JsonPropertyName("order_items")]
+        public ICollection<OrderItem>? OrderItems { get; set; }  = null!;
 
     }
 }
