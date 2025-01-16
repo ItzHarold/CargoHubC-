@@ -48,7 +48,7 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "uid": "P22222",
+  "uid": "12345",
   "code": "sjQ23408K",
   "description": "New Item",
   "short_description": "item",
@@ -72,11 +72,9 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "warehouse_id": 2,
+    "warehouse_id": 4,
     "code": "A.1.0",
-    "name": "Row: B, Rack: 10000000, Shelf: 0",
-    "createdAt": "1992-05-15T03:21:32",
-    "updatedAt": null
+    "name": "Row: B, Rack: 10000000, Shelf: 0"
 }
 
 
@@ -106,7 +104,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "TotalSurcharge": 15.00,
     "Items": [
         {
-            "Uid": "P22222",
+            "Uid": "P123",
             "Code": "P00001",
             "Description": "Product 1",
             "ShortDescription": "Prod 1",
@@ -178,28 +176,18 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "Id": 1,
-    "Reference": "T00001",
-    "TransferFrom": 1,
-    "TransferTo": 2,
-    "TransferStatus": "Pending",
-    "Items": [
+    "reference": "T00001",
+    "transferFrom": 1,
+    "transferTo": 2,
+    "transferStatus": "Pending",
+    "transfer_items": [
         {
-            "Uid": "P00001",
-            "Code": "P00001",
-            "Description": "Product 1",
-            "ShortDescription": "Prod 1",
-            "UpcCode": "123456789012",
-            "ModelNumber": "123456",
-            "CommodityCode": "123456",
-            "item_line": 1,
-            "item_group": 1,
-            "item_type": 1,
-            "supplier_id": 1,
-            "supplier_part_number": "asdfasd"
+            "item_uid": "12345",  
+            "amount": 5
         }
     ]
 }
+
 
 ### Add a new warehouse
 POST http://localhost:5031/api/warehouses
