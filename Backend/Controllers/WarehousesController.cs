@@ -37,10 +37,10 @@ namespace Backend.Controllers.Warehouses
             var response = new WarehouseResponse
             {
                 Code = warehouse.Code,
-                Name = warehouse.Code,
-                City = warehouse.Code,
-                Zip = warehouse.Code,
-                Country = warehouse.Code,
+                Name = warehouse.Name,
+                City = warehouse.City,
+                Zip = warehouse.Zip,
+                Country = warehouse.Country,
                 Id = warehouse.Id,
                 Province = warehouse.Province,
                 Address = warehouse.Address,
