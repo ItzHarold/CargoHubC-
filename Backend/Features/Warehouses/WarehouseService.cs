@@ -3,6 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Backend.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 
 namespace Backend.Features.Warehouses
 {
@@ -10,17 +11,19 @@ namespace Backend.Features.Warehouses
     {
         IEnumerable<Warehouse> GetAllWarehouses();
         Warehouse? GetWarehouseById(int id);
-        void AddWarehouse(Warehouse warehouse);
-        void UpdateWarehouse(Warehouse warehouse);
+        Task AddWarehouse(Warehouse warehouse);
+        Task UpdateWarehouse(Warehouse warehouse);
         void DeleteWarehouse(int id);
     }
 
     public class WarehouseService : IWarehouseService
     {
         private readonly CargoHubDbContext _dbContext;
-        public WarehouseService(CargoHubDbContext dbContext)
+        private readonly IValidator<Warehouse> _validator;
+        public WarehouseService(CargoHubDbContext dbContext, IValidator<Warehouse> validator)
         {
             _dbContext = dbContext;
+            _validator = validator;
         }
 
         public IEnumerable<Warehouse> GetAllWarehouses()
@@ -36,20 +39,32 @@ namespace Backend.Features.Warehouses
         {
             return _dbContext.Warehouses?.Find(id);
         }
-
-        public void AddWarehouse(Warehouse warehouse)
+        public async Task AddWarehouse(Warehouse warehouse)
         {
+            var validationResult = await _validator.ValidateAsync(warehouse);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             warehouse.CreatedAt = DateTime.Now;
             _dbContext.Warehouses?.Add(warehouse);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
-
-        public void UpdateWarehouse(Warehouse warehouse)
+        public async Task UpdateWarehouse(Warehouse warehouse)
         {
+            var validationResult = await _validator.ValidateAsync(warehouse);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             warehouse.UpdatedAt = DateTime.Now;
             _dbContext.Warehouses?.Update(warehouse);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteWarehouse(int id)

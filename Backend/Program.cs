@@ -70,6 +70,7 @@ public static class Program
         services.AddValidatorsFromAssemblyContaining<ItemLineValidator>();
         services.AddValidatorsFromAssemblyContaining<ItemTypeValidator>();
         services.AddValidatorsFromAssemblyContaining<LocationValidator>();
+        services.AddValidatorsFromAssemblyContaining<WarehouseValidator>();
 
 
 

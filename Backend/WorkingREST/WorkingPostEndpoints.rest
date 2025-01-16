@@ -48,7 +48,7 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "uid": "P111111",
+  "uid": "P22222",
   "code": "sjQ23408K",
   "description": "New Item",
   "short_description": "item",
@@ -86,7 +86,7 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "Id": 1,
+    "Id": 2,
     "source_id": 34,
     "order_date": "2024-09-17T10:00:00Z",
     "RequestDate": "2024-09-18T10:00:00Z",
@@ -99,14 +99,14 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "warehouse_id": 19,
     "ShipTo": "null",
     "bill_to": "null",
-    "ShipmentId": 2,
+    "ShipmentId": 1,
     "TotalAmount": 1234.56,
     "TotalDiscount": 50.00,
     "TotalTax": 123.45,
     "TotalSurcharge": 15.00,
     "Items": [
         {
-            "Uid": "P213132",
+            "Uid": "P22222",
             "Code": "P00001",
             "Description": "Product 1",
             "ShortDescription": "Prod 1",
@@ -118,22 +118,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
             "item_type": 1,
             "supplier_id": 1,
             "supplier_part_number": "asdf"
-        },
-        {
-            "Uid": "P034985",
-            "Code": "P22222",
-            "Description": "Product 2",
-            "ShortDescription": "Prod 2",
-            "UpcCode": "123123123",
-            "ModelNumber": "122333",
-            "CommodityCode": "123123",
-            "item_line": 1,
-            "item_group": 1,
-            "item_type": 1,
-            "supplier_id": 1,
-            "supplier_part_number": "asdf"
         }
-
     ]
 }
 
@@ -143,23 +128,29 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
     {
-    "Id": 4,
-    "OrderId": 2,
-    "SourceId": 34,
+    "Id": 1,
+    "order_id": 2,
+    "source_id": 34,
     "OrderDate": "2024-09-15",
     "RequestDate": "2024-09-16",
     "ShipmentDate": "2024-09-17",
-    "ShipmentType": "O",
+    "shipment_type": "O",
     "ShipmentStatus": "Shipped",
     "Notes": "New shipment with updated details.",
-    "CarrierCode": "DHL",
+    "carrier_code": "DHL",
     "CarrierDescription": "DHL Express",
-    "ServiceCode": "Standard",
-    "PaymentType": "Prepaid",
-    "TransferMode": "Air",
+    "service_code": "Standard",
+    "payment_type": "Prepaid",
+    "transfer_mode": "Air",
     "TotalPackageCount": 45,
     "TotalPackageWeight": 755.60,
-    "Items": ["P00001"]
+    "shipment_items": [
+       { 
+            "id": 1,
+            "ItemUid": "P22222",
+            "amount": 2
+       }
+    ]
 }
 
 ### Add a new supplier
