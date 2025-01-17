@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Backend.Infrastructure.Database;
+using Backend.Request;
 using FluentValidation;
 
 namespace Backend.Features.Locations
@@ -10,8 +11,8 @@ namespace Backend.Features.Locations
     {
         IEnumerable<Location> GetAllLocations();
         Location? GetLocationById(int id);
-        Task AddLocation(IncomingLocation incomingLocation);
-        Task UpdateLocation(IncomingLocation incomingLocation);
+        Task<Location> AddLocation(LocationRequest locationRequest);
+        Task UpdateLocation(int id, LocationRequest locationRequest);
         void DeleteLocation(int id);
     }
 
@@ -40,34 +41,44 @@ namespace Backend.Features.Locations
             return _dbContext.Locations?.FirstOrDefault(l => l.Id == id);
         }
 
-        public async Task AddLocation(IncomingLocation incomingLocation)
+        public async Task<Location> AddLocation(LocationRequest locationRequest)
         {
-            var location = TransformIncomingToLocation(incomingLocation);
+            var (row, rack, shelf) = ParseName(locationRequest.Name);
 
-            // Delegate validation to the validator
-            var validationResult = await _validator.ValidateAsync(location);
-            if (!validationResult.IsValid)
+            var location = new Location
             {
-                throw new ValidationException(validationResult.Errors);
-            }
+                WarehouseId = locationRequest.WarehouseId,
+                Code = locationRequest.Code,
+                Row = row,
+                Rack = rack,
+                Shelf = shelf,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
 
-            location.CreatedAt = DateTime.Now;
             _dbContext.Locations?.Add(location);
             await _dbContext.SaveChangesAsync();
+
+            return location;
         }
 
-        public async Task UpdateLocation(IncomingLocation incomingLocation)
+        public async Task UpdateLocation(int id, LocationRequest locationRequest)
         {
-            var location = TransformIncomingToLocation(incomingLocation);
-
-            // Delegate validation to the validator
-            var validationResult = await _validator.ValidateAsync(location);
-            if (!validationResult.IsValid)
+            var location = _dbContext.Locations?.FirstOrDefault(l => l.Id == id);
+            if (location == null)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new KeyNotFoundException($"Location with ID {id} not found.");
             }
 
+            var (row, rack, shelf) = ParseName(locationRequest.Name);
+
+            location.WarehouseId = locationRequest.WarehouseId;
+            location.Code = locationRequest.Code;
+            location.Row = row;
+            location.Rack = rack;
+            location.Shelf = shelf;
             location.UpdatedAt = DateTime.Now;
+
             _dbContext.Locations?.Update(location);
             await _dbContext.SaveChangesAsync();
         }
@@ -82,11 +93,10 @@ namespace Backend.Features.Locations
             }
         }
 
-        private static readonly string[] Delimiters = new[] { ", " };
-
-        private static Location TransformIncomingToLocation(IncomingLocation incomingLocation)
+        private static (string Row, string Rack, string Shelf) ParseName(string name)
         {
-            var parts = incomingLocation.Name?.Split(Delimiters, StringSplitOptions.None) ?? Array.Empty<string>();
+            var delimiters = new[] { ", " };
+            var parts = name.Split(delimiters, StringSplitOptions.None);
 
             string GetValue(string? part, string prefix)
             {
@@ -97,17 +107,11 @@ namespace Backend.Features.Locations
                     : string.Empty;
             }
 
-            return new Location
-            {
-                Id = incomingLocation.Id,
-                WarehouseId = incomingLocation.WarehouseId,
-                Code = incomingLocation.Code,
-                Row = GetValue(parts.ElementAtOrDefault(0), "Row:"),
-                Rack = GetValue(parts.ElementAtOrDefault(1), "Rack:"),
-                Shelf = GetValue(parts.ElementAtOrDefault(2), "Shelf:"),
-                CreatedAt = incomingLocation.CreatedAt,
-                UpdatedAt = incomingLocation.UpdatedAt
-            };
+            return (
+                Row: GetValue(parts.ElementAtOrDefault(0), "Row:"),
+                Rack: GetValue(parts.ElementAtOrDefault(1), "Rack:"),
+                Shelf: GetValue(parts.ElementAtOrDefault(2), "Shelf:")
+            );
         }
     }
 }

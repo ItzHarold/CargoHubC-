@@ -73,9 +73,9 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "warehouseId": 1,
+    "warehouse_id": 2,
     "code": "A.1.0",
-    "name": "Row: B, Rack: 10000000, Shelf: 0"
+    "name": "Row: ac, Rack: 10000000, Shelf: 0"
 }
 
 

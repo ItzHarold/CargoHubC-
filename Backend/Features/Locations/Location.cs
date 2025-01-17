@@ -42,19 +42,4 @@ namespace Backend.Features.Locations
         public ICollection<Transfer>? TransfersTo{get;set;}
         public ICollection<Transfer>? TransfersFrom{get;set;}
     }
-
-    public class IncomingLocation : BaseEntity
-    {
-        [JsonPropertyName("id")]
-        public int Id { get; set; }
-
-        [JsonPropertyName("warehouse_id")]
-        public int WarehouseId { get; set; }
-
-        [JsonPropertyName("code")]
-        public required string Code { get; set; }
-
-        [JsonPropertyName("name")]
-        public required string Name { get; set; }
-    }
 }

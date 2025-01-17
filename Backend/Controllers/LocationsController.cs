@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Backend.Features.Locations;
+using Backend.Request;
+using Backend.Response;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -32,39 +34,55 @@ namespace Backend.Controllers.Locations
             {
                 return NotFound(new { message = "Location not found." });
             }
-            return Ok(location);
+
+            var response = new LocationResponse
+            {
+                Id = location.Id,
+                WarehouseId = location.WarehouseId,
+                Code = location.Code,
+                Name = $"Row: {location.Row}, Rack: {location.Rack}, Shelf: {location.Shelf}",
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddLocation([FromBody] IncomingLocation incomingLocation)
+        public async Task<IActionResult> AddLocation([FromBody] LocationRequest locationRequest)
         {
             try
             {
-                await _locationService.AddLocation(incomingLocation);
-                return CreatedAtAction(nameof(GetLocationById), new { id = incomingLocation.Id }, incomingLocation);
+                var createdLocation = await _locationService.AddLocation(locationRequest);
+                var response = new LocationResponse
+                {
+                    Id = createdLocation.Id,
+                    WarehouseId = createdLocation.WarehouseId,
+                    Code = createdLocation.Code,
+                    Name = $"Row: {createdLocation.Row}, Rack: {createdLocation.Rack}, Shelf: {createdLocation.Shelf}",
+                };
+
+                return CreatedAtAction(nameof(GetLocationById), new { id = response.Id }, response);
             }
             catch (ValidationException ex)
             {
-                return BadRequest(FormatValidationErrors(ex.Errors));
+                return BadRequest(new { errors = ex.Errors });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateLocation(int id, [FromBody] IncomingLocation incomingLocation)
+        public async Task<IActionResult> UpdateLocation(int id, [FromBody] LocationRequest locationRequest)
         {
-            if (id != incomingLocation.Id)
-            {
-                return BadRequest(new { message = "Location ID in the path does not match the ID in the body." });
-            }
-
             try
             {
-                await _locationService.UpdateLocation(incomingLocation);
+                await _locationService.UpdateLocation(id, locationRequest);
                 return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (ValidationException ex)
             {
-                return BadRequest(FormatValidationErrors(ex.Errors));
+                return BadRequest(new { errors = ex.Errors });
             }
         }
 
