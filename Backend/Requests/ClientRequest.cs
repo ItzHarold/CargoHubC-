@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Backend.Response;
+namespace Backend.Requests;
 
 public class ClientRequest
 {

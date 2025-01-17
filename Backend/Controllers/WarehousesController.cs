@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Backend.Features.Warehouses;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Requests;
+using Backend.Requests;
 using Backend.Response;
 
 namespace Backend.Controllers.Warehouses

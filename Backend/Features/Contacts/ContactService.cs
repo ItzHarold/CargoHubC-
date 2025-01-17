@@ -41,12 +41,8 @@ namespace Backend.Features.Contacts
 
         public async Task AddContact(Contact contact)
         {
-            var validationResult = await _validator.ValidateAsync(contact);
+            //
 
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
             _dbContext.Contacts?.Add(contact);
             await _dbContext.SaveChangesAsync();
         }

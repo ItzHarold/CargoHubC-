@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Requests;
+namespace Backend.Requests;
 
 public class WarehouseRequest
 {

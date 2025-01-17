@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using Backend.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
-using Requests;
+using Backend.Requests;
 using Backend.Features.WarehouseContacts;
 using Backend.Features.Contacts;
 

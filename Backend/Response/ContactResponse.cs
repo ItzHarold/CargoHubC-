@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
 
-namespace Backend.Requests;
+namespace Backend.Response;
 
-public class ContactRequest
+public class ContactResponse
 {
     [JsonProperty("contact_name")]
     public required string ContactName { get; set; }

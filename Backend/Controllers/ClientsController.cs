@@ -4,6 +4,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Response;
+using Backend.Requests;
 
 namespace Backend.Controllers.Clients
 {
@@ -33,7 +34,7 @@ namespace Backend.Controllers.Clients
             {
                 return NotFound();
             }
-            
+
             var response = new ClientResponse
             {
                 Id = client.Id,
