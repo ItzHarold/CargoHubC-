@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Backend.Infrastructure.Database;
+using Backend.Requests;
 using FluentValidation;
 
 namespace Backend.Features.ItemTypes
@@ -9,8 +10,8 @@ namespace Backend.Features.ItemTypes
     {
         IEnumerable<ItemType> GetAllItemTypes();
         ItemType? GetItemTypeById(int id);
-        void AddItemType(ItemType itemType);
-        void UpdateItemType(int id, ItemType itemType);
+        Task<int> AddItemType(ItemTypeRequest itemTypeRequest);
+        Task UpdateItemType(ItemType itemType);
         void DeleteItemType(int id);
     }
 
@@ -39,27 +40,31 @@ namespace Backend.Features.ItemTypes
             return _dbContext.ItemTypes?.Find(id);
         }
 
-        public void AddItemType(ItemType itemType)
+        public async Task<int> AddItemType(ItemTypeRequest itemTypeRequest)
         {
-            var validationResult = _validator.Validate(itemType);
+            // var validationResult = _validator.Validate(itemGroup);
 
-            if (!validationResult.IsValid)
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            var itemType = new ItemType()
             {
-                throw new ValidationException(validationResult.Errors);
-            }
+                Name = itemTypeRequest.Name,
+                Description = itemTypeRequest.Description
+            };
 
             itemType.CreatedAt = DateTime.Now;
+            itemType.UpdatedAt = itemType.CreatedAt;
+
             _dbContext.ItemTypes?.Add(itemType);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
+            return itemType.Id;
         }
 
-        public void UpdateItemType(int id, ItemType itemType)
+        public async Task UpdateItemType(ItemType itemType)
         {
-            if (id != itemType.Id)
-            {
-                throw new ValidationException("Item Type ID in the path does not match the ID in the body.");
-            }
-
             var validationResult = _validator.Validate(itemType);
 
             if (!validationResult.IsValid)
@@ -69,7 +74,7 @@ namespace Backend.Features.ItemTypes
 
             itemType.UpdatedAt = DateTime.Now;
             _dbContext.ItemTypes?.Update(itemType);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteItemType(int id)

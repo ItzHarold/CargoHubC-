@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Backend.Features.ItemTypes;
+using Backend.Requests;
+using Backend.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.ItemTypes
@@ -21,18 +23,37 @@ namespace Backend.Controllers.ItemTypes
             return Ok(_itemTypeService.GetAllItemTypes());
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         public IActionResult GetItemTypeById(int id)
         {
-            var itemType = _itemTypeService.GetItemTypeById(id);
-            return itemType is not null ? Ok(itemType) : NotFound();
+            var itemGroup = _itemTypeService.GetItemTypeById(id);
+            if (itemGroup == null)
+            {
+                return NotFound();
+            }
+
+            var response = new ItemTypeResponse
+            {
+                Id = itemGroup.Id,
+                Name = itemGroup.Name,
+                Description = itemGroup.Description
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public IActionResult AddItemType([FromBody] ItemType itemType)
+        public async Task<IActionResult> AddItemType(ItemTypeRequest itemType)
         {
-            _itemTypeService.AddItemType(itemType);
-            return Ok(itemType);
+            try
+            {
+                int newItemTypeId = await _itemTypeService.AddItemType(itemType);
+                return GetItemTypeById(newItemTypeId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         [HttpDelete("{id:int}")]
@@ -41,12 +62,23 @@ namespace Backend.Controllers.ItemTypes
             _itemTypeService.DeleteItemType(id);
             return NoContent();
         }
-
-        [HttpPut("{id:int}")]
-        public IActionResult UpdateItemType(int id, [FromBody] ItemType itemType)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateItemType(int id, [FromBody] ItemType itemType)
         {
-            _itemTypeService.UpdateItemType(id, itemType);
-            return NoContent();
+            if (id != itemType.Id)
+            {
+                return BadRequest("Item Group does not match the ID");
+            }
+            try
+            {
+                await _itemTypeService.UpdateItemType(itemType);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+            
         }
     }
 }
