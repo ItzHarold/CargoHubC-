@@ -36,6 +36,7 @@ namespace Backend.Controllers.Clients
             
             var response = new ClientResponse
             {
+                Id = client.Id,
                 Name = client.Name,
                 Address = client.Address,
                 City = client.City,
