@@ -11,6 +11,7 @@ namespace Backend.Features.Orders
         void AddOrder(Order order);
         void UpdateOrder(Order order);
         void DeleteOrder(int id);
+        IEnumerable<Order> GetOrdersFromCustomers(int id);
     }
 
     public class OrderService: IOrderService
@@ -19,6 +20,11 @@ namespace Backend.Features.Orders
         public void AddOrder(Order order)
         {
             _orders.Add(order);
+        }
+
+        public IEnumerable<Order> GetOrdersFromCustomers(int id)
+        {
+            return _orders.Where(o => o.SourceId == id);
         }
 
         public IEnumerable<Order> GetAllOrders()
