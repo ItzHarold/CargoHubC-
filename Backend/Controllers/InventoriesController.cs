@@ -56,5 +56,13 @@ namespace Backend.Controllers.Inventories
             _inventoryService.DeleteInventory(id);
             return NoContent();
         }
+
+        [HttpGet("item/{id}/inventories")]
+        public IActionResult GetInventoriesByItemId(string id)
+        {
+            var inventories = _inventoryService.GetInventoriesByItemId(id);
+            return Ok(inventories);
+        }
+
     }
 }

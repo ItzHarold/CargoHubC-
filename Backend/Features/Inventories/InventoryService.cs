@@ -11,11 +11,17 @@ namespace Backend.Features.Inventories
         void AddInventory(Inventory inventory);
         void UpdateInventory(Inventory inventory);
         void DeleteInventory(int id);
+        IEnumerable<Inventory> GetInventoriesByItemId(string id);
     }
 
     public class InventoryService : IInventoryService
     {
         private readonly List<Inventory> _inventories = new();
+
+        public IEnumerable<Inventory> GetInventoriesByItemId(string id)
+        {
+            return _inventories.Where(c => c.ItemId == id);
+        }
 
         public IEnumerable<Inventory> GetAllInventories()
         {
