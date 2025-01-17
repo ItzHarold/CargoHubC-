@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Backend.Features.Suppliers;
+using Backend.Response;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -32,39 +33,55 @@ namespace Backend.Controllers.Suppliers
             {
                 return NotFound(new { message = "Supplier not found." });
             }
-            return Ok(supplier);
+
+            var response = new SupplierResponse
+            {
+                Id = supplier.Id,
+                Code = supplier.Code,
+                Name = supplier.Name,
+                Address = supplier.Address,
+                AddressExtra = supplier.AddressExtra,
+                City = supplier.City,
+                ZipCode = supplier.ZipCode,
+                Province = supplier.Province,
+                Country = supplier.Country,
+                ContactName = supplier.ContactName,
+                PhoneNumber = supplier.PhoneNumber,
+                Reference = supplier.Reference
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddSupplier([FromBody] Supplier supplier)
+        public async Task<IActionResult> AddSupplier([FromBody] SupplierRequest supplierRequest)
         {
             try
             {
-                await _supplierService.AddSupplier(supplier);
-                return CreatedAtAction(nameof(GetSupplierById), new { id = supplier.Id }, supplier);
+                var createdSupplier = await _supplierService.AddSupplier(supplierRequest);
+                return CreatedAtAction(nameof(GetSupplierById), new { id = createdSupplier.Id }, createdSupplier);
             }
             catch (ValidationException ex)
             {
-                return BadRequest(FormatValidationErrors(ex.Errors));
+                return BadRequest(new { errors = ex.Errors });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSupplier(int id, [FromBody] Supplier supplier)
+        public async Task<IActionResult> UpdateSupplier(int id, [FromBody] SupplierRequest supplierRequest)
         {
-            if (id != supplier.Id)
-            {
-                return BadRequest(new { message = "Supplier ID in the path does not match the ID in the body." });
-            }
-
             try
             {
-                await _supplierService.UpdateSupplier(supplier);
+                await _supplierService.UpdateSupplier(id, supplierRequest);
                 return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (ValidationException ex)
             {
-                return BadRequest(FormatValidationErrors(ex.Errors));
+                return BadRequest(new { errors = ex.Errors });
             }
         }
 

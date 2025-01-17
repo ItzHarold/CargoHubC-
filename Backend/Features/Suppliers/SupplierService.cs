@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Backend.Infrastructure.Database;
+using Backend.Response;
 using FluentValidation;
 
 namespace Backend.Features.Suppliers
@@ -10,8 +12,8 @@ namespace Backend.Features.Suppliers
     {
         IEnumerable<Supplier> GetAllSuppliers();
         Supplier? GetSupplierById(int id);
-        Task AddSupplier(Supplier supplier);
-        Task UpdateSupplier(Supplier supplier);
+        Task<Supplier> AddSupplier(SupplierRequest supplierRequest);
+        Task UpdateSupplier(int id, SupplierRequest supplierRequest);
         void DeleteSupplier(int id);
     }
 
@@ -40,30 +42,62 @@ namespace Backend.Features.Suppliers
             return _dbContext.Suppliers?.FirstOrDefault(s => s.Id == id);
         }
 
-        public async Task AddSupplier(Supplier supplier)
+        public async Task<Supplier> AddSupplier(SupplierRequest supplierRequest)
         {
-            // Validate the supplier object using FluentValidation
-            var validationResult = await _validator.ValidateAsync(supplier);
-            if (!validationResult.IsValid)
+            var supplier = new Supplier
             {
-                throw new ValidationException(validationResult.Errors);
-            }
+                Code = supplierRequest.Code,
+                Name = supplierRequest.Name,
+                Address = supplierRequest.Address,
+                AddressExtra = supplierRequest.AddressExtra,
+                City = supplierRequest.City,
+                ZipCode = supplierRequest.ZipCode,
+                Province = supplierRequest.Province,
+                Country = supplierRequest.Country,
+                ContactName = supplierRequest.ContactName,
+                PhoneNumber = supplierRequest.PhoneNumber,
+                Reference = supplierRequest.Reference
+            };
 
             supplier.CreatedAt = DateTime.Now;
+
             _dbContext.Suppliers?.Add(supplier);
             await _dbContext.SaveChangesAsync();
+
+            return supplier; // Return the newly created supplier
         }
 
-        public async Task UpdateSupplier(Supplier supplier)
+
+
+        public async Task UpdateSupplier(int id, SupplierRequest supplierRequest)
         {
-            // Validate the supplier object using FluentValidation
-            var validationResult = await _validator.ValidateAsync(supplier);
-            if (!validationResult.IsValid)
+            var supplier = _dbContext.Suppliers?.FirstOrDefault(s => s.Id == id);
+            if (supplier == null)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new KeyNotFoundException($"Supplier with ID {id} not found.");
             }
 
+            // Validation logic commented as per your instructions
+            // var validationResult = await _validator.ValidateAsync(supplier);
+
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            supplier.Code = supplierRequest.Code;
+            supplier.Name = supplierRequest.Name;
+            supplier.Address = supplierRequest.Address;
+            supplier.AddressExtra = supplierRequest.AddressExtra;
+            supplier.City = supplierRequest.City;
+            supplier.ZipCode = supplierRequest.ZipCode;
+            supplier.Province = supplierRequest.Province;
+            supplier.Country = supplierRequest.Country;
+            supplier.ContactName = supplierRequest.ContactName;
+            supplier.PhoneNumber = supplierRequest.PhoneNumber;
+            supplier.Reference = supplierRequest.Reference;
             supplier.UpdatedAt = DateTime.Now;
+
             _dbContext.Suppliers?.Update(supplier);
             await _dbContext.SaveChangesAsync();
         }

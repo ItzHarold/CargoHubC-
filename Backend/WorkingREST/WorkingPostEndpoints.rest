@@ -162,11 +162,11 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "name": "Global Supplies Inc.",
     "address": "123 Supplier Lane",
     "city": "Supply City",
-    "ZipCode": "12345",
+    "zip_code": "12345",
     "province": "ProvinceLand",
     "country": "SupplyCountry",
-    "ContactName": "John Supplier",
-    "PhoneNumber": "1234567890",
+    "contact_name": "John Supplier",
+    "phone_number": "1234567890",
     "reference": "REF123"
 }
 

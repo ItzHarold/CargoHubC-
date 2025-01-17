@@ -165,18 +165,16 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "Id": 1,
-    "Code": "SUP0002",
-    "Name": "Updated Supplier",
-    "Address": "1234 Wijnhaven",
-    "AddressExtra": "",
-    "City": "Rotterdam",
-    "ZipCode": "2342JK",
-    "Province": "Zuid-Holland",
-    "Country": "Netherlands",
-    "ContactName": "Jur",
-    "PhoneNumber": "01028903847",
-    "Reference": "Smith-SUP0002"
+    "code": "SUP123",
+    "name": "UPDATE Supplies Inc.",
+    "address": "123 Supplier Lane",
+    "city": "Supply City",
+    "zip_code": "12345",
+    "province": "ProvinceLand",
+    "country": "SupplyCountry",
+    "contact_name": "John Supplier",
+    "phone_number": "1234567890",
+    "reference": "REF123"
 }
 
 
