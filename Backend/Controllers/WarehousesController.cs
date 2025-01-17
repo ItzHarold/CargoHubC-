@@ -3,7 +3,7 @@ using Backend.Features.Warehouses;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Requests;
-using Responses;
+using Backend.Response;
 
 namespace Backend.Controllers.Warehouses
 {

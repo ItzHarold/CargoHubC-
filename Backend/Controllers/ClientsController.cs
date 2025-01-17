@@ -3,6 +3,7 @@ using Backend.Features.Clients;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Response;
 
 namespace Backend.Controllers.Clients
 {
@@ -32,16 +33,30 @@ namespace Backend.Controllers.Clients
             {
                 return NotFound();
             }
-            return Ok(client);
+            
+            var response = new ClientResponse
+            {
+                Name = client.Name,
+                Address = client.Address,
+                City = client.City,
+                ZipCode = client.ZipCode,
+                Province = client.Province,
+                Country = client.Country,
+                ContactName = client.ContactName,
+                ContactPhone = client.ContactPhone,
+                ContactEmail = client.ContactEmail
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddClient([FromBody] Client client)
+        public async Task<IActionResult> AddClient([FromBody] ClientRequest client)
         {
             try
             {
-                await _clientService.AddClient(client);
-                return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
+                int newClientId = await _clientService.AddClient(client);
+                return GetClientById(newClientId);
             }
             catch (ValidationException ex)
             {

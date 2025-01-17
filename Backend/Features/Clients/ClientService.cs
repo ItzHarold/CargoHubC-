@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Backend.Infrastructure.Database;
+using Backend.Response;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ namespace Backend.Features.Clients
     {
         IEnumerable<Client> GetAllClients();
         Client? GetClientById(int id);
-        Task AddClient(Client client);
+        Task<int> AddClient(ClientRequest clientRequest);
         Task UpdateClient(Client client);
         void DeleteClient(int id);
     }
@@ -40,18 +41,34 @@ namespace Backend.Features.Clients
             return _dbContext.Clients?.Find(id);
         }
 
-        public async Task AddClient(Client client)
+        public async Task<int> AddClient(ClientRequest clientRequest)
         {
-            var validationResult = await _validator.ValidateAsync(client);
+            // var validationResult = await _validator.ValidateAsync(client);
 
-            if (!validationResult.IsValid)
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            var client = new Client()
             {
-                throw new ValidationException(validationResult.Errors);
-            }
+                Name = clientRequest.Name,
+                Address = clientRequest.Address,
+                City = clientRequest.City,
+                ZipCode = clientRequest.ZipCode,
+                Province = clientRequest.Province,
+                Country = clientRequest.Country,
+                ContactName = clientRequest.ContactName,
+                ContactPhone = clientRequest.ContactPhone,
+                ContactEmail = clientRequest.ContactEmail
+            };
 
             client.CreatedAt = DateTime.Now;
+            client.UpdatedAt = client.CreatedAt;
+
             _dbContext.Clients?.Add(client);
             await _dbContext.SaveChangesAsync();
+            return client.Id;
         }
 
         public async Task UpdateClient(Client client)

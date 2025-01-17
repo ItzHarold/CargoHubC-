@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Requests;
 
-namespace Responses;
+namespace Backend.Response;
 
 public class WarehouseResponse
 {
