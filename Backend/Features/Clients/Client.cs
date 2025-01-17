@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.Orders;
 
 namespace Backend.Features.Clients
 {
@@ -46,5 +47,8 @@ namespace Backend.Features.Clients
         [Required]
         [JsonPropertyName("contact_email")]
         public required string ContactEmail { get; set; }
+
+        public ICollection<Order>? BillTo{get;set;}
+        public ICollection<Order>? ShipTo{get;set;}
     }
 }

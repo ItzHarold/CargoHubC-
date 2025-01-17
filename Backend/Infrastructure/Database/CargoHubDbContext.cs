@@ -77,17 +77,17 @@ public class CargoHubDbContext(DbContextOptions<CargoHubDbContext> options) : Db
             .HasForeignKey(e => e.TransferToLocationId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // modelBuilder.Entity<Order>()
-        //     .HasMany(e => e.ShipTo)
-        //     .WithOne(e => e.ShipTo)
-        //     .HasForeignKey(e => e.ShipToClientId)
-        //     .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Client>()
+            .HasMany(e => e.ShipTo)
+            .WithOne(e => e.ShipTo)
+            .HasForeignKey(e => e.ShipToClientId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // modelBuilder.Entity<Order>()
-        //     .HasMany(e => e.BillTo)
-        //     .WithOne(e => e.BillTo)
-        //     .HasForeignKey(e => e.BillToClientId)
-        //     .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Client>()
+            .HasMany(e => e.BillTo)
+            .WithOne(e => e.BillTo)
+            .HasForeignKey(e => e.BillToClientId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     public override int SaveChanges()

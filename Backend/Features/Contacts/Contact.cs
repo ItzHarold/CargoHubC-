@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.Shipments;
+
 using Backend.Features.WarehouseContacts;
 
 namespace Backend.Features.Contacts
@@ -26,7 +28,8 @@ namespace Backend.Features.Contacts
         [EmailAddress]
         [JsonPropertyName("contact_email")]
         public required string ContactEmail { get; set; }
-
+        // Navigation property
+        public ICollection<Shipment>? Shipments { get; set; }
         public ICollection<WarehouseContact>? WarehouseContacts { get; set; }
     }
 }
