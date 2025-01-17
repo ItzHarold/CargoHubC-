@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Backend.Features.Contacts;
 using Backend.Features.Locations;
 using Backend.Features.Orders;
+using Backend.Features.Transfers;
 using Backend.Features.WarehouseContacts;
 
 namespace Backend.Features.Warehouses
@@ -18,35 +19,38 @@ namespace Backend.Features.Warehouses
 
         [Required]
         [JsonPropertyName("code")]
-        public required string Code { get; set; }
+        public string? Code { get; set; }
 
         [Required]
         [JsonPropertyName("name")]
-        public required string Name { get; set; }
+        public string? Name { get; set; }
 
         [Required]
         [JsonPropertyName("address")]
-        public required string Address { get; set; }
+        public string? Address { get; set; }
 
         [Required]
         [JsonPropertyName("zip")]
-        public required string Zip { get; set; }
+        public string? Zip { get; set; }
 
         [Required]
         [JsonPropertyName("city")]
-        public required string City { get; set; }
+        public string? City { get; set; }
 
         [Required]
         [JsonPropertyName("province")]
-        public required string Province { get; set; }
+        public string? Province { get; set; }
 
         [Required]
         [JsonPropertyName("country")]
-        public required string Country { get; set; }
+        public string? Country { get; set; }
 
-        //Navigator
+        // Navigation properties
+        public ICollection<Transfer> TransfersTo { get; set; } = new List<Transfer>();
+        public ICollection<Transfer> TransfersFrom { get; set; } = new List<Transfer>();
+
         public ICollection<Location>? Locations { get; set; }
-        public ICollection<WarehouseContact> WarehouseContacts { get; set;} = null!;
-        public ICollection<Order> Orders { get; } = new List<Order>();
+        public ICollection<WarehouseContact> WarehouseContacts { get; set; } = new List<WarehouseContact>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }
