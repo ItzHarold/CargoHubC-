@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Items;
 using Backend.Features.OrderItems;
+using Backend.Features.ShipmentOrders;
 
 namespace Backend.Features.Orders
 {
@@ -77,6 +78,9 @@ namespace Backend.Features.Orders
 
         [JsonPropertyName("order_items")]
         public ICollection<OrderItem>? OrderItems { get; set; }  = null!;
+
+        [JsonPropertyName("shipment_orders")]
+        public ICollection<ShipmentOrder>? shipmentOrders { get; set; } = null!;
 
         [JsonPropertyName("items")]
         public List<Item>? Items { get; set; }

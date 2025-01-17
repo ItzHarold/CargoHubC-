@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.Orders;
 using Backend.Features.Shipments;
 
 namespace Backend.Features.ShipmentOrders
@@ -20,6 +21,9 @@ namespace Backend.Features.ShipmentOrders
         [ForeignKey("Orders")]
         [JsonPropertyName("order_id")]
         public required int orderId { get; set; }
+
+        public Order? order { get; set; }
+        public Shipment? shipment { get; set; }
 
     }
 }

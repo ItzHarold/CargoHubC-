@@ -39,12 +39,15 @@ namespace Backend.Features.Items
         [JsonPropertyName("commodity_code")]
         public string? CommodityCode { get; set; }
 
+        [Required]
         [JsonPropertyName("item_line")]
         public int? ItemLineId { get; set; }
 
+        [Required]
         [JsonPropertyName("item_group")]
         public int? ItemGroupId { get; set; }
 
+        [Required]
         [JsonPropertyName("item_type")]
         public int? ItemTypeId { get; set; }
 
@@ -71,6 +74,12 @@ namespace Backend.Features.Items
         [JsonPropertyName("supplier_part_number")]
         public required string SupplierPartNumber { get; set; }
 
+        [JsonPropertyName("transfer_items")]
+        public ICollection<TransferItem>? TransferItems { get; set; } = new List<TransferItem>();
+
+        [JsonPropertyName("order_items")]
+        public ICollection<OrderItem>? OrderItems { get; set; }  = null!;
+
 
         // NAVIGATION PRINCEPLES
         public ItemGroup? ItemGroup { get; set; }
@@ -79,11 +88,7 @@ namespace Backend.Features.Items
         public Supplier? Supplier { get; set; }
         public Inventory? Inventory { get; set; }
 
-        [JsonPropertyName("transfer_items")]
-        public ICollection<TransferItem>? TransferItems { get; set; } = new List<TransferItem>();
 
-        [JsonPropertyName("order_items")]
-        public ICollection<OrderItem>? OrderItems { get; set; }  = null!;
 
     }
 }

@@ -48,23 +48,24 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "uid": "12345",
-  "code": "sjQ23408K",
-  "description": "New Item",
-  "short_description": "item",
-  "upc_code": "6523523427122",
-  "model_number": "44-9JeF0S",
-  "commodity_code": "Lwoak",
-  "item_line": 1,
-  "item_group": 80,
-  "item_type": 14,
-  "unit_purchase_quantity": 20,
-  "unit_order_quantity": 12,
-  "pack_order_quantity": 7,
-  "supplier_id": 79,
-  "supplier_code": "MSI902",
-  "supplier_part_number": "A-75389-mNT"
+  "Uid": "12345",
+  "Code": "sjQ23408K",
+  "Description": "New Item",
+  "ShortDescription": "item",
+  "UpcCode": "6523523427122",
+  "ModelNumber": "44-9JeF0S",
+  "CommodityCode": "Lwoak",
+  "ItemLineId": 1,
+  "ItemGroupId": 1,
+  "ItemTypeId": 1,
+  "UnitPurchaseQuantity": 20,
+  "UnitOrderQuantity": 12,
+  "PackOrderQuantity": 13,
+  "SupplierId": 7,
+  "SupplierCode": "MSI902",
+  "SupplierPartNumber": "A-75389-mNT"
 }
+
 
 ### Add a new location
 POST http://localhost:5031/api/locations
@@ -90,13 +91,13 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "RequestDate": "2024-09-18T10:00:00Z",
     "Reference": "ORD00002",
     "ReferenceExtra": "Example reference text.",
-    "order_status": "Pending",
+    "OrderStatus": "Pending",
     "Notes": "Additional notes for the order.",
     "ShippingNotes": "Please deliver to the main office.",
     "PickingNotes": "Ensure items are picked in the correct order.",
     "warehouse_id": 19,
     "ShipTo": "null",
-    "bill_to": "null",
+    "BillTo": "null",
     "ShipmentId": 1,
     "TotalAmount": 1234.56,
     "TotalDiscount": 50.00,
@@ -104,7 +105,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "TotalSurcharge": 15.00,
     "Items": [
         {
-            "Uid": "P123",
+            "Uid": "7895",
             "Code": "P00001",
             "Description": "Product 1",
             "ShortDescription": "Prod 1",
@@ -115,7 +116,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
             "item_group": 1,
             "item_type": 1,
             "supplier_id": 1,
-            "supplier_part_number": "asdf"
+            "SupplierPartNumber": "asdf"
         }
     ]
 }
@@ -132,20 +133,20 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "OrderDate": "2024-09-15",
     "RequestDate": "2024-09-16",
     "ShipmentDate": "2024-09-17",
-    "shipment_type": "O",
+    "ShipmentType": "O",
     "ShipmentStatus": "Shipped",
     "Notes": "New shipment with updated details.",
-    "carrier_code": "DHL",
+    "CarrierCode": "DHL",
     "CarrierDescription": "DHL Express",
-    "service_code": "Standard",
-    "payment_type": "Prepaid",
-    "transfer_mode": "Air",
+    "ServiceCode": "Standard",
+    "PaymentType": "Prepaid",
+    "TransferMode": "Air",
     "TotalPackageCount": 45,
     "TotalPackageWeight": 755.60,
-    "shipment_items": [
+    "Items": [
        { 
             "id": 1,
-            "ItemUid": "P22222",
+            "ItemUid": "12345",
             "amount": 2
        }
     ]
@@ -161,11 +162,11 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "name": "Global Supplies Inc.",
     "address": "123 Supplier Lane",
     "city": "Supply City",
-    "zip_code": "12345",
+    "ZipCode": "12345",
     "province": "ProvinceLand",
     "country": "SupplyCountry",
-    "contact_name": "John Supplier",
-    "phone_number": "1234567890",
+    "ContactName": "John Supplier",
+    "PhoneNumber": "1234567890",
     "reference": "REF123"
 }
 
