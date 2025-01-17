@@ -62,7 +62,7 @@ public static class Program
         app.UseHttpsRedirection();
 
         app.UseMiddleware<LoggingMiddleware>();
-        app.UseMiddleware<ApiKeyMiddleware>(); //While in development Comment out! to acces swagger
+        //app.UseMiddleware<ApiKeyMiddleware>(); //While in development Comment out! to acces swagger
         app.UseAuthorization();
 
         app.MapControllers();

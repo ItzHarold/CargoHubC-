@@ -32,7 +32,7 @@ namespace Backend.Controllers.ItemGroupsController
             }
             return Ok(itemGroup);
         }
-
+        [HttpPost]
         public IActionResult AddItemGroup(ItemGroup itemGroup)
         {
             _itemGroupService.AddItemGroup(itemGroup);
