@@ -48,22 +48,22 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "Uid": "123456",
-  "Code": "sjQ23408K",
-  "Description": "New Item",
+  "Uid": "1234",
+  "Code": "ffdsfsdfsfds",
+  "Description": "neewww Item",
   "ShortDescription": "item",
-  "UpcCode": "6523523427122",
-  "ModelNumber": "44-9JeF0S",
-  "CommodityCode": "Lwoak",
+  "UpcCode": "fda12313312",
+  "ModelNumber": "44-33434343434",
+  "CommodityCode": "sdfsvdvsdvsgd",
   "ItemLineId": 1,
   "ItemGroupId": 1,
   "ItemTypeId": 1,
   "UnitPurchaseQuantity": 20,
   "UnitOrderQuantity": 12,
   "PackOrderQuantity": 13,
-  "SupplierId": 1,
-  "SupplierCode": "MSI902",
-  "SupplierPartNumber": "A-75389-mNT"
+  "Supplier_id": 4,
+  "SupplierCode": "HBKFABJHAF",
+  "SupplierPartNumber": "A-fsadafas-mNT"
 }
 
 

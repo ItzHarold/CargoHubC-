@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using Backend.Infrastructure.Database;
+using Backend.Request;
 
 namespace Backend.Features.Items
 {
@@ -9,8 +10,8 @@ namespace Backend.Features.Items
     {
         IEnumerable<Item> GetAllItems();
         Item? GetItemById(string uid);
-        void AddItem(Item item);
-        void UpdateItem(string uid, Item item);
+        void AddItem(ItemRequest itemRequest);
+        void UpdateItem(string uid, ItemRequest itemRequest);
         void DeleteItem(string uid);
         IEnumerable<Item> GetItemsBySupplierId(int supplierId);
     }
@@ -37,16 +38,58 @@ namespace Backend.Features.Items
             return _dbContext.Items?.FirstOrDefault(i => i.Uid == uid);
         }
 
-        public void AddItem(Item item)
+        public void AddItem(ItemRequest itemRequest)
         {
-            item.CreatedAt = DateTime.Now;
+            var item = new Item
+            {
+                Uid = itemRequest.Uid,
+                Code = itemRequest.Code,
+                Description = itemRequest.Description,
+                ShortDescription = itemRequest.ShortDescription,
+                UpcCode = itemRequest.UpcCode,
+                ModelNumber = itemRequest.ModelNumber,
+                CommodityCode = itemRequest.CommodityCode,
+                ItemLineId = itemRequest.ItemLineId,
+                ItemGroupId = itemRequest.ItemGroupId,
+                ItemTypeId = itemRequest.ItemTypeId,
+                UnitPurchaseQuantity = itemRequest.UnitPurchaseQuantity,
+                UnitOrderQuantity = itemRequest.UnitOrderQuantity,
+                PackOrderQuantity = itemRequest.PackOrderQuantity,
+                SupplierId = itemRequest.SupplierId,
+                SupplierCode = itemRequest.SupplierCode,
+                SupplierPartNumber = itemRequest.SupplierPartNumber,
+                CreatedAt = DateTime.Now
+            };
+
             _dbContext.Items?.Add(item);
             _dbContext.SaveChanges();
         }
 
-        public void UpdateItem(string uid, Item item)
+        public void UpdateItem(string uid, ItemRequest itemRequest)
         {
+            var item = _dbContext.Items?.FirstOrDefault(i => i.Uid == uid);
+            if (item == null)
+            {
+                throw new KeyNotFoundException($"Item with UID {uid} not found.");
+            }
+
+            item.Code = itemRequest.Code;
+            item.Description = itemRequest.Description;
+            item.ShortDescription = itemRequest.ShortDescription;
+            item.UpcCode = itemRequest.UpcCode;
+            item.ModelNumber = itemRequest.ModelNumber;
+            item.CommodityCode = itemRequest.CommodityCode;
+            item.ItemLineId = itemRequest.ItemLineId;
+            item.ItemGroupId = itemRequest.ItemGroupId;
+            item.ItemTypeId = itemRequest.ItemTypeId;
+            item.UnitPurchaseQuantity = itemRequest.UnitPurchaseQuantity;
+            item.UnitOrderQuantity = itemRequest.UnitOrderQuantity;
+            item.PackOrderQuantity = itemRequest.PackOrderQuantity;
+            item.SupplierId = itemRequest.SupplierId;
+            item.SupplierCode = itemRequest.SupplierCode;
+            item.SupplierPartNumber = itemRequest.SupplierPartNumber;
             item.UpdatedAt = DateTime.Now;
+
             _dbContext.Items?.Update(item);
             _dbContext.SaveChanges();
         }

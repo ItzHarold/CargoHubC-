@@ -1,4 +1,6 @@
 using Backend.Features.Items;
+using Backend.Request;
+using Backend.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Items
@@ -15,9 +17,9 @@ namespace Backend.Controllers.Items
         }
 
         [HttpPost(Name = "AddItem")]
-        public IActionResult AddItem([FromBody] Item item)
+        public IActionResult AddItem([FromBody] ItemRequest itemRequest)
         {
-            _service.AddItem(item);
+            _service.AddItem(itemRequest);
             return Ok();
         }
 
@@ -25,7 +27,34 @@ namespace Backend.Controllers.Items
         public IActionResult GetItemById(string uid)
         {
             var item = _service.GetItemById(uid);
-            return item is not null ? Ok(item) : NotFound();
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            var response = new ItemResponse
+            {
+                Uid = item.Uid,
+                Code = item.Code,
+                Description = item.Description,
+                ShortDescription = item.ShortDescription,
+                UpcCode = item.UpcCode,
+                ModelNumber = item.ModelNumber,
+                CommodityCode = item.CommodityCode,
+                ItemLineId = item.ItemLineId,
+                ItemGroupId = item.ItemGroupId,
+                ItemTypeId = item.ItemTypeId,
+                UnitPurchaseQuantity = item.UnitPurchaseQuantity,
+                UnitOrderQuantity = item.UnitOrderQuantity,
+                PackOrderQuantity = item.PackOrderQuantity,
+                SupplierId = item.SupplierId,
+                SupplierCode = item.SupplierCode,
+                SupplierPartNumber = item.SupplierPartNumber,
+                CreatedAt = item.CreatedAt,
+                UpdatedAt = item.UpdatedAt
+            };
+
+            return Ok(response);
         }
 
         [HttpGet(Name = "GetAllItems")]
@@ -42,9 +71,9 @@ namespace Backend.Controllers.Items
         }
 
         [HttpPut("{uid}", Name = "UpdateItem")]
-        public IActionResult UpdateItem(string uid, [FromBody] Item item)
+        public IActionResult UpdateItem(string uid, [FromBody] ItemRequest itemRequest)
         {
-            _service.UpdateItem(uid, item);
+            _service.UpdateItem(uid, itemRequest);
             return NoContent();
         }
 
