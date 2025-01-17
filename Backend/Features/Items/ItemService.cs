@@ -13,6 +13,9 @@ namespace Backend.Features.Items
         void UpdateItem(string uid, Item item);
         void DeleteItem(string uid);
         IEnumerable<Item> GetItemsBySupplierId(int supplierId);
+        IEnumerable<Item> GetItemsByItemType(int itemTypeId);
+        IEnumerable<Item> GetItemsByItemGroup(int itemGroupId);
+        IEnumerable<Item> GetItemsByItemLine(int itemLineId);
     }
 
     public class ItemService : IItemService
@@ -65,6 +68,20 @@ namespace Backend.Features.Items
         {
             // Fetch all items associated with a specific supplier
             return _dbContext.Items?.Where(i => i.SupplierId == supplierId).ToList() ?? new List<Item>();
+        }
+        public IEnumerable<Item> GetItemsByItemType(int itemTypeId)
+        {
+        return Context.Where(item => item.ItemType == itemTypeId);
+        }
+
+        public IEnumerable<Item> GetItemsByItemGroup(int itemGroupId)
+        {
+            return Context.Where(item => item.ItemGroup == itemGroupId);
+        }
+
+        public IEnumerable<Item> GetItemsByItemLine(int itemLineId)
+        {
+            return Context.Where(item => item.ItemLine == itemLineId);
         }
     }
 }

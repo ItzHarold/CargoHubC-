@@ -83,6 +83,9 @@
             "GetItemsInTransfer",
             "GetItemsForOrder",
             "UpdateItemInOrder"
+            "GetItemsByItemType",
+            "GetItemsByItemGroup",
+            "GetItemsByItemLine"
         ],
         "WarehouseManager": [
             "HealthCheck",

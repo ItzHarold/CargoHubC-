@@ -54,5 +54,26 @@ namespace Backend.Controllers.Items
             var items = _service.GetItemsBySupplierId(supplierId);
             return Ok(items);
         }
+
+        [HttpGet("by-item-type/{itemTypeId:int}")]
+        public IActionResult GetItemsByItemType(int itemTypeId)
+        {
+            var items = _service.GetItemsByItemType(itemTypeId);
+            return Ok(items);
+        }
+
+        [HttpGet("by-item-group/{itemGroupId:int}")]
+        public IActionResult GetItemsByItemGroup(int itemGroupId)
+        {
+            var items = _service.GetItemsByItemGroup(itemGroupId);
+            return Ok(items);
+        }
+
+        [HttpGet("by-item-line/{itemLineId:int}")]
+        public IActionResult GetItemsByItemLine(int itemLineId)
+        {
+            var items = _service.GetItemsByItemLine(itemLineId);
+            return Ok(items);
+        }
     }
 }
