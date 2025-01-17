@@ -1,6 +1,8 @@
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
 using Backend.Features.Suppliers;
+using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Suppliers
 {
@@ -16,16 +18,10 @@ namespace Backend.Controllers.Suppliers
         }
 
         [HttpGet]
-        public IEnumerable<Supplier> GetAllSuppliers()
+        public IActionResult GetAllSuppliers()
         {
-            return _supplierService.GetAllSuppliers();
-        }
-
-        [HttpPost]
-        public IActionResult AddSupplier([FromBody]Supplier supplier)
-        {
-            _supplierService.AddSupplier(supplier);
-            return Ok();
+            var suppliers = _supplierService.GetAllSuppliers();
+            return Ok(suppliers);
         }
 
         [HttpGet("{id}")]
@@ -34,29 +30,61 @@ namespace Backend.Controllers.Suppliers
             var supplier = _supplierService.GetSupplierById(id);
             if (supplier == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Supplier not found." });
             }
             return Ok(supplier);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateSupplier(int id, [FromBody]Supplier supplier)
+        [HttpPost]
+        public async Task<IActionResult> AddSupplier([FromBody] Supplier supplier)
         {
-            var existingSupplier = _supplierService.GetSupplierById(id);
-            if (existingSupplier == null)
+            try
             {
-                return NotFound();
+                await _supplierService.AddSupplier(supplier);
+                return CreatedAtAction(nameof(GetSupplierById), new { id = supplier.Id }, supplier);
             }
-            supplier.Id = id;
-            _supplierService.UpdateSupplier(supplier);
-            return Ok();
+            catch (ValidationException ex)
+            {
+                return BadRequest(FormatValidationErrors(ex.Errors));
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateSupplier(int id, [FromBody] Supplier supplier)
+        {
+            if (id != supplier.Id)
+            {
+                return BadRequest(new { message = "Supplier ID in the path does not match the ID in the body." });
+            }
+
+            try
+            {
+                await _supplierService.UpdateSupplier(supplier);
+                return NoContent();
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(FormatValidationErrors(ex.Errors));
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteSupplier(int id)
         {
             _supplierService.DeleteSupplier(id);
-            return Ok();
+            return NoContent();
+        }
+
+        private static object FormatValidationErrors(IEnumerable<ValidationFailure> errors)
+        {
+            return new
+            {
+                errors = errors.Select(e => new
+                {
+                    field = e.PropertyName,
+                    message = e.ErrorMessage
+                })
+            };
         }
     }
 }

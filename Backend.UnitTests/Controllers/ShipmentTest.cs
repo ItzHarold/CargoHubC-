@@ -2,6 +2,7 @@ using Backend.Features.Shipments;
 using System.Linq;
 using Xunit;
 using Backend.Features.Items;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Shipments.Tests
 {
@@ -11,7 +12,7 @@ namespace Backend.Features.Shipments.Tests
 
         public ShipmentServiceTests()
         {
-            _shipmentService = new ShipmentService();
+            _shipmentService = new ShipmentService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]
@@ -43,8 +44,8 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Prepaid",
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
-                TotalPackageWeight = 100m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalPackageWeight = 100,
+                Items = [] 
             };
 
             // Act
@@ -75,8 +76,8 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Prepaid",
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
-                TotalPackageWeight = 100m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalPackageWeight = 100,
+                Items = [] 
             };
             _shipmentService.AddShipment(shipment);
 
@@ -117,8 +118,8 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Prepaid",
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
-                TotalPackageWeight = 100m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalPackageWeight = 100,
+                Items = [] 
             };
             _shipmentService.AddShipment(shipment);
 
@@ -137,7 +138,7 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Collect",
                 TransferMode = "Land",
                 TotalPackageCount = 10,
-                TotalPackageWeight = 200m,
+                TotalPackageWeight = 200,
                 Items = shipment.Items
             };
 
@@ -171,8 +172,8 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Prepaid",
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
-                TotalPackageWeight = 100m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalPackageWeight = 100,
+                Items = [] 
             };
             _shipmentService.AddShipment(shipment);
 
@@ -203,8 +204,8 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Prepaid",
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
-                TotalPackageWeight = 100m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalPackageWeight = 100,
+                Items = []
             };
             _shipmentService.AddShipment(shipment);
 

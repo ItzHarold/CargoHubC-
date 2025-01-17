@@ -74,6 +74,15 @@
             "GetItemLineById",
             "DeleteItemLine",
             "UpdateItemLine",
+            "GetAllLocations",
+            "GetLocationById",
+            "UpdateLocation",
+            "AddLocation",
+            "DeleteLocation",
+            "GetItemsBySupplierId",
+            "GetItemsInTransfer",
+            "GetItemsForOrder",
+            "UpdateItemInOrder"
             "GetItemsByItemType",
             "GetItemsByItemGroup",
             "GetItemsByItemLine"

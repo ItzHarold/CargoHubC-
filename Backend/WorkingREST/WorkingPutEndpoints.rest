@@ -1,3 +1,22 @@
+### Update an existing Client
+
+PUT http://localhost:5031/api/clients/1
+Content-Type: application/json
+X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+
+{
+  "Id": 1,
+  "Name": "Test Update",
+  "Address": "123 Sinterklaas, Rotterdam, NY",
+  "City": "Rotterdam",
+  "ZipCode": "1234AB",
+  "Province": "Zuid-Holland",
+  "Country": "Netherlands",
+  "ContactName": "Charlotte",
+  "ContactPhone": "+1234567890",
+  "ContactEmail": "charlotte@gmail.com"
+}
+
 ### Update an existing inventory entry
 PUT http://localhost:5031/api/inventories/1
 Content-Type: application/json
@@ -11,17 +30,17 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
   "TotalOrdered": 40,
   "TotalAllocated": 10,
   "TotalAvailable": 110,
-  "Description": "New Description"
+  "Description": "Updated Description"
 }
 
 ### Update an existing item group
-PUT http://localhost:5031/api/itemgroups/1
+PUT http://localhost:5031/api/item_groups/1
 Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
   "id": 1,
-  "name": "New Name",
+  "name": "Updated Name",
   "description": "Updated description for the category"
 }
 
@@ -31,10 +50,10 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "id": 1,
-  "contactName": "Harold",
-  "contactPhone": "1234456786",
-  "contactEmail": "asld@ajsd.nl"
+  "Id": "1",
+  "ContactName": "Updated Name",
+  "ContactPhone": "123123123",
+  "ContactEmail": "test@test.nl"
 }
 
 
@@ -68,10 +87,10 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "id": 1,
-  "warehouse_id": 1,
-  "code": "Z.5.1",
-  "name": "Row: Z, Rack: 5, Shelf: 1"
+  "Id": 1,
+  "WarehouseId": 1,
+  "Code": "Z.5.1",
+  "Name": "Test Update"
 }
 
 ### Update an existing order
@@ -102,15 +121,15 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
         {
             "Uid": "P00001",
             "Code": "P00001",
-            "Description": "Product 1",
+            "Description": "Updated 1",
             "ShortDescription": "Prod 1",
             "UpcCode": "123456789012",
             "ModelNumber": "123456",
             "CommodityCode": "123456",
-            "ItemLine": 1,
-            "ItemGroup": 1,
-            "ItemType": 1,
-            "SupplierId": 1
+            "item_line": 1,
+            "item_group": 1,
+            "item_type": 1,
+            "supplier_id": 1
         }
     ]
 }
@@ -121,7 +140,7 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "Id": 1,
+  "Id": 4,
   "OrderId": 1,
   "SourceId": 33,
   "OrderDate": "2000-03-09",
@@ -136,7 +155,8 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
   "PaymentType": "Manual",
   "TransferMode": "Ground",
   "TotalPackageCount": 31,
-  "TotalPackageWeight": 594.42
+  "TotalPackageWeight": 594.42,
+    "Items": ["P00000"]
 }
 
 ### Update an existing supplier
@@ -195,7 +215,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 }
 
 ### Update an item type
-PUT http://localhost:5031/api/item-types/{item_type_id}
+PUT http://localhost:5031/api/item_types/1
 Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
@@ -215,3 +235,25 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "name": "updated Item Line",
     "description": "updated description item line"
 }
+
+### Update an item in a specific order
+PUT http://localhost:5031/api/orders/1/items/P213132
+Content-Type: application/json
+X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+
+{
+    "uid": "P213132",
+    "code": "12345",
+    "description": "Updated Item Description",
+    "short_description": "Updated Short Description",
+    "upc_code": "UpdatedUPC123",
+    "model_number": "UpdatedModel123",
+    "commodity_code": "UpdatedCommodity123",
+    "unit_purchase_quantity": 20,
+    "unit_order_quantity": 15,
+    "pack_order_quantity": 10,
+    "supplier_id": 1,
+    "supplier_code": "UpdatedSUP123",
+    "supplier_part_number": "Updated-SPN12345"
+}
+

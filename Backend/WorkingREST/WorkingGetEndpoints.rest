@@ -46,7 +46,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 GET http://localhost:5031/api/transfers/1
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
-### Get for items in transfer by ID
+### Get items for a transfer by transfer ID
 GET http://localhost:5031/api/transfers/1/items
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
@@ -79,11 +79,11 @@ GET http://localhost:5031/api/item_lines/1/items
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for all items_groups
-GET http://localhost:5031/api/itemgroups
+GET http://localhost:5031/api/item_groups
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for items_groups by id
-GET http://localhost:5031/api/itemgroups/1
+GET http://localhost:5031/api/item_groups/1
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for items in items_groups by ID
@@ -127,11 +127,11 @@ GET http://localhost:5031/api/orders
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for orders by ID
-GET http://localhost:5031/api/orders/1
+GET http://localhost:5031/api/orders/2
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for items in orders by ID
-GET http://localhost:5031/api/orders/1/items
+GET http://localhost:5031/api/orders/2/items
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for all clients
@@ -160,4 +160,8 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Get for items in shipments by ID
 GET http://localhost:5031/api/shipments/1/items
+X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+
+### Get all items for a specific supplier
+GET http://localhost:5031/api/items/supplier/79
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f

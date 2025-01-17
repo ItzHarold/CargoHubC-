@@ -4,29 +4,15 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "name": "Jurwin",
-  "address": "10 Wijnhaven",
-  "city": "Rotterdam",
-  "zip_code": "2222JK",
-  "province": "Zuid-Holland",
-  "country": "Netherlands",
-  "contact_name": "Jurwin",
-  "contact_phone": "123-123123",
-  "contact_email": "Jurwin@Wijnhaven.com"
-}
-
-### Update an existing client entry using POST
-POST http://localhost:5031/api/clients/update
-Content-Type: application/json
-X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
-
-{
-  "id": "1",
-  "name": "New Name",
-  "contact_email": "New.email@example.com",
-  "contact_phone": "+1234567890",
-  "address": "123 Sinterklaas, Rotterdam, NY",
-  "status": "active"
+    "name": "John Doe",
+    "address": "123 Elm Street",
+    "city": "Springfield",
+    "zip_code": "12345",
+    "province": "Illinois",
+    "country": "USA",
+    "contact_name": "Jane Doe",
+    "contact_phone": "524-1234",
+    "contact_email": "janeeeeee.doe@example.com"
 }
 
 ### POST Request to add a new contact
@@ -35,11 +21,9 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "id": "1",
-  "contactName": "Charlotte",
-  "contactPhone": "123123123",
-  "contactEmail": "test@test.nl"
-
+  "contact_name": "Harold",
+  "contact_phone": "1231232223123",
+  "contact_email": "tes2322t@test.nl"
 }
 
 ### POST Request to add a new inventory entry
@@ -48,15 +32,15 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "id": 1,
-  "ItemId": "P000002",
-  "TotalOnHand": 200,
-  "TotalExpected": 150,
-  "TotalOrdered": 40,
-  "TotalAllocated": 10,
-  "TotalAvailable": 110,
-  "Description": "Jurchad Enterprise"
+    "item_id": 1,
+    "locations": [1, 2],
+    "total_on_hand": 50,
+    "total_expected": 100,
+    "total_ordered": 75,
+    "total_allocated": 20,
+    "total_available": 30
 }
+
 
 ### Add a new item
 POST http://localhost:5031/api/items
@@ -64,9 +48,9 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "uid": "P001201",
+  "uid": "12345",
   "code": "sjQ23408K",
-  "description": "Item",
+  "description": "New Item",
   "short_description": "item",
   "upc_code": "6523523427122",
   "model_number": "44-9JeF0S",
@@ -88,9 +72,11 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "code": "C.5.2",
-  "name": "Row: C, Rack: 5, Shelf: 2"
+    "warehouse_id": 4,
+    "code": "A.1.0",
+    "name": "Row: B, Rack: 10000000, Shelf: 0"
 }
+
 
 ### Add a new order
 POST http://localhost:5031/api/orders
@@ -98,37 +84,38 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "Id": 1,
-    "SourceId": 34,
-    "OrderDate": "2024-09-17T10:00:00Z",
+    "Id": 2,
+    "source_id": 34,
+    "order_date": "2024-09-17T10:00:00Z",
     "RequestDate": "2024-09-18T10:00:00Z",
     "Reference": "ORD00002",
     "ReferenceExtra": "Example reference text.",
-    "OrderStatus": "Pending",
+    "order_status": "Pending",
     "Notes": "Additional notes for the order.",
     "ShippingNotes": "Please deliver to the main office.",
     "PickingNotes": "Ensure items are picked in the correct order.",
-    "WarehouseId": 19,
+    "warehouse_id": 19,
     "ShipTo": "null",
-    "BillTo": "null",
-    "ShipmentId": 2,
+    "bill_to": "null",
+    "ShipmentId": 1,
     "TotalAmount": 1234.56,
     "TotalDiscount": 50.00,
     "TotalTax": 123.45,
     "TotalSurcharge": 15.00,
     "Items": [
         {
-            "Uid": "P00001",
+            "Uid": "P123",
             "Code": "P00001",
             "Description": "Product 1",
             "ShortDescription": "Prod 1",
             "UpcCode": "123456789012",
             "ModelNumber": "123456",
             "CommodityCode": "123456",
-            "ItemLine": 1,
-            "ItemGroup": 1,
-            "ItemType": 1,
-            "SupplierId": 1
+            "item_line": 1,
+            "item_group": 1,
+            "item_type": 1,
+            "supplier_id": 1,
+            "supplier_part_number": "asdf"
         }
     ]
 }
@@ -140,35 +127,27 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
     {
     "Id": 1,
-    "OrderId": 2,
-    "SourceId": 34,
+    "order_id": 2,
+    "source_id": 34,
     "OrderDate": "2024-09-15",
     "RequestDate": "2024-09-16",
     "ShipmentDate": "2024-09-17",
-    "ShipmentType": "O",
+    "shipment_type": "O",
     "ShipmentStatus": "Shipped",
     "Notes": "New shipment with updated details.",
-    "CarrierCode": "DHL",
+    "carrier_code": "DHL",
     "CarrierDescription": "DHL Express",
-    "ServiceCode": "Standard",
-    "PaymentType": "Prepaid",
-    "TransferMode": "Air",
+    "service_code": "Standard",
+    "payment_type": "Prepaid",
+    "transfer_mode": "Air",
     "TotalPackageCount": 45,
     "TotalPackageWeight": 755.60,
-    "Items": [
-        {
-            "Uid": "P00001",
-            "Code": "P00001",
-            "Description": "Product 1",
-            "ShortDescription": "Prod 1",
-            "UpcCode": "123456789012",
-            "ModelNumber": "123456",
-            "CommodityCode": "123456",
-            "ItemLine": 1,
-            "ItemGroup": 1,
-            "ItemType": 1,
-            "SupplierId": 1
-        }
+    "shipment_items": [
+       { 
+            "id": 1,
+            "ItemUid": "P22222",
+            "amount": 2
+       }
     ]
 }
 
@@ -178,19 +157,18 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "Id": 1,
-    "Code": "SUP0002",
-    "Name": "Jur & Co.",
-    "Address": "1234 Wijnhaven",
-    "AddressExtra": "",
-    "City": "Rotterdam",
-    "ZipCode": "2342JK",
-    "Province": "Zuid-Holland",
-    "Country": "Netherlands",
-    "ContactName": "Jur",
-    "PhoneNumber": "01028903847",
-    "Reference": "Smith-SUP0002"
+    "code": "SUP123",
+    "name": "Global Supplies Inc.",
+    "address": "123 Supplier Lane",
+    "city": "Supply City",
+    "zip_code": "12345",
+    "province": "ProvinceLand",
+    "country": "SupplyCountry",
+    "contact_name": "John Supplier",
+    "phone_number": "1234567890",
+    "reference": "REF123"
 }
+
 
 ### Add a new transfer
 POST http://localhost:5031/api/transfers
@@ -198,27 +176,18 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "Id": 1,
-    "Reference": "T00001",
-    "TransferFrom": 1,
-    "TransferTo": 2,
-    "TransferStatus": "Pending",
-    "Items": [
+    "reference": "T00001",
+    "transferFrom": 1,
+    "transferTo": 2,
+    "transferStatus": "Pending",
+    "transfer_items": [
         {
-            "Uid": "P00001",
-            "Code": "P00001",
-            "Description": "Product 1",
-            "ShortDescription": "Prod 1",
-            "UpcCode": "123456789012",
-            "ModelNumber": "123456",
-            "CommodityCode": "123456",
-            "ItemLine": 1,
-            "ItemGroup": 1,
-            "ItemType": 1,
-            "SupplierId": 1
+            "item_uid": "12345",  
+            "amount": 5
         }
     ]
 }
+
 
 ### Add a new warehouse
 POST http://localhost:5031/api/warehouses
@@ -226,19 +195,29 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "code": "XK9YJ7B3",
-  "name": "Hogeschool Rotterdam",
-  "address": "Wijnhaven 107",
-  "zip": "2222 IO",
-  "city": "Rotterdam",
-  "province": "Zuid Holland",
-  "country": "NL",
-  "contact": {
-    "name": "Harold",
-    "phone": "(010) 1234567",
-    "email": "Harold.devries@example.com"
-  }
+    "code": "AKFJAF-123",
+    "name": "Main Warehouse",
+    "address": "123 Warehouse Street",
+    "zip": "45678",
+    "city": "Metropolis",
+    "province": "Central",
+    "country": "USA",
+    "contact": [
+        {
+            "contact_name": "John Doe",
+            "contact_phone": "555-1234",
+            "contact_email": "john.doe@example.com"
+        },
+        {
+            "contact_name": "Jane Smith",
+            "contact_phone": "555-5678",
+            "contact_email": "jane.smith@example.com"
+        }
+    ],
+    "created_at": "2025-01-16T12:00:00",
+    "updated_at": null
 }
+
 
 ### Add a new item type
 POST http://localhost:5031/api/item_types
@@ -268,8 +247,8 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "id": 1,
     "name": "Item Line",
-    "description": "Description item line"
+    "description": "Description item line",
+    "created_at": "2024-09-17T10:00:00Z"
 }
 

@@ -12,25 +12,47 @@ using Backend.Features.Shipments;
 using Backend.Features.Suppliers;
 using Backend.Features.Transfers;
 using Backend.Features.Warehouses;
+using Backend.Features.Logs;
+using Backend.Features.InventoryLocations;
 using Microsoft.EntityFrameworkCore;
+using Backend.Features.OrderItem;
+using Backend.Features.ShimpentItems;
+using Backend.Features.TransferItem;
+using Backend.Features.WarehouseContacts;
+using Backend.Features.ShipmentOrders;
 
 namespace Backend.Infrastructure.Database;
 
 public class CargoHubDbContext(DbContextOptions<CargoHubDbContext> options) : DbContext(options)
 {
-    public virtual DbSet<Client> Clients { get; set; }
-    public virtual DbSet<Contact> Contacts { get; set; }
-    public virtual DbSet<Inventory> Inventories { get; set; }
-    public virtual DbSet<ItemGroup> ItemGroups { get; set; }
-    public virtual DbSet<ItemLine> ItemLines { get; set; }
-    public virtual DbSet<ItemType> ItemTypes { get; set; }
-    public virtual DbSet<Item> Items { get; set; }
-    public virtual DbSet<Location> Locations { get; set; }
-    public virtual DbSet<Order> Orders { get; set; }
-    public virtual DbSet<Shipment> Shipments { get; set; }
-    public virtual DbSet<Supplier> Suppliers { get; set; }
-    public virtual DbSet<Transfer> Transfers { get; set; }
-    public virtual DbSet<Warehouse> Warehouses { get; set; }
+    public virtual DbSet<Client>? Clients { get; set; }
+    public virtual DbSet<Contact>? Contacts { get; set; }
+    public virtual DbSet<Inventory>? Inventories { get; set; }
+    public virtual DbSet<ItemGroup>? ItemGroups { get; set; }
+    public virtual DbSet<ItemLine>? ItemLines { get; set; }
+    public virtual DbSet<ItemType>? ItemTypes { get; set; }
+    public virtual DbSet<Item>? Items { get; set; }
+    public virtual DbSet<Location>? Locations { get; set; }
+    public virtual DbSet<Order>? Orders { get; set; }
+    public virtual DbSet<Shipment>? Shipments { get; set; }
+    public virtual DbSet<Supplier>? Suppliers { get; set; }
+    public virtual DbSet<Transfer>? Transfers { get; set; }
+    public virtual DbSet<Warehouse>? Warehouses { get; set; }
+
+    public virtual DbSet<InventoryLocation>? InventoryLocations { get; set; }
+
+    public virtual DbSet<OrderItem>? OrderItems { get; set; }
+
+    public virtual DbSet<ShipmentItem>? ShipmentItems { get; set; }
+
+    public virtual DbSet<TransferItems>? TransferItems { get; set; }
+
+    public virtual DbSet<WarehouseContacts>? WarehouseContacts { get; set; }
+
+    public virtual DbSet<Log>? Logs { get; set; }
+    
+    public virtual DbSet<ShipmentOrder>? ShipmentOrders { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

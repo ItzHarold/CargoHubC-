@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
+using Backend.Infrastructure.Database;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Features.Clients
 {
@@ -8,59 +10,71 @@ namespace Backend.Features.Clients
     {
         IEnumerable<Client> GetAllClients();
         Client? GetClientById(int id);
-        void AddClient(Client client);
-        void UpdateClient(Client client);
+        Task AddClient(Client client);
+        Task UpdateClient(Client client);
         void DeleteClient(int id);
     }
 
     public class ClientService : IClientService
     {
-        private readonly List<Client> _clients = new();
+        private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<Client> _validator;
+
+        public ClientService(CargoHubDbContext dbContext, IValidator<Client> validator)
+        {
+            _dbContext = dbContext;
+            _validator = validator;
+        }
 
         public IEnumerable<Client> GetAllClients()
         {
-            return _clients;
+            if (_dbContext.Clients != null)
+            {
+                return _dbContext.Clients.ToList();
+            }
+            return new List<Client>();
         }
 
         public Client? GetClientById(int id)
         {
-            return _clients.FirstOrDefault(c => c.Id == id);
+            return _dbContext.Clients?.Find(id);
         }
 
-        public void AddClient(Client client)
+        public async Task AddClient(Client client)
         {
-            client.Id = _clients.Count > 0 ? _clients.Max(c => c.Id) + 1 : 1;
-            _clients.Add(client);
-        }
+            var validationResult = await _validator.ValidateAsync(client);
 
-        public void UpdateClient(Client client)
-        {
-            var existingClient = GetClientById(client.Id);
-            if (existingClient != null)
+            if (!validationResult.IsValid)
             {
-                var updatedClient = new Client
-                {
-                    Id = existingClient.Id,
-                    Name = client.Name,
-                    Address = client.Address,
-                    City = client.City,
-                    ZipCode = client.ZipCode,
-                    Province = client.Province,
-                    Country = client.Country,
-                    ContactName = client.ContactName,
-                    ContactPhone = client.ContactPhone,
-                    ContactEmail = client.ContactEmail
-                };
-                _clients[_clients.IndexOf(existingClient)] = updatedClient;
+                throw new ValidationException(validationResult.Errors);
             }
+
+            client.CreatedAt = DateTime.Now;
+            _dbContext.Clients?.Add(client);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateClient(Client client)
+        {
+            var validationResult = await _validator.ValidateAsync(client);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
+            client.UpdatedAt = DateTime.Now;
+            _dbContext.Clients?.Update(client);
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteClient(int id)
         {
-            var client = GetClientById(id);
+            var client = _dbContext.Clients?.Find(id);
             if (client != null)
             {
-                _clients.Remove(client);
+                _dbContext.Clients?.Remove(client);
+                _dbContext.SaveChanges();
             }
         }
     }

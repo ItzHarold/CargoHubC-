@@ -2,6 +2,7 @@ using Backend.Features.Orders;
 using System.Linq;
 using Xunit;
 using Backend.Features.Items;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Orders.Tests
 {
@@ -11,7 +12,7 @@ namespace Backend.Features.Orders.Tests
 
         public OrderServiceTests()
         {
-            _orderService = new OrderService();
+            _orderService = new OrderService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]
@@ -39,8 +40,8 @@ namespace Backend.Features.Orders.Tests
                 WarehouseId = 1,
                 ShipTo = "Client 1",
                 BillTo = "Client 2",
-                TotalAmount = 100.00m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalAmount = 100,
+                Items = [] 
             };
 
             // Act
@@ -67,8 +68,8 @@ namespace Backend.Features.Orders.Tests
                 WarehouseId = 1,
                 ShipTo = "Client 1",
                 BillTo = "Client 2",
-                TotalAmount = 200.00m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalAmount = 200,
+                Items = [] 
             };
             _orderService.AddOrder(order);
 
@@ -105,8 +106,8 @@ namespace Backend.Features.Orders.Tests
                 WarehouseId = 1,
                 ShipTo = "Client 1",
                 BillTo = "Client 2",
-                TotalAmount = 150.00m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalAmount = 150,
+                Items = [] 
             };
             _orderService.AddOrder(order);
 
@@ -121,7 +122,7 @@ namespace Backend.Features.Orders.Tests
                 WarehouseId = order.WarehouseId,
                 ShipTo = order.ShipTo,
                 BillTo = order.BillTo,
-                TotalAmount = 175.00m,
+                TotalAmount = 175,
                 Items = order.Items
             };
 
@@ -151,8 +152,8 @@ namespace Backend.Features.Orders.Tests
                 WarehouseId = 1,
                 ShipTo = "Client 1",
                 BillTo = "Client 2",
-                TotalAmount = 300.00m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalAmount = 300,
+                Items = [] 
             };
             _orderService.AddOrder(order);
 
@@ -179,8 +180,8 @@ namespace Backend.Features.Orders.Tests
                 WarehouseId = 1,
                 ShipTo = "Client 1",
                 BillTo = "Client 2",
-                TotalAmount = 400.00m,
-                Items = new List<Item>() // Assuming Item is another valid class
+                TotalAmount = 400,
+                Items = [] 
             };
             _orderService.AddOrder(order);
 

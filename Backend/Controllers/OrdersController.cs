@@ -1,6 +1,6 @@
-using System.Collections.Generic;
-using Backend.Features.Orders;
+using Backend.Features.Items;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Features.Orders;
 
 namespace Backend.Controllers.Orders
 {
@@ -45,5 +45,32 @@ namespace Backend.Controllers.Orders
             _orderService.DeleteOrder(id);
         }
 
+        [HttpPut("{orderId}/items/{itemUid}")]
+        public IActionResult UpdateItemInOrder(int orderId, string itemUid, [FromBody] Item item)
+        {
+            try
+            {
+                _orderService.UpdateItemInOrder(orderId, itemUid, item);
+                return NoContent(); // Successfully updated the item
+            }
+            catch (ArgumentException ex)
+            {
+                // If the item or order is not found, return a NotFound response with the message
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("{id}/items")]
+        public IActionResult GetItemsForOrder(int id)
+        {
+            // Fetch the items for the given order ID
+            var items = _orderService.GetItemsByOrderId(id);
+
+            if (items.Any())
+            {
+                return Ok(items); // Return the list of items if found
+            }
+            return NotFound("No items found for this order."); // Return NotFound if no items exist
+        }
     }
 }

@@ -3,6 +3,7 @@ using Xunit;
 using System.Linq;
 using System.Collections.Generic;
 using Backend.Features.Contacts;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Warehouses.Tests
 {
@@ -12,7 +13,7 @@ namespace Backend.Features.Warehouses.Tests
 
         public WarehouseServiceTests()
         {
-            _warehouseService = new WarehouseService();
+            _warehouseService = new WarehouseService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]

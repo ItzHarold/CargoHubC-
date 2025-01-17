@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.ItemGroups.Tests
 {
@@ -10,7 +11,7 @@ namespace Backend.Features.ItemGroups.Tests
 
         public ItemGroupServiceTests()
         {
-            _itemGroupService = new ItemGroupService();
+            _itemGroupService = new ItemGroupService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]

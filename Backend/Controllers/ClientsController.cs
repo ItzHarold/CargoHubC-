@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Backend.Features.Clients;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Clients
@@ -34,21 +36,36 @@ namespace Backend.Controllers.Clients
         }
 
         [HttpPost]
-        public IActionResult AddClient(Client client)
+        public async Task<IActionResult> AddClient([FromBody] Client client)
         {
-            _clientService.AddClient(client);
-            return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
+            try
+            {
+                await _clientService.AddClient(client);
+                return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateClient(int id, Client client)
+        public async Task<IActionResult> UpdateClient(int id, [FromBody] Client client)
         {
             if (id != client.Id)
             {
-                return BadRequest();
+                return BadRequest("Client ID in the path does not match the ID in the body.");
             }
-            _clientService.UpdateClient(client);
-            return NoContent();
+
+            try
+            {
+                await _clientService.UpdateClient(client);
+                return NoContent();
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpDelete("{id}")]

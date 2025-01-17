@@ -12,6 +12,7 @@ namespace Backend.Features.Items
         void AddItem(Item item);
         void UpdateItem(string uid, Item item);
         void DeleteItem(string uid);
+        IEnumerable<Item> GetItemsBySupplierId(int supplierId);
         IEnumerable<Item> GetItemsByItemType(int itemTypeId);
         IEnumerable<Item> GetItemsByItemGroup(int itemGroupId);
         IEnumerable<Item> GetItemsByItemLine(int itemLineId);
@@ -19,39 +20,55 @@ namespace Backend.Features.Items
 
     public class ItemService : IItemService
     {
-        public List<Item> Context { get; set; } = [];
+        private readonly CargoHubDbContext _dbContext;
+        public ItemService(CargoHubDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
-        public IEnumerable<Item> GetAllItems() => Context;
+        public IEnumerable<Item> GetAllItems()
+        {
+            if (_dbContext.Items != null)
+            {
+                return _dbContext.Items.ToList();
+            }
+            return new List<Item>();
+        }
 
         public Item? GetItemById(string uid)
         {
-            return Context.FirstOrDefault(item => item.Uid == uid);
+            return _dbContext.Items?.FirstOrDefault(i => i.Uid == uid);
         }
 
         public void AddItem(Item item)
         {
-            Context.Add(item);
+            item.CreatedAt = DateTime.Now;
+            _dbContext.Items?.Add(item);
+            _dbContext.SaveChanges();
         }
 
         public void UpdateItem(string uid, Item item)
         {
-            if (item.Uid != uid) return;
-
-            int index = Context.FindIndex(i => i.Uid == uid);
-            if (index == -1) return;
-
-            Context[index] = item;
+            item.UpdatedAt = DateTime.Now;
+            _dbContext.Items?.Update(item);
+            _dbContext.SaveChanges();
         }
 
         public void DeleteItem(string uid)
         {
-            foreach (var item in Context.Where(item => item.Uid == uid))
+            var item = _dbContext.Items?.FirstOrDefault(i => i.Uid == uid);
+            if (item != null)
             {
-                Context.Remove(item);
-                break;
+                _dbContext.Items?.Remove(item);
+                _dbContext.SaveChanges();
             }
         }
 
+        public IEnumerable<Item> GetItemsBySupplierId(int supplierId)
+        {
+            // Fetch all items associated with a specific supplier
+            return _dbContext.Items?.Where(i => i.SupplierId == supplierId).ToList() ?? new List<Item>();
+        }
         public IEnumerable<Item> GetItemsByItemType(int itemTypeId)
         {
         return Context.Where(item => item.ItemType == itemTypeId);

@@ -1,6 +1,7 @@
 using Backend.Features.Locations;
 using System.Linq;
 using Xunit;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Locations.Tests
 {
@@ -10,7 +11,7 @@ namespace Backend.Features.Locations.Tests
 
         public LocationServiceTests()
         {
-            _locationService = new LocationService();
+            _locationService = new LocationService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]
@@ -31,8 +32,10 @@ namespace Backend.Features.Locations.Tests
             {
                 Id = 1,
                 WarehouseId = 1,
-                Code = "1",
-                Name = "Test Location"
+                Code = "3",
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
 
             // Act
@@ -41,7 +44,6 @@ namespace Backend.Features.Locations.Tests
 
             // Assert
             Assert.Single(allLocations);
-            Assert.Equal(location.Name, allLocations.First().Name);
         }
 
         [Fact]
@@ -52,8 +54,10 @@ namespace Backend.Features.Locations.Tests
             {
                 Id = 1,
                 WarehouseId = 1,
-                Code = "2",
-                Name = "Test Location"
+                Code = "3",
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
             _locationService.AddLocation(location);
 
@@ -62,7 +66,6 @@ namespace Backend.Features.Locations.Tests
 
             // Assert
             Assert.NotNull(retrievedLocation);
-            Assert.Equal(location.Name, retrievedLocation?.Name);
         }
 
         [Fact]
@@ -84,7 +87,9 @@ namespace Backend.Features.Locations.Tests
                 Id = 1,
                 WarehouseId = 1,
                 Code = "3",
-                Name = "Original Location"
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
             _locationService.AddLocation(location);
 
@@ -93,7 +98,9 @@ namespace Backend.Features.Locations.Tests
                 Id = location.Id,
                 WarehouseId = location.WarehouseId,
                 Code = "Updated Code",
-                Name = "Updated Location"
+                Row = location.Row,
+                Rack = location.Rack,
+                Shelf = location.Shelf
             };
 
             // Act
@@ -103,7 +110,6 @@ namespace Backend.Features.Locations.Tests
             // Assert
             Assert.NotNull(retrievedLocation);
             Assert.Equal(updatedLocation.Code, retrievedLocation?.Code);
-            Assert.Equal(updatedLocation.Name, retrievedLocation?.Name);
         }
 
         [Fact]
@@ -112,10 +118,12 @@ namespace Backend.Features.Locations.Tests
             // Arrange
             var location = new Location
             {
-                Id = 2,
+                Id = 3,
                 WarehouseId = 1,
                 Code = "12345",
-                Name = "Location to Delete"
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
             _locationService.AddLocation(location);
 
@@ -136,7 +144,9 @@ namespace Backend.Features.Locations.Tests
                 Id = 3,
                 WarehouseId = 1,
                 Code = "12345",
-                Name = "Location Stay"
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
             _locationService.AddLocation(location);
 

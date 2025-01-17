@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
+using Backend.Infrastructure.Database;
+using Backend.Features.Items;
+using Backend.Features.TransferItem;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Features.Transfers
 {
@@ -15,46 +18,92 @@ namespace Backend.Features.Transfers
 
     public class TransferService : ITransferService
     {
-        private readonly List<Transfer> _transfers = new();
+        private readonly CargoHubDbContext _dbContext;
+        private readonly IItemService _itemService;
+
+        public TransferService(CargoHubDbContext dbContext, IItemService itemService)
+        {
+            _dbContext = dbContext;
+            _itemService = itemService;
+        }
+
         public IEnumerable<Transfer> GetAllTransfers()
         {
-            return _transfers;
+            return _dbContext.Transfers?
+                .Include(t => t.TransferItems)
+                .ToList() ?? new List<Transfer>();
         }
 
         public void AddTransfer(Transfer transfer)
         {
-            _transfers.Add(transfer);
+            // Validate that all items in TransferItems exist
+            foreach (var transferItem in transfer.TransferItems)
+            {
+                var item = _itemService.GetItemById(transferItem.ItemUid);
+
+                if (item == null)
+                {
+                    throw new KeyNotFoundException($"Item with UID {transferItem.ItemUid} not found");
+                }
+
+            }
+
+            // Set the creation timestamp for the transfer
+            transfer.CreatedAt = DateTime.Now;
+
+            // Now, add the transfer to the DB
+            _dbContext.Transfers?.Add(transfer);
+            
+            // Save to generate an ID for the transfer first
+            _dbContext.SaveChanges();
+
+            // Now, create TransferItems for the relation
+            foreach (var transferItem in transfer.TransferItems)
+            {
+                // Ensure TransferItem is linked with Transfer
+                var transferItemEntity = new TransferItems
+                {
+                    ItemUid = transferItem.ItemUid, // Link to Item by UID
+                    Amount = transferItem.Amount  // Set the amount for the item
+                };
+
+                _dbContext.TransferItems?.Add(transferItemEntity);
+            }
         }
+
 
         public Transfer? GetTransferById(int id)
         {
-            return _transfers.FirstOrDefault(t => t.Id == id);
+            return _dbContext.Transfers?
+                .Include(t => t.TransferItems)
+                .FirstOrDefault(t => t.Id == id);
         }
 
         public void UpdateTransfer(Transfer transfer)
         {
-            var existingTransfer = _transfers.FirstOrDefault(t => t.Id == transfer.Id);
-            if (existingTransfer == null)
+            // Validate that all items exist
+            foreach (var transferItem in transfer.TransferItems)
             {
-                return;
+                var item = _itemService.GetItemById(transferItem.ItemUid);
+                if (item == null)
+                {
+                    throw new KeyNotFoundException($"Item with UID {transferItem.ItemUid} not found");
+                }
             }
 
-            existingTransfer.Reference = transfer.Reference;
-            existingTransfer.TransferFrom = transfer.TransferFrom;
-            existingTransfer.TransferTo = transfer.TransferTo;
-            existingTransfer.TransferStatus = transfer.TransferStatus;
-            existingTransfer.Items = transfer.Items;
+            transfer.UpdatedAt = DateTime.Now;
+            _dbContext.Transfers?.Update(transfer);
+            _dbContext.SaveChanges();
         }
 
         public void DeleteTransfer(int id)
         {
-            var transfer = _transfers.FirstOrDefault(x => x.Id == id);
-            if (transfer == null)
+            var transfer = _dbContext.Transfers?.Find(id);
+            if (transfer != null)
             {
-                return;
+                _dbContext.Transfers?.Remove(transfer);
+                _dbContext.SaveChanges();
             }
-
-            _transfers.Remove(transfer);
         }
     }
 }

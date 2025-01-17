@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.TransferItem;
 
 namespace Backend.Features.Items
 {
@@ -32,24 +33,43 @@ namespace Backend.Features.Items
         [JsonPropertyName("commodity_code")]
         public string? CommodityCode { get; set; }
 
-        [Required]
         [ForeignKey("ItemLine")]
         [JsonPropertyName("item_line")]
-        public required int ItemLine { get; set; }
+        public int? ItemLine { get; set; }
 
-        [Required]
         [ForeignKey("ItemGroup")]
         [JsonPropertyName("item_group")]
-        public required int ItemGroup { get; set; }
+        public  int? ItemGroup { get; set; }
 
-        [Required]
         [ForeignKey("ItemType")]
         [JsonPropertyName("item_type")]
-        public required int ItemType { get; set; }
+        public int? ItemType { get; set; }
+
+        [Required]
+        [JsonPropertyName("unit_purchase_quantity")]
+        public int UnitPurchaseQuantity { get; set; }
+
+        [Required]
+        [JsonPropertyName("unit_order_quantity")]
+        public int UnitOrderQuantity { get; set; }
+
+        [Required]
+        [JsonPropertyName("pack_order_quantity")]
+        public int PackOrderQuantity { get; set; }
 
         [Required]
         [ForeignKey("Supplier")]
         [JsonPropertyName("supplier_id")]
         public required int SupplierId { get; set; }
+
+        [JsonPropertyName("supplier_code")]
+        public string? SupplierCode { get; set; }
+
+        [Required]
+        [JsonPropertyName("supplier_part_number")]
+        public required string SupplierPartNumber { get; set; }
+
+        [JsonPropertyName("transfer_items")]
+        public virtual ICollection<TransferItems> TransferItems { get; set; } = new List<TransferItems>();
     }
 }

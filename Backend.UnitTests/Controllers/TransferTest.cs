@@ -3,6 +3,7 @@ using Xunit;
 using System.Linq;
 using System.Collections.Generic;
 using Backend.Features.Items;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Transfers.Tests
 {
@@ -12,7 +13,7 @@ namespace Backend.Features.Transfers.Tests
 
         public TransferServiceTests()
         {
-            _transferService = new TransferService();
+            _transferService = new TransferService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]
@@ -36,8 +37,8 @@ namespace Backend.Features.Transfers.Tests
                 TransferFrom = 1,
                 TransferTo = 2,
                 TransferStatus = "Pending",
-                Items = new List<Item> 
-                {
+                Items =
+                [
                     new Item
                     {
                         Uid = "UID001",
@@ -46,7 +47,8 @@ namespace Backend.Features.Transfers.Tests
                         ItemLine = 1,
                         ItemGroup = 1,
                         ItemType = 1,
-                        SupplierId = 1
+                        SupplierId = 1,
+                        SupplierPartNumber = "SPN001"
                     },
                     new Item
                     {
@@ -56,9 +58,10 @@ namespace Backend.Features.Transfers.Tests
                         ItemLine = 1,
                         ItemGroup = 1,
                         ItemType = 1,
-                        SupplierId = 1
+                        SupplierId = 1,
+                        SupplierPartNumber = "SPN002"
                     }
-                }
+                ]
             };
 
             // Act
@@ -81,8 +84,8 @@ namespace Backend.Features.Transfers.Tests
                 TransferFrom = 1,
                 TransferTo = 2,
                 TransferStatus = "Pending",
-                Items = new List<Item> 
-                {
+                Items =
+                [
                     new Item
                     {
                         Uid = "UID001", 
@@ -91,9 +94,10 @@ namespace Backend.Features.Transfers.Tests
                         ItemLine = 1,
                         ItemGroup = 1,
                         ItemType = 1,
-                        SupplierId = 1
+                        SupplierId = 1,
+                        SupplierPartNumber = "SPN001"
                     }
-                }
+                ]
             };
             _transferService.AddTransfer(transfer);
 
@@ -126,8 +130,8 @@ namespace Backend.Features.Transfers.Tests
                 TransferFrom = 1,
                 TransferTo = 2,
                 TransferStatus = "Pending",
-                Items = new List<Item> 
-                {
+                Items =
+                [
                     new Item
                     {
                         Uid = "UID001", 
@@ -136,9 +140,10 @@ namespace Backend.Features.Transfers.Tests
                         ItemLine = 1,
                         ItemGroup = 1,
                         ItemType = 1,
-                        SupplierId = 1
+                        SupplierId = 1,
+                        SupplierPartNumber = "SPN001"
                     }
-                }
+                ]
             };
             _transferService.AddTransfer(transfer);
 
@@ -149,8 +154,8 @@ namespace Backend.Features.Transfers.Tests
                 TransferFrom = 2,
                 TransferTo = 3,
                 TransferStatus = "Completed",
-                Items = new List<Item> 
-                {
+                Items =
+                [
                     new Item
                     {
                         Uid = "UID002", 
@@ -159,9 +164,10 @@ namespace Backend.Features.Transfers.Tests
                         ItemLine = 1,
                         ItemGroup = 1,
                         ItemType = 1,
-                        SupplierId = 1
+                        SupplierId = 1,
+                        SupplierPartNumber = "SPN002"
                     }
-                }
+                ]
             };
 
             // Act
@@ -186,8 +192,8 @@ namespace Backend.Features.Transfers.Tests
                 TransferFrom = 1,
                 TransferTo = 3,
                 TransferStatus = "Completed",
-                Items = new List<Item> 
-                {
+                Items =
+                [
                     new Item
                     {
                         Uid = "UID001", 
@@ -196,9 +202,10 @@ namespace Backend.Features.Transfers.Tests
                         ItemLine = 1,
                         ItemGroup = 1,
                         ItemType = 1,
-                        SupplierId = 1
+                        SupplierId = 1,
+                        SupplierPartNumber = "SPN001"
                     }
-                }
+                ]
             };
             _transferService.AddTransfer(transfer);
 
@@ -221,8 +228,8 @@ namespace Backend.Features.Transfers.Tests
                 TransferFrom = 1,
                 TransferTo = 2,
                 TransferStatus = "Pending",
-                Items = new List<Item> 
-                {
+                Items =
+                [
                     new Item
                     {
                         Uid = "UID001", 
@@ -231,9 +238,10 @@ namespace Backend.Features.Transfers.Tests
                         ItemLine = 1,
                         ItemGroup = 1,
                         ItemType = 1,
-                        SupplierId = 1
+                        SupplierId = 1,
+                        SupplierPartNumber = "SPN001"
                     }
-                }
+                ]
             };
             _transferService.AddTransfer(transfer);
 

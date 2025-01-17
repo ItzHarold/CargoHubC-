@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Backend.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 
 namespace Backend.Features.Warehouses
 {
@@ -8,58 +11,70 @@ namespace Backend.Features.Warehouses
     {
         IEnumerable<Warehouse> GetAllWarehouses();
         Warehouse? GetWarehouseById(int id);
-        void AddWarehouse(Warehouse warehouse);
-        void UpdateWarehouse(Warehouse warehouse);
+        Task AddWarehouse(Warehouse warehouse);
+        Task UpdateWarehouse(Warehouse warehouse);
         void DeleteWarehouse(int id);
     }
 
     public class WarehouseService : IWarehouseService
     {
-        private readonly List<Warehouse> _warehouses = new();
+        private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<Warehouse> _validator;
+        public WarehouseService(CargoHubDbContext dbContext, IValidator<Warehouse> validator)
+        {
+            _dbContext = dbContext;
+            _validator = validator;
+        }
 
         public IEnumerable<Warehouse> GetAllWarehouses()
         {
-            return _warehouses;
+            if (_dbContext.Warehouses != null)
+            {
+                return _dbContext.Warehouses.ToList();
+            }
+            return new List<Warehouse>();
         }
 
         public Warehouse? GetWarehouseById(int id)
         {
-            return _warehouses.FirstOrDefault(x => x.Id == id);
+            return _dbContext.Warehouses?.Find(id);
         }
-
-        public void AddWarehouse(Warehouse warehouse)
+        public async Task AddWarehouse(Warehouse warehouse)
         {
-            _warehouses.Add(warehouse);
-        }
+            var validationResult = await _validator.ValidateAsync(warehouse);
 
-        public void UpdateWarehouse(Warehouse warehouse)
-        {
-            var existingWarehouse = _warehouses.FirstOrDefault(x => x.Id == warehouse.Id);
-            if (existingWarehouse == null)
+            if (!validationResult.IsValid)
             {
-                return;
+                throw new ValidationException(validationResult.Errors);
             }
 
-            existingWarehouse.Id = warehouse.Id;
-            existingWarehouse.Code = warehouse.Code;
-            existingWarehouse.Name = warehouse.Name;
-            existingWarehouse.Address = warehouse.Address;
-            existingWarehouse.Zip = warehouse.Zip;
-            existingWarehouse.City = warehouse.City;
-            existingWarehouse.Province = warehouse.Province;
-            existingWarehouse.Country = warehouse.Country;
-            existingWarehouse.Contacts = warehouse.Contacts;
+            warehouse.CreatedAt = DateTime.Now;
+            _dbContext.Warehouses?.Add(warehouse);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateWarehouse(Warehouse warehouse)
+        {
+            var validationResult = await _validator.ValidateAsync(warehouse);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
+            warehouse.UpdatedAt = DateTime.Now;
+            _dbContext.Warehouses?.Update(warehouse);
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteWarehouse(int id)
         {
-            var warehouse = _warehouses.FirstOrDefault(x => x.Id == id);
-            if (warehouse == null)
+            var warehouse = _dbContext.Warehouses?.Find(id);
+            if (warehouse != null)
             {
-                return;
+                _dbContext.Warehouses?.Remove(warehouse);
+                _dbContext.SaveChanges();
             }
-
-            _warehouses.Remove(warehouse);
         }
     }
 }

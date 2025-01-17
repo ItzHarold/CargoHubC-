@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Backend.Features.Items;
 
 namespace Backend.Features.Orders
@@ -9,56 +10,71 @@ namespace Backend.Features.Orders
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public required int Id { get; set; }
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
         [Required]
         [ForeignKey("Supplier")]
+        [JsonPropertyName("source_id")]
         public required int SourceId { get; set; }
 
         [Required]
+        [JsonPropertyName("order_date")]
         public required DateTime OrderDate { get; set; }
 
-        [Required]
-        public required DateTime RequestDate { get; set; }
+        [JsonPropertyName("request_date")]
+        public DateTime? RequestDate { get; set; }
 
-        [Required]
-        public required string Reference { get; set; }
+        [JsonPropertyName("reference")]
+        public string? Reference { get; set; }
 
+        [JsonPropertyName("reference_extra")]
         public string? ReferenceExtra { get; set; }
 
         [Required]
+        [JsonPropertyName("order_status")]
         public required string OrderStatus { get; set; }
 
+        [JsonPropertyName("notes")]
         public string? Notes { get; set; }
 
+        [JsonPropertyName("shipping_notes")]
         public string? ShippingNotes { get; set; }
 
+        [JsonPropertyName("picking_notes")]
         public string? PickingNotes { get; set; }
 
         [Required]
         [ForeignKey("Warehouse")]
+        [JsonPropertyName("warehouse_id")]
         public required int WarehouseId { get; set; }
 
-        [Required]
         [ForeignKey("Client")]
-        public required string ShipTo { get; set; }
+        [JsonPropertyName("ship_to")]
+        public string? ShipTo { get; set; }
 
         [Required]
         [ForeignKey("Client")]
+        [JsonPropertyName("bill_to")]
         public required string BillTo { get; set; }
 
         [ForeignKey("Shipment")]
+        [JsonPropertyName("shipment_id")]
         public int? ShipmentId { get; set; }
 
-        [Required]
-        public required decimal TotalAmount { get; set; }
+        [JsonPropertyName("total_amount")]
+        public float TotalAmount { get; set; }
 
-        public decimal? TotalDiscount { get; set; }
+        [JsonPropertyName("total_discount")]
+        public float? TotalDiscount { get; set; }
 
-        public decimal? TotalTax { get; set; }
+        [JsonPropertyName("total_tax")]
+        public float? TotalTax { get; set; }
 
-        public decimal? TotalSurcharge { get; set; }
+        [JsonPropertyName("total_surcharge")]
+        public float? TotalSurcharge { get; set; }
 
-        public required List<Item> Items { get; set; }
+        [JsonPropertyName("items")]
+        public List<Item>? Items { get; set; }
     }
 }

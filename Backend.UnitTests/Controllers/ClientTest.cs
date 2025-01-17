@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Clients.Tests
 {
@@ -10,7 +11,7 @@ namespace Backend.Features.Clients.Tests
 
         public ClientServiceTests()
         {
-            _clientService = new ClientService();
+            _clientService = new ClientService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]

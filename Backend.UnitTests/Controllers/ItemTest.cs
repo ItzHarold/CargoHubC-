@@ -1,5 +1,6 @@
 using System.Linq;
 using Xunit;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Items.Tests
 {
@@ -9,7 +10,7 @@ namespace Backend.Features.Items.Tests
 
         public ItemServiceTests()
         {
-            _itemService = new ItemService();
+            _itemService = new ItemService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]
@@ -34,7 +35,8 @@ namespace Backend.Features.Items.Tests
                 ItemLine = 1,
                 ItemGroup = 1,
                 ItemType = 1,
-                SupplierId = 1
+                SupplierId = 1,
+                SupplierPartNumber = "SPN123"
             };
 
             // Act
@@ -58,7 +60,8 @@ namespace Backend.Features.Items.Tests
                 ItemLine = 1,
                 ItemGroup = 1,
                 ItemType = 1,
-                SupplierId = 1
+                SupplierId = 1,
+                SupplierPartNumber = "SPN123"
             };
             _itemService.AddItem(item);
 
@@ -92,7 +95,8 @@ namespace Backend.Features.Items.Tests
                 ItemLine = 1,
                 ItemGroup = 1,
                 ItemType = 1,
-                SupplierId = 1
+                SupplierId = 1,
+                SupplierPartNumber = "SPN123"
             };
             _itemService.AddItem(item);
 
@@ -104,7 +108,8 @@ namespace Backend.Features.Items.Tests
                 ItemLine = 1,
                 ItemGroup = 1,
                 ItemType = 1,
-                SupplierId = 1
+                SupplierId = 1,
+                SupplierPartNumber = "SPN456"
             };
 
             // Act
@@ -129,7 +134,8 @@ namespace Backend.Features.Items.Tests
                 ItemLine = 1,
                 ItemGroup = 1,
                 ItemType = 1,
-                SupplierId = 1
+                SupplierId = 1,
+                SupplierPartNumber = "SPN999"
             };
 
             // Act
@@ -151,7 +157,8 @@ namespace Backend.Features.Items.Tests
                 ItemLine = 1,
                 ItemGroup = 1,
                 ItemType = 1,
-                SupplierId = 1
+                SupplierId = 1,
+                SupplierPartNumber = "SPN123"
             };
             _itemService.AddItem(item);
 
@@ -175,7 +182,8 @@ namespace Backend.Features.Items.Tests
                 ItemLine = 1,
                 ItemGroup = 1,
                 ItemType = 1,
-                SupplierId = 1
+                SupplierId = 1,
+                SupplierPartNumber = "SPN123"
             };
             _itemService.AddItem(item);
 

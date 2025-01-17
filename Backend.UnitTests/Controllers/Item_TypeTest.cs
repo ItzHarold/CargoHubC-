@@ -1,5 +1,6 @@
 using System.Linq;
 using Xunit;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.ItemTypes.Tests
 {
@@ -9,7 +10,7 @@ namespace Backend.Features.ItemTypes.Tests
 
         public ItemTypeServiceTests()
         {
-            _itemTypeService = new ItemTypeService();
+            _itemTypeService = new ItemTypeService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]

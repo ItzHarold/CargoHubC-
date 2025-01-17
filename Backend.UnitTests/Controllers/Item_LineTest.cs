@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.ItemLines.Tests
 {
@@ -10,7 +11,7 @@ namespace Backend.Features.ItemLines.Tests
 
         public ItemLineServiceTests()
         {
-            _itemLineService = new ItemLineService();
+            _itemLineService = new ItemLineService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]

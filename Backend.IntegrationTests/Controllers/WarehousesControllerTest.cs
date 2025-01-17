@@ -60,7 +60,8 @@ namespace Backend.IntegrationTests.Controllers
                 Contacts = new Contact[]
                 {
                     new Contact { Id = 1, ContactName = "John Doe", ContactEmail = "john.doe@example.com", ContactPhone = "123-456-7890" }
-                }
+                },
+                CreatedAt = DateTime.Now
             };
 
             var content = JsonContent.Create(warehouse);
@@ -84,7 +85,7 @@ namespace Backend.IntegrationTests.Controllers
             {
                 Id = 1,
                 Code = "WH001",
-                Name = "Updated Warehouse",
+                Name = "Main Warehouse",
                 Address = "123 Main St",
                 Zip = "12345",
                 City = "Metropolis",
@@ -92,14 +93,11 @@ namespace Backend.IntegrationTests.Controllers
                 Country = "Countryland",
                 Contacts = new Contact[]
                 {
-                    new Contact
-                    {
-                        Id = 1,
-                        ContactName = "John Doe Updated",
-                        ContactEmail = "john.doe@example.com",
-                        ContactPhone = "123-456-7890"
-                    }
-                }
+                    new Contact { Id = 1, ContactName = "John Doe", ContactEmail = "", ContactPhone = "123-456-7890" }
+                },
+                CreatedAt = DateTime.Now,
+                UpdatedAt = null
+
             };
 
             var content = JsonContent.Create(warehouse);

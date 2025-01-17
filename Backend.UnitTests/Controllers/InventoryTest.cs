@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Inventories.Tests
 {
@@ -10,7 +11,7 @@ namespace Backend.Features.Inventories.Tests
 
         public InventoryServiceTests()
         {
-            _inventoryService = new InventoryService();
+            _inventoryService = new InventoryService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]
@@ -30,13 +31,14 @@ namespace Backend.Features.Inventories.Tests
             var inventory = new Inventory
             {
                 Id = 1,
-                ItemId = "P00001",
+                ItemId = 1,
                 TotalOnHand = 10,
                 TotalExpected = 20,
                 TotalOrdered = 15,
                 TotalAllocated = 5,
                 TotalAvailable = 10,
-                Description = "Test inventory"
+                Description = "Test inventory",
+                LocationId = [1, 2, 3]
             };
 
             // Act
@@ -55,13 +57,14 @@ namespace Backend.Features.Inventories.Tests
             var inventory = new Inventory
             {
                 Id = 1,
-                ItemId = "P00002",
+                ItemId = 1,
                 TotalOnHand = 30,
                 TotalExpected = 50,
                 TotalOrdered = 20,
                 TotalAllocated = 10,
                 TotalAvailable = 20,
-                Description = "Another test inventory"
+                Description = "Another test inventory",
+                LocationId = [1, 2, 3]
             };
             _inventoryService.AddInventory(inventory);
 
@@ -90,26 +93,28 @@ namespace Backend.Features.Inventories.Tests
             var inventory = new Inventory
             {
                 Id = 1,
-                ItemId = "P0003",
+                ItemId = 1,
                 TotalOnHand = 50,
                 TotalExpected = 70,
                 TotalOrdered = 30,
                 TotalAllocated = 20,
                 TotalAvailable = 30,
-                Description = "Original inventory"
+                Description = "Original inventory",
+                LocationId = [1, 2, 3]
             };
             _inventoryService.AddInventory(inventory);
 
             var updatedInventory = new Inventory
             {
                 Id = inventory.Id,
-                ItemId = "P0003",
+                ItemId = 1,
                 TotalOnHand = 60,
                 TotalExpected = 80,
                 TotalOrdered = 40,
                 TotalAllocated = 30,
                 TotalAvailable = 50,
-                Description = "Updated inventory"
+                Description = "Updated inventory",
+                LocationId = [1, 2, 3]
             };
 
             // Act
@@ -129,13 +134,14 @@ namespace Backend.Features.Inventories.Tests
             var updatedInventory = new Inventory
             {
                 Id = 999,
-                ItemId = "P0999",
+                ItemId = 1,
                 TotalOnHand = 0,
                 TotalExpected = 0,
                 TotalOrdered = 0,
                 TotalAllocated = 0,
                 TotalAvailable = 0,
-                Description = "Nonexistent inventory"
+                Description = "Nonexistent inventory",
+                LocationId = [1, 2, 3]
             };
 
             // Act
@@ -152,13 +158,14 @@ namespace Backend.Features.Inventories.Tests
             var inventory = new Inventory
             {
                 Id = 1,
-                ItemId = "P0004",
+                ItemId = 1,
                 TotalOnHand = 40,
                 TotalExpected = 60,
                 TotalOrdered = 30,
                 TotalAllocated = 10,
                 TotalAvailable = 30,
-                Description = "Test inventory for deletion"
+                Description = "Test inventory for deletion",
+                LocationId = [1, 2, 3]
             };
             _inventoryService.AddInventory(inventory);
 
@@ -177,13 +184,14 @@ namespace Backend.Features.Inventories.Tests
             var inventory = new Inventory
             {
                 Id = 1,
-                ItemId = "P0005",
+                ItemId = 1,
                 TotalOnHand = 20,
                 TotalExpected = 30,
                 TotalOrdered = 15,
                 TotalAllocated = 5,
                 TotalAvailable = 10,
-                Description = "Test inventory"
+                Description = "Test inventory",
+                LocationId = [1, 2, 3]
             };
             _inventoryService.AddInventory(inventory);
 

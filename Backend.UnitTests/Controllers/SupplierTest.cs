@@ -1,5 +1,6 @@
 using Backend.Features.Suppliers;
 using Xunit;
+using Backend.UnitTests.Factories;
 
 namespace Backend.Features.Suppliers.Tests
 {
@@ -9,7 +10,7 @@ namespace Backend.Features.Suppliers.Tests
 
         public SupplierServiceTests()
         {
-            _supplierService = new SupplierService();
+            _supplierService = new SupplierService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]

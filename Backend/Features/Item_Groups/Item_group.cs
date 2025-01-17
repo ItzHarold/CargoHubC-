@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Backend.Features.ItemGroups;
 
@@ -8,10 +9,13 @@ public class ItemGroup : BaseEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required int Id { get; set; }
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
 
     [Required]
+    [JsonPropertyName("name")]
     public required string Name { get; set; }
 
+    [JsonPropertyName("description")]
     public string? Description { get; set; }
 }

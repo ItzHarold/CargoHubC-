@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Backend.UnitTests.Factories;
+
 
 namespace Backend.Features.Contacts.Tests
 {
@@ -10,7 +12,7 @@ namespace Backend.Features.Contacts.Tests
 
         public ContactServiceTests()
         {
-            _contactService = new ContactService();
+            _contactService = new ContactService(InMemoryDatabaseFactory.CreateMockContext());
         }
 
         [Fact]

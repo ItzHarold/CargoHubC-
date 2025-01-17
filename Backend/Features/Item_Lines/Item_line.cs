@@ -10,7 +10,7 @@ namespace Backend.Features.ItemLines
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int id { get; set; }
+        public int id { get; set; }
 
         [Required]
         [JsonPropertyName("name")]

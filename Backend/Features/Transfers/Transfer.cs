@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Backend.Features.Items;
+using Backend.Features.TransferItem;
 
 namespace Backend.Features.Transfers
 {
@@ -9,22 +11,26 @@ namespace Backend.Features.Transfers
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public required int Id { get; set; }
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
-        [Required]
-        public required string Reference { get; set; }
+        [JsonPropertyName("reference")]
+        public string? Reference { get; set; }
 
+        //TODO if transfer from is null, transfer to is required. Else if transfer to is null, transfer from is required
         [ForeignKey("WarehouseFrom")]
+        [JsonPropertyName("transfer_from")]
         public int? TransferFrom { get; set; }
 
-        [Required]
         [ForeignKey("WarehouseTo")]
-        public required int TransferTo { get; set; }
+        [JsonPropertyName("transfer_to")]
+        public int? TransferTo { get; set; }
+
+        [JsonPropertyName("transfer_status")]
+        public string? TransferStatus { get; set; }
 
         [Required]
-        public required string TransferStatus { get; set; }
-
-        [Required]
-        public  required List<Item> Items { get; set; }
+        [JsonPropertyName("transfer_items")]
+        public virtual ICollection<TransferItems> TransferItems { get; set; } = new List<TransferItems>();
     }
 }
