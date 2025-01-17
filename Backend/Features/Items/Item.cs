@@ -8,6 +8,7 @@ using Backend.Features.Suppliers;
 using Backend.Features.Inventories;
 using Backend.Features.TransferItems;
 using Backend.Features.OrderItems;
+using Backend.Features.ShimpentItems;
 
 namespace Backend.Features.Items
 {
@@ -79,6 +80,9 @@ namespace Backend.Features.Items
 
         [JsonPropertyName("order_items")]
         public ICollection<OrderItem>? OrderItems { get; set; }  = null!;
+
+        [JsonPropertyName("shipment_items")]
+        public ICollection<ShipmentItem>? ShipmentItems { get; } = [];
 
 
         // NAVIGATION PRINCEPLES
