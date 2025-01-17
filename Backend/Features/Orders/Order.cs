@@ -60,8 +60,6 @@ namespace Backend.Features.Orders
         [JsonPropertyName("bill_to")]
         public required string BillTo { get; set; }
 
-        [ForeignKey("Shipment")]
-        [JsonPropertyName("shipment_id")]
         public int? ShipmentId { get; set; }
 
         [JsonPropertyName("total_amount")]
@@ -80,7 +78,7 @@ namespace Backend.Features.Orders
         public ICollection<OrderItem>? OrderItems { get; set; }  = null!;
 
         [JsonPropertyName("shipment_orders")]
-        public ICollection<ShipmentOrder>? shipmentOrders { get; set; } = null!;
+        public ICollection<ShipmentOrder>? shipmentOrders { get; } = [];
 
         [JsonPropertyName("items")]
         public List<Item>? Items { get; set; }

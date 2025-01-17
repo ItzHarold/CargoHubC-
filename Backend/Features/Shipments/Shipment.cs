@@ -15,11 +15,6 @@ namespace Backend.Features.Shipments
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey("Order")]
-        [JsonPropertyName("order_id")]
-        public required int OrderId { get; set; }
-
-        [Required]
         [ForeignKey("Supplier")]
         [JsonPropertyName("source_id")]
         public required int SourceId { get; set; }
@@ -69,6 +64,6 @@ namespace Backend.Features.Shipments
         public float? TotalPackageWeight { get; set; }
 
         [JsonPropertyName("shipment_orders")]
-        public ICollection<ShipmentOrder>? ShipmentOrders { get; set; }  = null!;
+        public ICollection<ShipmentOrder>? shipmentOrders { get; } = [];
     }
 }

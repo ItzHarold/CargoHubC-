@@ -22,8 +22,8 @@ namespace Backend.Features.ShipmentOrders
         [JsonPropertyName("order_id")]
         public required int orderId { get; set; }
 
-        public Order? order { get; set; }
-        public Shipment? shipment { get; set; }
+        public Order? order { get; set; } = null!;
+        public Shipment? shipment { get; set; } = null!;
 
     }
 }
