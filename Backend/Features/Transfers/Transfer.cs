@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Items;
+using Backend.Features.Locations;
 using Backend.Features.TransferItems;
 
 namespace Backend.Features.Transfers
@@ -18,13 +19,10 @@ namespace Backend.Features.Transfers
         public string? Reference { get; set; }
 
         //TODO if transfer from is null, transfer to is required. Else if transfer to is null, transfer from is required
-        [ForeignKey("WarehouseFrom")]
-        [JsonPropertyName("transfer_from")]
-        public int? TransferFrom { get; set; }
-
-        [ForeignKey("WarehouseTo")]
-        [JsonPropertyName("transfer_to")]
-        public int? TransferTo { get; set; }
+        public int? TransferFromLocationId { get; set; }
+        public int? TransferToLocationId { get; set; }
+        public Location? TransferTo {get; set;}
+        public Location? TransferFrom {get; set;}
 
         [JsonPropertyName("transfer_status")]
         public string? TransferStatus { get; set; }

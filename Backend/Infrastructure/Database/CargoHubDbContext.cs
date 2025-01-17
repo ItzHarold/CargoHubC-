@@ -64,6 +64,30 @@ public class CargoHubDbContext(DbContextOptions<CargoHubDbContext> options) : Db
                     .HasDefaultValueSql("GETUTCDATE()");
             }
         }
+
+        modelBuilder.Entity<Location>()
+            .HasMany(e => e.TransfersFrom)
+            .WithOne(e => e.TransferFrom)
+            .HasForeignKey(e => e.TransferFromLocationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Location>()
+            .HasMany(e => e.TransfersTo)
+            .WithOne(e => e.TransferTo)
+            .HasForeignKey(e => e.TransferToLocationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // modelBuilder.Entity<Order>()
+        //     .HasMany(e => e.ShipTo)
+        //     .WithOne(e => e.ShipTo)
+        //     .HasForeignKey(e => e.ShipToClientId)
+        //     .OnDelete(DeleteBehavior.Cascade);
+
+        // modelBuilder.Entity<Order>()
+        //     .HasMany(e => e.BillTo)
+        //     .WithOne(e => e.BillTo)
+        //     .HasForeignKey(e => e.BillToClientId)
+        //     .OnDelete(DeleteBehavior.Cascade);
     }
 
     public override int SaveChanges()

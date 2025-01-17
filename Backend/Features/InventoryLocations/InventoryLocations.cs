@@ -14,13 +14,19 @@ namespace Backend.Features.InventoryLocations
         [JsonPropertyName("id")]
         public required int Id { get; set; }
 
+        [Required]
         [JsonPropertyName("inventory_id")]
         public required int InventoryId { get; set; }
 
+        [Required]
         [JsonPropertyName("location_id")]
         public required int LocationId { get; set; }
 
         public Inventory Inventory { get; set; } = null!;
+
         public Location Location { get; set; } = null!;
+
+        [Required]
+        public int Amount {get;set;}
     }
 }
