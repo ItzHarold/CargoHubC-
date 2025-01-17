@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Backend.Features.Items;
 using Backend.Features.OrderItems;
 using Backend.Features.ShipmentOrders;
+using Backend.Features.Suppliers;
 
 namespace Backend.Features.Orders
 {
@@ -79,6 +80,8 @@ namespace Backend.Features.Orders
 
         [JsonPropertyName("shipment_orders")]
         public ICollection<ShipmentOrder>? shipmentOrders { get; } = [];
+
+        public Supplier Supplier { get; set; } = null!;
 
         [JsonPropertyName("items")]
         public List<Item>? Items { get; set; }
