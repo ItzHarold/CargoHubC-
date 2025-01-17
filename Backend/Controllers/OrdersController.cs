@@ -45,5 +45,11 @@ namespace Backend.Controllers.Orders
             _orderService.DeleteOrder(id);
         }
 
+        [HttpGet("{id}/customer")]
+        public void GetOrdersFromCustomers(int id)
+        {
+            _orderService.GetOrdersFromCustomers(id);
+        }
+
     }
 }
