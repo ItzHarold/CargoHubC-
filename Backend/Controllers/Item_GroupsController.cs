@@ -4,7 +4,7 @@ using Backend.Features.ItemGroups;
 using Backend.Response;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
-using Backend.Request;
+using Backend.Requests;
 
 namespace Backend.Controllers.ItemGroupsController
 {

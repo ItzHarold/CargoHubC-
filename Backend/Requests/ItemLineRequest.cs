@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Backend.Requests
 {
-    public class ItemGroupRequest
+    public class ItemLineRequest
     {
         [JsonProperty("name")]
         public required string Name { get; set; }

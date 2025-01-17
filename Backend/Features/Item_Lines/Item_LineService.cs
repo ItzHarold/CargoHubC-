@@ -2,6 +2,7 @@
 using System.Linq;
 using Backend.Infrastructure.Database;
 using FluentValidation;
+using Backend.Requests;
 
 namespace Backend.Features.ItemLines
 {
@@ -9,8 +10,8 @@ namespace Backend.Features.ItemLines
     {
         IEnumerable<ItemLine> GetAllItemLines();
         ItemLine? GetItemLineById(int id);
-        void AddItemLine(ItemLine itemLine);
-        void UpdateItemLine(int id, ItemLine itemLine);
+        Task<int> AddItemLine(ItemLineRequest itemLineRequest);
+        Task UpdateItemLine(ItemLine itemLine);
         void DeleteItemLine(int id);
     }
 
@@ -39,27 +40,35 @@ namespace Backend.Features.ItemLines
             return _dbContext.ItemLines?.Find(id);
         }
 
-        public void AddItemLine(ItemLine itemLine)
+        public async Task<int> AddItemLine(ItemLineRequest itemLineRequest)
         {
-            var validationResult = _validator.Validate(itemLine);
+            // Validation (if applicable)
+            // var validationResult = await _validator.ValidateAsync(itemLineRequest);
+            
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
 
-            if (!validationResult.IsValid)
+            var itemLine = new ItemLine()
             {
-                throw new ValidationException(validationResult.Errors);
-            }
+                Name = itemLineRequest.Name,
+                Description = itemLineRequest.Description
+            };
 
             itemLine.CreatedAt = DateTime.Now;
+            itemLine.UpdatedAt = itemLine.CreatedAt;
+
+            // Adding to the appropriate DbSet for ItemLine, not ItemGroup
             _dbContext.ItemLines?.Add(itemLine);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
+
+            return itemLine.id;
         }
 
-        public void UpdateItemLine(int id, ItemLine itemLine)
-        {
-            if (id != itemLine.id)
-            {
-                throw new ValidationException("Item Line ID in the path does not match the ID in the body.");
-            }
 
+        public async Task UpdateItemLine(ItemLine itemLine)
+        {
             var validationResult = _validator.Validate(itemLine);
 
             if (!validationResult.IsValid)
@@ -69,7 +78,7 @@ namespace Backend.Features.ItemLines
 
             itemLine.UpdatedAt = DateTime.Now;
             _dbContext.ItemLines?.Update(itemLine);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteItemLine(int id)

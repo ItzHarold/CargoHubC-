@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Backend.Infrastructure.Database;
-using Backend.Request;
+using Backend.Requests;
 using Backend.Response;
 using FluentValidation;
 
