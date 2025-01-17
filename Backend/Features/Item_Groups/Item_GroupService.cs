@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Backend.Infrastructure.Database;
+using Backend.Request;
+using Backend.Response;
 using FluentValidation;
 
 namespace Backend.Features.ItemGroups
@@ -9,8 +11,8 @@ namespace Backend.Features.ItemGroups
     {
         IEnumerable<ItemGroup> GetAllItemGroups();
         ItemGroup? GetItemGroupById(int id);
-        void AddItemGroup(ItemGroup itemGroup);
-        void UpdateItemGroup(ItemGroup itemGroup);
+        Task<int> AddItemGroup(ItemGroupRequest itemGroupRequest);
+        Task UpdateItemGroup(ItemGroup itemGroup);
         void DeleteItemGroup(int id);
     }
 
@@ -39,21 +41,30 @@ namespace Backend.Features.ItemGroups
             return _dbContext.ItemGroups?.Find(id);
         }
 
-        public void AddItemGroup(ItemGroup itemGroup)
+        public async Task<int> AddItemGroup(ItemGroupRequest itemGroupRequest)
         {
-            var validationResult = _validator.Validate(itemGroup);
+            // var validationResult = _validator.Validate(itemGroup);
 
-            if (!validationResult.IsValid)
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            var itemGroup = new ItemGroup()
             {
-                throw new ValidationException(validationResult.Errors);
-            }
+                Name = itemGroupRequest.Name,
+                Description = itemGroupRequest.Description
+            };
 
             itemGroup.CreatedAt = DateTime.Now;
+            itemGroup.UpdatedAt = itemGroup.CreatedAt;
+
             _dbContext.ItemGroups?.Add(itemGroup);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
+            return itemGroup.Id;
         }
 
-        public void UpdateItemGroup(ItemGroup itemGroup)
+        public async Task UpdateItemGroup(ItemGroup itemGroup)
         {
             var validationResult = _validator.Validate(itemGroup);
 
@@ -64,7 +75,7 @@ namespace Backend.Features.ItemGroups
 
             itemGroup.UpdatedAt = DateTime.Now;
             _dbContext.ItemGroups?.Update(itemGroup);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteItemGroup(int id)

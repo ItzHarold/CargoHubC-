@@ -1,6 +1,10 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Backend.Features.ItemGroups;
+using Backend.Response;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
+using Backend.Request;
 
 namespace Backend.Controllers.ItemGroupsController
 {
@@ -30,24 +34,49 @@ namespace Backend.Controllers.ItemGroupsController
             {
                 return NotFound();
             }
-            return Ok(itemGroup);
+
+            var response = new ItemGroupResponse
+            {
+                Id = itemGroup.Id,
+                Name = itemGroup.Name,
+                Description = itemGroup.Description
+            };
+
+            return Ok(response);
         }
+
+
         [HttpPost]
-        public IActionResult AddItemGroup(ItemGroup itemGroup)
+        public async Task<IActionResult> AddItemGroup(ItemGroupRequest itemGroup)
         {
-            _itemGroupService.AddItemGroup(itemGroup);
-            return CreatedAtAction(nameof(GetItemGroupById), new { id = itemGroup.Id }, itemGroup);
+            try
+            {
+                int newItemGroupId = await _itemGroupService.AddItemGroup(itemGroup);
+                return GetItemGroupById(newItemGroupId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateItemGroup(int id, ItemGroup itemGroup)
+        public async Task<IActionResult> UpdateItemGroup(int id, [FromBody] ItemGroup itemGroup)
         {
             if (id != itemGroup.Id)
             {
-                return BadRequest();
+                return BadRequest("Item Group does not match the ID");
             }
-            _itemGroupService.UpdateItemGroup(itemGroup);
-            return NoContent();
+            try
+            {
+                await _itemGroupService.UpdateItemGroup(itemGroup);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+            
         }
 
         [HttpDelete("{id}")]
