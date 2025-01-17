@@ -5,6 +5,7 @@ using Backend.Features.Items;
 using Backend.Features.OrderItems;
 using Backend.Features.ShipmentOrders;
 using Backend.Features.Suppliers;
+using Backend.Features.Warehouses;
 
 namespace Backend.Features.Orders
 {
@@ -83,6 +84,9 @@ namespace Backend.Features.Orders
 
         public Supplier Supplier { get; set; } = null!;
 
+        public Warehouse Warehouse { get; set; } = null!;
+
+        //TODO to be changed
         [JsonPropertyName("items")]
         public List<Item>? Items { get; set; }
     }

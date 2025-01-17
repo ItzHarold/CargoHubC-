@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Contacts;
 using Backend.Features.Locations;
+using Backend.Features.Orders;
 using Backend.Features.WarehouseContacts;
 
 namespace Backend.Features.Warehouses
@@ -46,5 +47,6 @@ namespace Backend.Features.Warehouses
         //Navigator
         public ICollection<Location>? Locations { get; set; }
         public ICollection<WarehouseContact> WarehouseContacts { get; set;} = null!;
+        public ICollection<Order> Orders { get; } = new List<Order>();
     }
 }
