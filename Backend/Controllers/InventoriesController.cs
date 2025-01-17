@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Backend.Features.Inventories;
+using Backend.Response;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Inventories
@@ -30,14 +32,36 @@ namespace Backend.Controllers.Inventories
             {
                 return NotFound();
             }
-            return Ok(inventory);
+
+            var response = new InventoryResponse
+            {
+                Id = inventory.Id,
+                ItemId = inventory.ItemId,
+                Description = inventory.Description,
+                ItemReference = inventory.ItemReference,
+                LocationId = inventory.LocationId,
+                TotalOnHand = inventory.TotalOnHand,
+                TotalExpected = inventory.TotalExpected,
+                TotalOrdered = inventory.TotalOrdered,
+                TotalAllocated = inventory.TotalAllocated,
+                TotalAvailable = inventory.TotalAvailable
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddInventory([FromBody] Inventory inventory)
+        public async Task<IActionResult> AddInventory([FromBody] InventoryRequest inventoryRequest)
         {
-            await _inventoryService.AddInventory(inventory);
-            return CreatedAtAction(nameof(GetInventoryById), new { id = inventory.Id }, inventory);
+            try
+            {
+                int newInventoryId = await _inventoryService.AddInventory(inventoryRequest);
+                return GetInventoryById(newInventoryId);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpPut("{id}")]

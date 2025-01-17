@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Backend.Infrastructure.Database;
+using Backend.Response;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ namespace Backend.Features.Inventories
     {
         IEnumerable<Inventory> GetAllInventories();
         Inventory? GetInventoryById(int id);
-        Task AddInventory(Inventory inventory);
+        Task<int> AddInventory(InventoryRequest inventoryRequest);
         Task UpdateInventory(Inventory inventory);
         void DeleteInventory(int id);
     }
@@ -40,33 +41,52 @@ namespace Backend.Features.Inventories
             return _dbContext.Inventories?.Find(id);
         }
 
-        public async Task AddInventory(Inventory inventory)
+        public async Task<int> AddInventory(InventoryRequest inventoryRequest)
         {
-            var validationResult = await _validator.ValidateAsync(inventory);
+            // Validation logic commented as per your instructions
+            // var validationResult = await _validator.ValidateAsync(inventory);
 
-            if (!validationResult.IsValid)
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            var inventory = new Inventory
             {
-                throw new ValidationException(validationResult.Errors);
-            }
+                ItemId = inventoryRequest.ItemId,
+                Description = inventoryRequest.Description,
+                ItemReference = inventoryRequest.ItemReference,
+                LocationId = inventoryRequest.LocationId,
+                TotalOnHand = inventoryRequest.TotalOnHand,
+                TotalExpected = inventoryRequest.TotalExpected,
+                TotalOrdered = inventoryRequest.TotalOrdered,
+                TotalAllocated = inventoryRequest.TotalAllocated,
+                TotalAvailable = inventoryRequest.TotalAvailable,
+                CreatedAt = DateTime.Now,
+            };
 
-            inventory.CreatedAt = DateTime.Now;
+            inventory.UpdatedAt = inventory.CreatedAt;
+
             _dbContext.Inventories?.Add(inventory);
             await _dbContext.SaveChangesAsync();
+            return inventory.Id;
         }
 
         public async Task UpdateInventory(Inventory inventory)
         {
-            var validationResult = await _validator.ValidateAsync(inventory);
+            // Validation logic commented as per your instructions
+            // var validationResult = await _validator.ValidateAsync(inventory);
 
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
 
             inventory.UpdatedAt = DateTime.Now;
             _dbContext.Inventories?.Update(inventory);
             await _dbContext.SaveChangesAsync();
         }
+
 
         public void DeleteInventory(int id)
         {

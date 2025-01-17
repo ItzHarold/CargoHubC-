@@ -32,8 +32,8 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "item_id": 1,
-    "locations": [1, 2],
+    "item_id": 12345,
+    "locations": [0],
     "total_on_hand": 50,
     "total_expected": 100,
     "total_ordered": 75,
@@ -48,7 +48,7 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-  "Uid": "12345",
+  "Uid": "123456",
   "Code": "sjQ23408K",
   "Description": "New Item",
   "ShortDescription": "item",
@@ -61,7 +61,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
   "UnitPurchaseQuantity": 20,
   "UnitOrderQuantity": 12,
   "PackOrderQuantity": 13,
-  "SupplierId": 7,
+  "SupplierId": 1,
   "SupplierCode": "MSI902",
   "SupplierPartNumber": "A-75389-mNT"
 }
@@ -73,7 +73,7 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "warehouse_id": 4,
+    "warehouseId": 1,
     "code": "A.1.0",
     "name": "Row: B, Rack: 10000000, Shelf: 0"
 }
@@ -144,7 +144,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "TotalPackageCount": 45,
     "TotalPackageWeight": 755.60,
     "Items": [
-       { 
+       {
             "id": 1,
             "ItemUid": "12345",
             "amount": 2
@@ -183,7 +183,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
     "transferStatus": "Pending",
     "transfer_items": [
         {
-            "item_uid": "12345",  
+            "item_uid": "12345",
             "amount": 5
         }
     ]
