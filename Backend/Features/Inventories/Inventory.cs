@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Items;
 using Backend.Features.Locations;
+using Backend.Features.InventoryLocations;
 
 namespace Backend.Features.Inventories
 {
@@ -50,6 +51,7 @@ namespace Backend.Features.Inventories
 
         //Navigator principle
         public Item? Item{get;set;}
+        public ICollection<InventoryLocation> InventoryLocations { get; } = [];
 
     }
 }

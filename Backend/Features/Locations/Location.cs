@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.InventoryLocations;
 using Backend.Features.Warehouses;
 
 namespace Backend.Features.Locations
@@ -34,6 +35,8 @@ namespace Backend.Features.Locations
         [Required]
         [JsonPropertyName("shelf")]
         public required string Shelf { get; set; }
+
+        public ICollection<InventoryLocation> InventoryLocations { get; } = [];
     }
 
     public class IncomingLocation : BaseEntity
