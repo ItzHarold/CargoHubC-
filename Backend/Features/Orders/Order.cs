@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.Clients;
+using Backend.Features.Contacts;
 using Backend.Features.Items;
 using Backend.Features.OrderItems;
 using Backend.Features.ShipmentOrders;
@@ -18,9 +20,12 @@ namespace Backend.Features.Orders
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey("Supplier")]
+        [ForeignKey("SourceContact")]
         [JsonPropertyName("source_id")]
         public required int SourceId { get; set; }
+
+        // Navigation property for the supplier contact
+        public Contact? SourceContact { get; set; }
 
         [Required]
         [JsonPropertyName("order_date")]
@@ -53,14 +58,14 @@ namespace Backend.Features.Orders
         [JsonPropertyName("warehouse_id")]
         public required int WarehouseId { get; set; }
 
-        [ForeignKey("Client")]
-        [JsonPropertyName("ship_to")]
-        public string? ShipTo { get; set; }
+        // [ForeignKey("Client")]
+        // [JsonPropertyName("ship_to")]
+        // public string? ShipTo { get; set; }
 
-        [Required]
-        [ForeignKey("Client")]
-        [JsonPropertyName("bill_to")]
-        public required string BillTo { get; set; }
+        // [Required]
+        // [ForeignKey("Client")]
+        // [JsonPropertyName("bill_to")]
+        // public required string BillTo { get; set; }
 
         public int? ShipmentId { get; set; }
 
@@ -89,5 +94,10 @@ namespace Backend.Features.Orders
         //TODO to be changed
         [JsonPropertyName("items")]
         public List<Item>? Items { get; set; }
+
+        public int? ShipToClientId { get; set; }
+        public int? BillToClientId { get; set; }
+        public Client? ShipTo {get; set;}
+        public Client? BillTo {get; set;}
     }
 }

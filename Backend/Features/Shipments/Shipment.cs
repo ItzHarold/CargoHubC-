@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Backend.Features.Items;
 using Backend.Features.ShimpentItems;
 using Backend.Features.ShipmentOrders;
+using Backend.Features.Contacts;
 
 namespace Backend.Features.Shipments
 {
@@ -16,9 +17,10 @@ namespace Backend.Features.Shipments
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey("Supplier")]
+        [ForeignKey("SourceContact")]
         [JsonPropertyName("source_id")]
         public required int SourceId { get; set; }
+        public Contact? SourceContact { get; set; }
 
         [JsonPropertyName("order_date")]
         public DateTime? OrderDate { get; set; }
