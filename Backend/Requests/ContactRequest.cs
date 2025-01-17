@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
 
-namespace Requests;
+namespace Backend.Response;
 
 public class ContactRequest
 {
