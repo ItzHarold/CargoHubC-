@@ -32,8 +32,8 @@ Content-Type: application/json
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 {
-    "item_id": 12345,
-    "locations": [0],
+    "item_id": "P000003",
+    "locations": [2],
     "total_on_hand": 50,
     "total_expected": 100,
     "total_ordered": 75,

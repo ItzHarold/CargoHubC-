@@ -12,7 +12,7 @@ namespace Backend.Features.Inventories
         IEnumerable<Inventory> GetAllInventories();
         Inventory? GetInventoryById(int id);
         Task<int> AddInventory(InventoryRequest inventoryRequest);
-        Task UpdateInventory(Inventory inventory);
+        Task UpdateInventory(int id, InventoryRequest inventoryRequest);
         void DeleteInventory(int id);
     }
 
@@ -43,14 +43,6 @@ namespace Backend.Features.Inventories
 
         public async Task<int> AddInventory(InventoryRequest inventoryRequest)
         {
-            // Validation logic commented as per your instructions
-            // var validationResult = await _validator.ValidateAsync(inventory);
-
-            // if (!validationResult.IsValid)
-            // {
-            //     throw new ValidationException(validationResult.Errors);
-            // }
-
             var inventory = new Inventory
             {
                 ItemId = inventoryRequest.ItemId,
@@ -63,26 +55,34 @@ namespace Backend.Features.Inventories
                 TotalAllocated = inventoryRequest.TotalAllocated,
                 TotalAvailable = inventoryRequest.TotalAvailable,
                 CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
-
-            inventory.UpdatedAt = inventory.CreatedAt;
 
             _dbContext.Inventories?.Add(inventory);
             await _dbContext.SaveChangesAsync();
+
             return inventory.Id;
         }
 
-        public async Task UpdateInventory(Inventory inventory)
+        public async Task UpdateInventory(int id, InventoryRequest inventoryRequest)
         {
-            // Validation logic commented as per your instructions
-            // var validationResult = await _validator.ValidateAsync(inventory);
+            var inventory = _dbContext.Inventories?.FirstOrDefault(i => i.Id == id);
+            if (inventory == null)
+            {
+                throw new KeyNotFoundException($"Inventory with ID {id} not found.");
+            }
 
-            // if (!validationResult.IsValid)
-            // {
-            //     throw new ValidationException(validationResult.Errors);
-            // }
-
+            inventory.ItemId = inventoryRequest.ItemId;
+            inventory.Description = inventoryRequest.Description;
+            inventory.ItemReference = inventoryRequest.ItemReference;
+            inventory.LocationId = inventoryRequest.LocationId;
+            inventory.TotalOnHand = inventoryRequest.TotalOnHand;
+            inventory.TotalExpected = inventoryRequest.TotalExpected;
+            inventory.TotalOrdered = inventoryRequest.TotalOrdered;
+            inventory.TotalAllocated = inventoryRequest.TotalAllocated;
+            inventory.TotalAvailable = inventoryRequest.TotalAvailable;
             inventory.UpdatedAt = DateTime.Now;
+
             _dbContext.Inventories?.Update(inventory);
             await _dbContext.SaveChangesAsync();
         }

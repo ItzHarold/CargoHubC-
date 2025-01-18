@@ -65,15 +65,21 @@ namespace Backend.Controllers.Inventories
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateInventory(int id, [FromBody] Inventory inventory)
+        public async Task<IActionResult> UpdateInventory(int id, [FromBody] InventoryRequest inventoryRequest)
         {
-            if (id != inventory.Id)
+            try
             {
-                return BadRequest("Inventory ID in the path does not match the ID in the body.");
+                await _inventoryService.UpdateInventory(id, inventoryRequest);
+                return NoContent();
             }
-
-            await _inventoryService.UpdateInventory(inventory);
-            return NoContent();
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpDelete("{id}")]
