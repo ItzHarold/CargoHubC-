@@ -83,5 +83,17 @@ namespace Backend.Controllers.Items
             var items = _service.GetItemsBySupplierId(supplierId);
             return Ok(items);
         }
+
+        [HttpGet("group/{itemGroupId}", Name = "GetItemsByItemGroupId")]
+        public IActionResult GetItemsByItemGroupId(int itemGroupId)
+        {
+            var items = _service.GetItemsByItemGroupId(itemGroupId);
+            if (items == null || !items.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(items);
+        }
     }
 }
