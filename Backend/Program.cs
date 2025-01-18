@@ -92,6 +92,7 @@ public static class Program
         services.AddValidatorsFromAssemblyContaining<LocationValidator>();
         services.AddValidatorsFromAssemblyContaining<WarehouseValidator>();
         services.AddValidatorsFromAssemblyContaining<ShipmentValidator>();
+        services.AddValidatorsFromAssemblyContaining<TransferValidator>();
 
 
 
