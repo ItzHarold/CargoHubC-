@@ -2,7 +2,8 @@
 using System.Linq;
 using System.Xml.Linq;
 using Backend.Infrastructure.Database;
-using Microsoft.EntityFrameworkCore;
+using Backend.Requests;
+using FluentValidation;
 
 namespace Backend.Features.Shipments
 {
@@ -10,18 +11,20 @@ namespace Backend.Features.Shipments
     {
         IEnumerable<Shipment> GetAllShipments();
         Shipment? GetShipmentById(int id);
-        void AddShipment(Shipment shipment);
-        void UpdateShipment(Shipment shipment);
+        Task<int> AddShipment(ShipmentRequest shipmentRequest);
+        Task UpdateShipment(int id, ShipmentRequest request);
         void DeleteShipment(int id);
     }
 
     public class ShipmentService: IShipmentService
     {
         private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<Shipment> _validator;
 
-        public ShipmentService(CargoHubDbContext dbContext)
+        public ShipmentService(CargoHubDbContext dbContext, IValidator<Shipment> validator)
         {
             _dbContext = dbContext;
+            _validator = validator;
         }
 
         public IEnumerable<Shipment> GetAllShipments()
@@ -32,22 +35,79 @@ namespace Backend.Features.Shipments
             }
             return new List<Shipment>();
         }
+
         public Shipment? GetShipmentById(int id)
         {
-            return _dbContext.Shipments?.FirstOrDefault(s => s.Id == id);
+            return _dbContext.Shipments?.Find(id);
         }
-        public void AddShipment(Shipment shipment)
+
+        public async Task<int> AddShipment(ShipmentRequest shipmentRequest)
         {
+            // var validationResult = await _validator.ValidateAsync(client);
+
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            var shipment = new Shipment()
+            {
+                SourceId = shipmentRequest.SourceId,
+                OrderDate = shipmentRequest.OrderDate,
+                RequestDate = shipmentRequest.RequestDate,
+                ShipmentDate = shipmentRequest.ShipmentDate,
+                ShipmentType = shipmentRequest.ShipmentType,
+                ShipmentStatus = shipmentRequest.ShipmentStatus,
+                Notes = shipmentRequest.Notes,
+                CarrierCode = shipmentRequest.CarrierCode,
+                CarrierDescription = shipmentRequest.CarrierDescription,
+                ServiceCode = shipmentRequest.ServiceCode,
+                PaymentType = shipmentRequest.PaymentType,
+                TransferMode = shipmentRequest.TransferMode,
+                TotalPackageCount = shipmentRequest.TotalPackageCount,
+                TotalPackageWeight = shipmentRequest.TotalPackageWeight
+            };
+
             shipment.CreatedAt = DateTime.Now;
+            shipment.UpdatedAt = shipment.CreatedAt;
+
             _dbContext.Shipments?.Add(shipment);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
+            return shipment.Id;
         }
-        public void UpdateShipment(Shipment shipment)
+        
+        public async Task UpdateShipment(int id, ShipmentRequest request)
         {
-            shipment.UpdatedAt = DateTime.Now;
-            _dbContext.Shipments?.Update(shipment);
-            _dbContext.SaveChanges();
+            var existingShipment = await _dbContext.Shipments!.FindAsync(id) 
+                ?? throw new KeyNotFoundException($"Shipment with ID {id} not found.");
+
+            // Update the existing shipment with values from the request
+            existingShipment.SourceId = request.SourceId;
+            existingShipment.OrderDate = request.OrderDate;
+            existingShipment.RequestDate = request.RequestDate;
+            existingShipment.ShipmentDate = request.ShipmentDate;
+            existingShipment.ShipmentType = request.ShipmentType;
+            existingShipment.ShipmentStatus = request.ShipmentStatus;
+            existingShipment.Notes = request.Notes;
+            existingShipment.CarrierCode = request.CarrierCode;
+            existingShipment.CarrierDescription = request.CarrierDescription;
+            existingShipment.ServiceCode = request.ServiceCode;
+            existingShipment.PaymentType = request.PaymentType;
+            existingShipment.TransferMode = request.TransferMode;
+            existingShipment.TotalPackageCount = request.TotalPackageCount;
+            existingShipment.TotalPackageWeight = request.TotalPackageWeight;
+            existingShipment.UpdatedAt = DateTime.Now;
+
+            var validationResult = _validator.Validate(existingShipment);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
+            _dbContext.Shipments?.Update(existingShipment);
+            await _dbContext.SaveChangesAsync();
         }
+        
         public void DeleteShipment(int id)
         {
             if (_dbContext.Shipments != null)

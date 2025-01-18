@@ -63,7 +63,7 @@ namespace Backend.Controllers.ItemLines
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateItemGroup(int id, [FromBody] ItemLine itemLine)
+        public async Task<IActionResult> UpdateItemLine(int id, [FromBody] ItemLine itemLine)
         {
             if (id != itemLine.id)
             {
