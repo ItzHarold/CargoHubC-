@@ -34,6 +34,7 @@ namespace Backend.Controllers.Suppliers
                 return NotFound(new { message = "Supplier not found." });
             }
 
+            // Convert Supplier entity to SupplierResponse
             var response = new SupplierResponse
             {
                 Id = supplier.Id,
@@ -47,11 +48,25 @@ namespace Backend.Controllers.Suppliers
                 Country = supplier.Country,
                 ContactName = supplier.ContactName,
                 PhoneNumber = supplier.PhoneNumber,
-                Reference = supplier.Reference
+                Reference = supplier.Reference,
+                // Convert Items to ItemResponse
+                Items = supplier.Items?.Select(item => new ItemResponse
+                {
+                    Uid = item.Uid,
+                    Code = item.Code,
+                    Description = item.Description,
+                    ShortDescription = item.ShortDescription,
+                    UpcCode = item.UpcCode,
+                    ModelNumber = item.ModelNumber,
+                    CommodityCode = item.CommodityCode,
+                    SupplierId = item.SupplierId,
+                    SupplierPartNumber = item.SupplierPartNumber
+                }).ToList() ?? new List<ItemResponse>() // Ensure an empty list if no items are present
             };
 
             return Ok(response);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> AddSupplier([FromBody] SupplierRequest supplierRequest)

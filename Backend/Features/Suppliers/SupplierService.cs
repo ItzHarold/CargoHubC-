@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Backend.Infrastructure.Database;
 using Backend.Response;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Features.Suppliers
 {
@@ -32,15 +33,21 @@ namespace Backend.Features.Suppliers
         {
             if (_dbContext.Suppliers != null)
             {
-                return _dbContext.Suppliers.ToList();
+                // Include Items for each supplier
+                return _dbContext.Suppliers
+                    .Include(s => s.Items)  // Include the related Items collection
+                    .ToList();
             }
             return new List<Supplier>();
         }
 
         public Supplier? GetSupplierById(int id)
         {
-            return _dbContext.Suppliers?.FirstOrDefault(s => s.Id == id);
+            return _dbContext.Suppliers?
+                .Include(s => s.Items) // Include related Items
+                .FirstOrDefault(s => s.Id == id);
         }
+
 
         public async Task<Supplier> AddSupplier(SupplierRequest supplierRequest)
         {

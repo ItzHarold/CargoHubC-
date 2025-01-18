@@ -187,10 +187,6 @@ namespace Backend.Features.Transfers
             await _dbContext.SaveChangesAsync();
         }
 
-
-
-
-
         public void DeleteTransfer(int id)
         {
             var transfer = _dbContext.Transfers?.Find(id);
