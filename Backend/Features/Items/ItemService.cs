@@ -15,6 +15,8 @@ namespace Backend.Features.Items
         void DeleteItem(string uid);
         IEnumerable<Item> GetItemsBySupplierId(int supplierId);
         IEnumerable<Item> GetItemsByItemGroupId(int itemGroupId);
+        IEnumerable<Item> GetItemsByItemLineId(int itemLineId);
+        IEnumerable<Item> GetItemsByItemTypeId(int itemTypeId);
     }
 
     public class ItemService : IItemService
@@ -115,6 +117,18 @@ namespace Backend.Features.Items
         {
             // Fetch all items associated with a specific item group
             return _dbContext.Items?.Where(i => i.ItemGroupId == itemGroupId).ToList() ?? new List<Item>();
+        }
+
+        public IEnumerable<Item> GetItemsByItemLineId(int itemLineId)
+        {
+            // Fetch all items associated with the given ItemLineId
+            return _dbContext.Items?.Where(i => i.ItemLineId == itemLineId).ToList() ?? new List<Item>();
+        }
+
+        public IEnumerable<Item> GetItemsByItemTypeId(int itemTypeId)
+        {
+            // Fetch all items associated with the given ItemTypeId
+            return _dbContext.Items?.Where(i => i.ItemTypeId == itemTypeId).ToList() ?? new List<Item>();
         }
     }
 }

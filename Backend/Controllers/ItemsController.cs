@@ -95,5 +95,37 @@ namespace Backend.Controllers.Items
 
             return Ok(items);
         }
+
+        [HttpGet("line/{itemLineId}", Name = "GetItemsByItemLineId")]
+        public IActionResult GetItemsByItemLineId(int itemLineId)
+        {
+            var items = _service.GetItemsByItemLineId(itemLineId);
+            if (items == null || !items.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(items);
+        }
+
+        [HttpGet("type/{itemTypeId}", Name = "GetItemsByItemTypeId")]
+        public IActionResult GetItemsByItemTypeId(int itemTypeId)
+        {
+            // Debugging - log the request
+            Console.WriteLine($"Request received for ItemTypeId: {itemTypeId}");
+
+            var items = _service.GetItemsByItemTypeId(itemTypeId);
+
+            // Debugging - check if any items were returned
+            if (items == null || !items.Any())
+            {
+                // Log the result
+                Console.WriteLine($"No items found for ItemTypeId: {itemTypeId}");
+                return NotFound();
+            }
+
+            return Ok(items);
+        }
+
     }
 }
