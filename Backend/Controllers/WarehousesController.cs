@@ -19,10 +19,9 @@ namespace Backend.Controllers.Warehouses
         }
 
         [HttpGet]
-        public IActionResult GetAllWarehouses()
+        public IEnumerable<Warehouse> GetAllWarehouses()
         {
-            var warehouses = _warehouseService.GetAllWarehouses();
-            return Ok(warehouses);
+            return _warehouseService.GetAllWarehouses();
         }
 
         [HttpGet("{id}")]
@@ -71,21 +70,24 @@ namespace Backend.Controllers.Warehouses
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateWarehouse(int id, [FromBody] Warehouse warehouse)
+        public async Task<IActionResult> UpdateWarehouse(int id, [FromBody] WarehouseRequest request)
         {
-            if (id != warehouse.Id)
-            {
-                return BadRequest(new { message = "Warehouse ID in the path does not match the ID in the body." });
-            }
-
             try
             {
-                await _warehouseService.UpdateWarehouse(warehouse);
+                await _warehouseService.UpdateWarehouse(id, request);
                 return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
             }
             catch (ValidationException ex)
             {
                 return BadRequest(new { errors = ex.Errors });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
             }
         }
 

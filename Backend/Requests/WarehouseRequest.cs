@@ -27,4 +27,5 @@ public class WarehouseRequest
 
     [JsonProperty("contacts")]
     public required List<ContactRequest> Contacts { get; set; }
+    public object? Locations { get; internal set; }
 }

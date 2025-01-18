@@ -15,7 +15,7 @@ namespace Backend.Features.Warehouses
         IEnumerable<Warehouse> GetAllWarehouses();
         Warehouse? GetWarehouseById(int id);
         Task<int> AddWarehouse(WarehouseRequest warehouseRequest);
-        Task UpdateWarehouse(Warehouse warehouse);
+        Task UpdateWarehouse(int id, WarehouseRequest request);
         void DeleteWarehouse(int id);
     }
 
@@ -33,10 +33,15 @@ namespace Backend.Features.Warehouses
         {
             if (_dbContext.Warehouses != null)
             {
-                return _dbContext.Warehouses.ToList();
+                // Include WarehouseContacts and optionally Contact information
+                return _dbContext.Warehouses
+                    .Include(w => w.WarehouseContacts)    // Include WarehouseContacts
+                    .ThenInclude(wc => wc.Contact)       // Optionally include Contact if needed
+                    .ToList();
             }
             return new List<Warehouse>();
         }
+
 
         public Warehouse? GetWarehouseById(int id)
         {
@@ -69,7 +74,7 @@ namespace Backend.Features.Warehouses
                     Contact = new Contact {
                         ContactName = c.ContactName,
                         ContactEmail = c.ContactEmail,
-                        ContactPhone = c.ContactPhone,
+                        ContactPhone = c.ContactPhone
                     }
                 }).ToList()
             };
@@ -81,19 +86,35 @@ namespace Backend.Features.Warehouses
             return warehouse.Id;
         }
 
-        public async Task UpdateWarehouse(Warehouse warehouse)
+        public async Task UpdateWarehouse(int id, WarehouseRequest request)
         {
-            var validationResult = await _validator.ValidateAsync(warehouse);
+            var existingWarehouse = await _dbContext.Warehouses!
+                .FindAsync(id) 
+                ?? throw new KeyNotFoundException($"Warehouse with ID {id} not found.");
+
+            // Update warehouse properties
+            existingWarehouse.Code = request.Code;
+            existingWarehouse.Name = request.Name;
+            existingWarehouse.Address = request.Address;
+            existingWarehouse.Zip = request.Zip;
+            existingWarehouse.City = request.City;
+            existingWarehouse.Province = request.Province;
+            existingWarehouse.Country = request.Country;
+
+            // Create a new instance of the validator and indicate it's an update
+            var validationResult = await _validator.ValidateAsync(existingWarehouse, options => options.IncludeRuleSets("Update"));
 
             if (!validationResult.IsValid)
             {
                 throw new ValidationException(validationResult.Errors);
             }
 
-            warehouse.UpdatedAt = DateTime.Now;
-            _dbContext.Warehouses?.Update(warehouse);
+            existingWarehouse.UpdatedAt = DateTime.Now;
+            _dbContext.Warehouses?.Update(existingWarehouse);
             await _dbContext.SaveChangesAsync();
         }
+
+
 
         public void DeleteWarehouse(int id)
         {
