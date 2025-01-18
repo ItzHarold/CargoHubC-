@@ -10,7 +10,7 @@ namespace Backend.Features.Clients
 {
     public interface IClientService
     {
-        IEnumerable<Client> GetAllClients();
+        IEnumerable<Client> GetAllClients(string? sort, string? direction, string? name, string? city, string? country);
         Client? GetClientById(int id);
         Task<int> AddClient(ClientRequest clientRequest);
         Task UpdateClient(Client client);
@@ -28,14 +28,63 @@ namespace Backend.Features.Clients
             _validator = validator;
         }
 
-        public IEnumerable<Client> GetAllClients()
+        public IEnumerable<Client> GetAllClients(string? sort, string? direction, string? name, string? city, string? country)
         {
-            if (_dbContext.Clients != null)
+            // Check if _dbContext.Clients is null
+            if (_dbContext.Clients == null)
             {
-                return _dbContext.Clients.ToList();
+                // Return an empty list if Clients is null
+                return new List<Client>();
             }
-            return new List<Client>();
+
+            IQueryable<Client> query = _dbContext.Clients.AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(c => c.Name.Contains(name));
+            }
+            if (!string.IsNullOrEmpty(city))
+            {
+                query = query.Where(c => c.City.Contains(city));
+            }
+            if (!string.IsNullOrEmpty(country))
+            {
+                query = query.Where(c => c.Country.Contains(country));
+            }
+
+            // Apply sorting based on the query parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "name":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name);
+                        break;
+                    case "address":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.Address) : query.OrderBy(c => c.Address);
+                        break;
+                    case "city":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.City) : query.OrderBy(c => c.City);
+                        break;
+                    case "country":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.Country) : query.OrderBy(c => c.Country);
+                        break;
+                    // Add more cases as needed for other properties
+                    default:
+                        // Default sorting (you can choose any default behavior here)
+                        query = query.OrderBy(c => c.Name);
+                        break;
+                }
+            }
+
+            // Return the filtered and sorted result as a list
+            return query.ToList();
         }
+
+
+
+
 
         public Client? GetClientById(int id)
         {

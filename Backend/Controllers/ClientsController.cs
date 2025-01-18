@@ -20,9 +20,9 @@ namespace Backend.Controllers.Clients
         }
 
         [HttpGet]
-        public IActionResult GetAllClients()
+        public IActionResult GetAllClients([FromQuery] string? sort, [FromQuery] string? direction, [FromQuery] string? name, [FromQuery] string? city, [FromQuery] string? country)
         {
-            var clients = _clientService.GetAllClients();
+            var clients = _clientService.GetAllClients(sort, direction, name, city, country);
             return Ok(clients);
         }
 
