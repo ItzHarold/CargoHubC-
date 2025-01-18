@@ -48,5 +48,8 @@ namespace Backend.Requests
 
         [JsonProperty("shipment_items")]
         public ICollection<ShipmentItemRequest>? ShipmentItems { get; set; }
+
+        [JsonProperty("order_ids")]
+        public ICollection<int> OrderIds { get; set; } = new List<int>();
     }
 }

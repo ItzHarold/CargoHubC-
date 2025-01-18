@@ -67,9 +67,9 @@ namespace Backend.Features.Shipments
         public float? TotalPackageWeight { get; set; }
 
         [JsonPropertyName("shipment_orders")]
-        public ICollection<ShipmentOrder>? ShipmentOrders { get; } = [];
+        public ICollection<ShipmentOrder>? ShipmentOrders { get; } = new List<ShipmentOrder>();
 
         [JsonPropertyName("shipment_items")]
-        public ICollection<ShipmentItem>? ShipmentItems { get; } = [];
+        public ICollection<ShipmentItem> ShipmentItems { get; } = new List<ShipmentItem>();
     }
 }

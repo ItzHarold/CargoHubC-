@@ -4,6 +4,9 @@ namespace Backend.Requests
 {
     public class ShipmentRequest
     {
+        [JsonProperty("order_id")]
+        public required int OrderId { get; set; }
+
         [JsonProperty("source_id")]
         public required int SourceId { get; set; }
 
@@ -46,8 +49,8 @@ namespace Backend.Requests
         [JsonProperty("total_package_weight")]
         public float? TotalPackageWeight { get; set; }
 
-        [JsonProperty("shipment_items")]
-        public ICollection<ShipmentItemRequest>? ShipmentItems { get; set; }
+        [JsonProperty("items")]
+        public ICollection<ShipmentItemRequest>? ShipmentItems { get; set; } = new List<ShipmentItemRequest>();
     }
 
     public class ShipmentItemRequest

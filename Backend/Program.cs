@@ -95,6 +95,7 @@ public static class Program
 
 
 
+
         services.AddTransient<IClientService, ClientService>();
         services.AddTransient<IWarehouseService, WarehouseService>();
         services.AddTransient<IContactService, ContactService>();

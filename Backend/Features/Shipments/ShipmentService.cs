@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Backend.Features.Items;
+using Backend.Features.ShimpentItems;
 using Backend.Infrastructure.Database;
 using Backend.Requests;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Features.Shipments
 {
@@ -31,25 +34,24 @@ namespace Backend.Features.Shipments
         {
             if (_dbContext.Shipments != null)
             {
-                return _dbContext.Shipments.ToList();
+                return _dbContext.Shipments
+                    .Include(s => s.ShipmentItems)
+                    .Include(s => s.ShipmentOrders)
+                    .ToList();
             }
             return new List<Shipment>();
         }
 
         public Shipment? GetShipmentById(int id)
         {
-            return _dbContext.Shipments?.Find(id);
+            return _dbContext?.Shipments
+                ?.Include(s => s.ShipmentItems)
+                ?.Include(s => s.SourceContact)
+                ?.FirstOrDefault(s => s.Id == id);
         }
 
         public async Task<int> AddShipment(ShipmentRequest shipmentRequest)
         {
-            // var validationResult = await _validator.ValidateAsync(client);
-
-            // if (!validationResult.IsValid)
-            // {
-            //     throw new ValidationException(validationResult.Errors);
-            // }
-
             var shipment = new Shipment()
             {
                 SourceId = shipmentRequest.SourceId,
@@ -65,8 +67,23 @@ namespace Backend.Features.Shipments
                 PaymentType = shipmentRequest.PaymentType,
                 TransferMode = shipmentRequest.TransferMode,
                 TotalPackageCount = shipmentRequest.TotalPackageCount,
-                TotalPackageWeight = shipmentRequest.TotalPackageWeight
+                TotalPackageWeight = shipmentRequest.TotalPackageWeight,
             };
+            
+            // Add shipment items if they exist
+            if (shipmentRequest.ShipmentItems != null)
+            {
+                foreach (var item in shipmentRequest.ShipmentItems)
+                {
+                    var shipmentItem = new ShipmentItem
+                    {
+                        ItemUid = item.ItemId,
+                        Amount = item.Amount,
+                        ShipmentId = shipment.Id  // This will be set after SaveChanges
+                    };
+                    shipment.ShipmentItems.Add(shipmentItem);
+                }
+            }
 
             shipment.CreatedAt = DateTime.Now;
             shipment.UpdatedAt = shipment.CreatedAt;
@@ -75,16 +92,16 @@ namespace Backend.Features.Shipments
             await _dbContext.SaveChangesAsync();
             return shipment.Id;
         }
+
         
         public async Task UpdateShipment(int id, ShipmentRequest request)
         {
             var existingShipment = await _dbContext.Shipments!.FindAsync(id) 
                 ?? throw new KeyNotFoundException($"Shipment with ID {id} not found.");
 
-            // Update the existing shipment with values from the request
+            // Update shipment properties
             existingShipment.SourceId = request.SourceId;
             existingShipment.OrderDate = request.OrderDate;
-            existingShipment.RequestDate = request.RequestDate;
             existingShipment.ShipmentDate = request.ShipmentDate;
             existingShipment.ShipmentType = request.ShipmentType;
             existingShipment.ShipmentStatus = request.ShipmentStatus;
@@ -98,6 +115,7 @@ namespace Backend.Features.Shipments
             existingShipment.TotalPackageWeight = request.TotalPackageWeight;
             existingShipment.UpdatedAt = DateTime.Now;
 
+
             var validationResult = _validator.Validate(existingShipment);
             if (!validationResult.IsValid)
             {
@@ -107,6 +125,8 @@ namespace Backend.Features.Shipments
             _dbContext.Shipments?.Update(existingShipment);
             await _dbContext.SaveChangesAsync();
         }
+
+
         
         public void DeleteShipment(int id)
         {

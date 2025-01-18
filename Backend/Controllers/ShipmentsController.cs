@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
 using Backend.Requests;
 using Backend.Response;
+using Backend.Features.Orders;
 
 namespace Backend.Controllers.Shipments
 {
@@ -25,7 +26,7 @@ namespace Backend.Controllers.Shipments
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetClientById(int id)
+        public IActionResult GetShipmentById(int id)
         {
             var shipment = _shipmentService.GetShipmentById(id);
             if (shipment == null)
@@ -60,7 +61,7 @@ namespace Backend.Controllers.Shipments
             try
             {
                 int newShipmentId = await _shipmentService.AddShipment(shipment);
-                return GetClientById(newShipmentId);
+                return GetShipmentById(newShipmentId);
             }
             catch (ValidationException ex)
             {

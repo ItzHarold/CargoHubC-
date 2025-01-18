@@ -12,7 +12,7 @@ namespace Backend.Features.ShimpentItems
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [JsonPropertyName("ItemUid")]
         public required string ItemUid { get; set; }
