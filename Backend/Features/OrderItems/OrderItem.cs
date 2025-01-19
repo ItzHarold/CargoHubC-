@@ -12,7 +12,7 @@ namespace Backend.Features.OrderItems
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [JsonPropertyName("ItemUid")]

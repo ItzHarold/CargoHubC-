@@ -1,6 +1,7 @@
 using Backend.Features.Items;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Features.Orders;
+using Backend.Request;
 
 namespace Backend.Controllers.Orders
 {
@@ -16,9 +17,15 @@ namespace Backend.Controllers.Orders
         }
 
         [HttpPost]
-        public void AddOrder([FromBody] Order order)
+        public async Task<IActionResult> AddOrder([FromBody] OrderRequest orderRequest)
         {
-            _orderService.AddOrder(order);
+            int newOrderId = await _orderService.AddOrder(orderRequest);
+            var order = _orderService.GetOrderById(newOrderId);
+            if (order == null)
+                return NotFound();
+
+            var response = _orderService.MapToResponse(order);
+            return CreatedAtAction(nameof(GetOrderById), new { id = response.Id }, response);
         }
 
         [HttpGet]
@@ -33,10 +40,23 @@ namespace Backend.Controllers.Orders
             return _orderService.GetOrderById(id);
         }
 
-        [HttpPut]
-        public void UpdateOrder([FromBody] Order order)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateOrder(int id, [FromBody] OrderRequest orderRequest)
         {
-            _orderService.UpdateOrder(order);
+            try
+            {
+                await _orderService.UpdateOrder(id, orderRequest);
+                var updatedOrder = _orderService.GetOrderById(id);
+                if (updatedOrder == null)
+                    return NotFound();
+
+                var response = _orderService.MapToResponse(updatedOrder);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]

@@ -57,7 +57,5 @@ namespace Backend.Features.Suppliers
         public string? Reference { get; set; }
 
         public ICollection<Item>? Items{get; set;} = new List<Item>();
-        
-        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }
