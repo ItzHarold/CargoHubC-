@@ -10,7 +10,15 @@ namespace Backend.Features.Inventories
 {
     public interface IInventoryService
     {
-        IEnumerable<Inventory> GetAllInventories();
+        IEnumerable<Inventory> GetAllInventories(
+        string? sort,
+        string? direction,
+        string? itemId,
+        int? totalOnHand,
+        int? totalExpected,
+        int? totalOrdered,
+        int? totalAllocated,
+        int? totalAvailable);
         Inventory? GetInventoryById(int id);
         Task<int> AddInventory(InventoryRequest inventoryRequest);
         Task UpdateInventory(int id, InventoryRequest inventoryRequest);
@@ -28,14 +36,90 @@ namespace Backend.Features.Inventories
             _validator = validator;
         }
 
-        public IEnumerable<Inventory> GetAllInventories()
+        public IEnumerable<Inventory> GetAllInventories(
+            string? sort,
+            string? direction,
+            string? itemId,
+            int? totalOnHand,
+            int? totalExpected,
+            int? totalOrdered,
+            int? totalAllocated,
+            int? totalAvailable)
         {
-            if (_dbContext.Inventories != null)
+            // Initialize the query on the Inventories table
+            if (_dbContext.Inventories == null)
             {
-                return _dbContext.Inventories.ToList();
+                return new List<Inventory>();
             }
-            return new List<Inventory>();
+
+            var query = _dbContext.Inventories.AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (!string.IsNullOrEmpty(itemId))
+            {
+                query = query.Where(c => c.ItemId.Contains(itemId));
+            }
+
+            if (totalOnHand.HasValue)
+            {
+                query = query.Where(c => c.TotalOnHand == totalOnHand.Value);
+            }
+
+            if (totalExpected.HasValue)
+            {
+                query = query.Where(c => c.TotalExpected == totalExpected.Value);
+            }
+
+            if (totalOrdered.HasValue)
+            {
+                query = query.Where(c => c.TotalOrdered == totalOrdered.Value);
+            }
+
+            if (totalAllocated.HasValue)
+            {
+                query = query.Where(c => c.TotalAllocated == totalAllocated.Value);
+            }
+
+            if (totalAvailable.HasValue)
+            {
+                query = query.Where(c => c.TotalAvailable == totalAvailable.Value);
+            }
+
+            // Apply sorting based on the query parameters (but excluding locations)
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "total_available":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.TotalAvailable) : query.OrderBy(c => c.TotalAvailable);
+                        break;
+                    case "total_allocated":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.TotalAllocated) : query.OrderBy(c => c.TotalAllocated);
+                        break;
+                    case "total_ordered":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.TotalOrdered) : query.OrderBy(c => c.TotalOrdered);
+                        break;
+                    case "total_expected":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.TotalExpected) : query.OrderBy(c => c.TotalExpected);
+                        break;
+                    case "total_on_hand":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.TotalOnHand) : query.OrderBy(c => c.TotalOnHand);
+                        break;
+                    case "item_id":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.ItemId) : query.OrderBy(c => c.ItemId);
+                        break;
+                    default:
+                        // Default sorting behavior (e.g., by item_id)
+                        query = query.OrderBy(c => c.ItemId);
+                        break;
+                }
+            }
+
+            // Return the filtered and sorted result as a list
+            return query.ToList();
         }
+
+
 
         public Inventory? GetInventoryById(int id)
         {

@@ -18,11 +18,29 @@ namespace Backend.Controllers.Inventories
         }
 
         [HttpGet]
-        public IActionResult GetAllInventories()
+        public IActionResult GetAllInventories(
+            string? sort,
+            string? direction,
+            string? itemId,
+            int? totalOnHand,
+            int? totalExpected,
+            int? totalOrdered,
+            int? totalAllocated,
+            int? totalAvailable)
         {
-            var inventory = _inventoryService.GetAllInventories();
-            return Ok(inventory);
+            var inventories = _inventoryService.GetAllInventories(
+                sort,
+                direction,
+                itemId,
+                totalOnHand,
+                totalExpected,
+                totalOrdered,
+                totalAllocated,
+                totalAvailable);
+
+            return Ok(inventories);
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetInventoryById(int id)
