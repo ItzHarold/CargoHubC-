@@ -18,11 +18,12 @@ namespace Backend.Controllers.Contacts
         }
 
         [HttpGet]
-        public IActionResult GetAllContacts()
+        public IActionResult GetAllContacts([FromQuery] string? sort, [FromQuery] string? direction, [FromQuery] string? name, [FromQuery] string? phone, [FromQuery] string? email)
         {
-            var contacts = _contactService.GetAllContacts();
+            var contacts = _contactService.GetAllContacts(sort, direction, name, phone, email);
             return Ok(contacts);
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetContactById(int id)

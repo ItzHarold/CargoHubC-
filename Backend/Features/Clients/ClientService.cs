@@ -81,11 +81,7 @@ namespace Backend.Features.Clients
             // Return the filtered and sorted result as a list
             return query.ToList();
         }
-
-
-
-
-
+        
         public Client? GetClientById(int id)
         {
             return _dbContext.Clients?.Find(id);
