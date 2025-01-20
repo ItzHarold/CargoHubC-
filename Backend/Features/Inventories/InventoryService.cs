@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Backend.Features.InventoryLocations;
 using Backend.Infrastructure.Database;
 using Backend.Response;
 using FluentValidation;
@@ -61,12 +62,33 @@ namespace Backend.Features.Inventories
             _dbContext.Inventories?.Add(inventory);
             await _dbContext.SaveChangesAsync();
 
+            // Create InventoryLocation records for each location
+            if (inventoryRequest.LocationId != null && inventoryRequest.LocationId.Length > 0)
+            {
+                foreach (var locationId in inventoryRequest.LocationId)
+                {
+                    var inventoryLocation = new InventoryLocation
+                    {
+                        InventoryId = inventory.Id,
+                        LocationId = locationId,
+                        Amount = 0, // Set initial amount or distribute TotalOnHand across locations
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+
+                    _dbContext.InventoryLocations?.Add(inventoryLocation);
+                }
+
+                await _dbContext.SaveChangesAsync();
+            }
+
             return inventory.Id;
         }
 
         public async Task UpdateInventory(int id, InventoryRequest inventoryRequest)
         {
             var inventory = _dbContext.Inventories?.FirstOrDefault(i => i.Id == id);
+
             if (inventory == null)
             {
                 throw new KeyNotFoundException($"Inventory with ID {id} not found.");
@@ -83,6 +105,34 @@ namespace Backend.Features.Inventories
             inventory.TotalAvailable = inventoryRequest.TotalAvailable;
             inventory.UpdatedAt = DateTime.Now;
 
+            // Update InventoryLocation records
+            // Remove old locations that are no longer in the request
+            var locationsToRemove = inventory.InventoryLocations
+                .Where(il => !inventoryRequest.LocationId.Contains(il.LocationId))
+                .ToList();
+
+            foreach (var location in locationsToRemove)
+            {
+                _dbContext.InventoryLocations?.Remove(location);
+            }
+
+            // Add new locations
+            foreach (var locationId in inventoryRequest.LocationId)
+            {
+                if (!inventory.InventoryLocations.Any(il => il.LocationId == locationId))
+                {
+                    var inventoryLocation = new InventoryLocation
+                    {
+                        InventoryId = inventory.Id,
+                        LocationId = locationId,
+                        Amount = 0,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+
+                    _dbContext.InventoryLocations?.Add(inventoryLocation);
+                }
+            }
             _dbContext.Inventories?.Update(inventory);
             await _dbContext.SaveChangesAsync();
         }
