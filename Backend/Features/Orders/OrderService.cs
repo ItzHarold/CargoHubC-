@@ -91,6 +91,16 @@ namespace Backend.Features.Orders
             order.CreatedAt = DateTime.UtcNow;
             _dbContext?.Orders?.Add(order);
 
+            if (orderRequest.Items != null && orderRequest.Items.Count != 0)
+            {
+                order.OrderItems = orderRequest.Items.Select(i => new OrderItem
+                {
+                    ItemUid = i.ItemUid,
+                    Amount = i.Amount,
+                    OrderId = order.Id
+                }).ToList();
+            }
+
             if (_dbContext != null)
             {
                 await _dbContext.SaveChangesAsync();
@@ -119,7 +129,9 @@ namespace Backend.Features.Orders
                 return new List<Order>();
             }
             // Start with a base query for orders
-            IQueryable<Order> query = _dbContext.Orders.AsQueryable();
+            IQueryable<Order> query = _dbContext.Orders.
+            Include(o => o.OrderItems)
+            .AsQueryable();
 
             // Apply filtering based on the query parameters
             if (!string.IsNullOrEmpty(reference))
