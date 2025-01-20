@@ -12,7 +12,20 @@ namespace Backend.Features.Shipments
 {
     public interface IShipmentService
     {
-        IEnumerable<Shipment> GetAllShipments();
+        IEnumerable<Shipment> GetAllShipments(
+            string? sort,
+            string? direction,
+            int? sourceId,
+            DateTime? orderDate,
+            DateTime? requestDate,
+            DateTime? shipmentDate,
+            string? shipmentType,
+            string? shipmentStatus,
+            string? carrierCode,
+            string? paymentType,
+            string? transferMode,
+            int? totalPackageCount,
+            float? totalPackageWeight);
         Shipment? GetShipmentById(int id);
         Task<int> AddShipment(ShipmentRequest shipmentRequest);
         Task UpdateShipment(int id, ShipmentRequest request);
@@ -30,17 +43,134 @@ namespace Backend.Features.Shipments
             _validator = validator;
         }
 
-        public IEnumerable<Shipment> GetAllShipments()
+        public IEnumerable<Shipment> GetAllShipments(
+            string? sort,
+            string? direction,
+            int? sourceId,
+            DateTime? orderDate,
+            DateTime? requestDate,
+            DateTime? shipmentDate,
+            string? shipmentType,
+            string? shipmentStatus,
+            string? carrierCode,
+            string? paymentType,
+            string? transferMode,
+            int? totalPackageCount,
+            float? totalPackageWeight)
         {
-            if (_dbContext.Shipments != null)
+            if (_dbContext.Shipments == null)
             {
-                return _dbContext.Shipments
-                    .Include(s => s.ShipmentItems)
-                    .Include(s => s.ShipmentOrders)
-                    .ToList();
+                return new List<Shipment>();
             }
-            return new List<Shipment>();
+            var query = _dbContext.Shipments
+                .Include(s => s.ShipmentItems)
+                .Include(s => s.ShipmentOrders)
+                .AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (sourceId.HasValue)
+            {
+                query = query.Where(s => s.SourceId == sourceId);
+            }
+
+            if (orderDate.HasValue)
+            {
+                query = query.Where(s => s.OrderDate == orderDate);
+            }
+
+            if (requestDate.HasValue)
+            {
+                query = query.Where(s => s.RequestDate == requestDate);
+            }
+
+            if (shipmentDate.HasValue)
+            {
+                query = query.Where(s => s.ShipmentDate == shipmentDate);
+            }
+
+            if (!string.IsNullOrEmpty(shipmentType))
+            {
+                query = query.Where(s => s.ShipmentType.Contains(shipmentType));
+            }
+
+            if (!string.IsNullOrEmpty(shipmentStatus))
+            {
+                query = query.Where(s => s.ShipmentStatus!.Contains(shipmentStatus));
+            }
+
+            if (!string.IsNullOrEmpty(carrierCode))
+            {
+                query = query.Where(s => s.CarrierCode.Contains(carrierCode));
+            }
+
+            if (!string.IsNullOrEmpty(paymentType))
+            {
+                query = query.Where(s => s.PaymentType.Contains(paymentType));
+            }
+
+            if (!string.IsNullOrEmpty(transferMode))
+            {
+                query = query.Where(s => s.TransferMode.Contains(transferMode));
+            }
+
+            if (totalPackageCount.HasValue)
+            {
+                query = query.Where(s => s.TotalPackageCount == totalPackageCount);
+            }
+
+            if (totalPackageWeight.HasValue)
+            {
+                query = query.Where(s => s.TotalPackageWeight == totalPackageWeight);
+            }
+
+            // Apply sorting based on the sort and direction parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+               switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "source_id":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.SourceId) : query.OrderBy(s => s.SourceId);
+                        break;
+                    case "order_date":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.OrderDate) : query.OrderBy(s => s.OrderDate);
+                        break;
+                    case "request_date":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.RequestDate) : query.OrderBy(s => s.RequestDate);
+                        break;
+                    case "shipment_date":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.ShipmentDate) : query.OrderBy(s => s.ShipmentDate);
+                        break;
+                    case "shipment_type":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.ShipmentType) : query.OrderBy(s => s.ShipmentType);
+                        break;
+                    case "shipment_status":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.ShipmentStatus) : query.OrderBy(s => s.ShipmentStatus);
+                        break;
+                    case "carrier_code":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.CarrierCode) : query.OrderBy(s => s.CarrierCode);
+                        break;
+                    case "payment_type":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.PaymentType) : query.OrderBy(s => s.PaymentType);
+                        break;
+                    case "transfer_mode":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.TransferMode) : query.OrderBy(s => s.TransferMode);
+                        break;
+                    case "total_package_count":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.TotalPackageCount) : query.OrderBy(s => s.TotalPackageCount);
+                        break;
+                    case "total_package_weight":
+                        query = direction == "desc" ? query.OrderByDescending(s => s.TotalPackageWeight) : query.OrderBy(s => s.TotalPackageWeight);
+                        break;
+                    default:
+                        query = query.OrderBy(s => s.OrderDate); // Default sorting by `OrderDate`
+                        break;
+                }
+            }
+
+            // Execute and return the filtered and sorted query, including related entities
+            return query.ToList();
         }
+
 
         public Shipment? GetShipmentById(int id)
         {

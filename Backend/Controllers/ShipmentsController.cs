@@ -19,11 +19,41 @@ namespace Backend.Controllers.Shipments
             _shipmentService = shipmentService;
         }
 
-        [HttpGet]
-        public IEnumerable<Shipment> GetAllShipments()
+        [HttpGet(Name = "GetAllShipments")]
+        public IActionResult GetAllShipments(
+            string? sort,
+            string? direction,
+            int? sourceId,
+            DateTime? orderDate,
+            DateTime? requestDate,
+            DateTime? shipmentDate,
+            string? shipmentType,
+            string? shipmentStatus,
+            string? carrierCode,
+            string? paymentType,
+            string? transferMode,
+            int? totalPackageCount,
+            float? totalPackageWeight)
         {
-            return _shipmentService.GetAllShipments();
+            var shipments = _shipmentService.GetAllShipments(
+                sort,
+                direction,
+                sourceId,
+                orderDate,
+                requestDate,
+                shipmentDate,
+                shipmentType,
+                shipmentStatus,
+                carrierCode,
+                paymentType,
+                transferMode,
+                totalPackageCount,
+                totalPackageWeight
+            );
+
+            return Ok(shipments);
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetShipmentById(int id)

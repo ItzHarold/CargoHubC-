@@ -12,7 +12,16 @@ namespace Backend.Features.Orders
 {
     public interface IOrderService
     {
-        IEnumerable<Order> GetAllOrders();
+        IEnumerable<Order> GetAllOrders(
+            string? sort,
+            string? direction,
+            string? reference,
+            float? totalAmount,
+            float? totalDiscount,
+            float? totalTax,
+            float? totalSurcharge,
+            string? orderStatus,
+            int? warehouseId);
         Order? GetOrderById(int id);
         Task<int> AddOrder(OrderRequest orderRequest);
         Task UpdateOrder(int orderId, OrderRequest orderRequest);
@@ -94,16 +103,96 @@ namespace Backend.Features.Orders
             return order.Id;
         }
 
-
-
-        public IEnumerable<Order> GetAllOrders()
+        public IEnumerable<Order> GetAllOrders(
+            string? sort,
+            string? direction,
+            string? reference,
+            float? totalAmount,
+            float? totalDiscount,
+            float? totalTax,
+            float? totalSurcharge,
+            string? orderStatus,
+            int? warehouseId)
         {
-            if (_dbContext.Orders != null)
+            if (_dbContext.Orders == null)
             {
-                return _dbContext.Orders.ToList();
+                return new List<Order>();
             }
-            return new List<Order>();
+            // Start with a base query for orders
+            IQueryable<Order> query = _dbContext.Orders.AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (!string.IsNullOrEmpty(reference))
+            {
+                query = query.Where(o => o.Reference!.Contains(reference));
+            }
+
+            if (totalAmount.HasValue)
+            {
+                query = query.Where(o => o.TotalAmount == totalAmount);
+            }
+
+            if (totalDiscount.HasValue)
+            {
+                query = query.Where(o => o.TotalDiscount == totalDiscount);
+            }
+
+            if (totalTax.HasValue)
+            {
+                query = query.Where(o => o.TotalTax == totalTax);
+            }
+
+            if (totalSurcharge.HasValue)
+            {
+                query = query.Where(o => o.TotalSurcharge == totalSurcharge);
+            }
+
+            if (!string.IsNullOrEmpty(orderStatus))
+            {
+                query = query.Where(o => o.OrderStatus!.Contains(orderStatus));
+            }
+
+            if (warehouseId.HasValue)
+            {
+                query = query.Where(o => o.WarehouseId == warehouseId);
+            }
+
+            // Apply sorting based on the sort and direction parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "reference":
+                        query = direction == "desc" ? query.OrderByDescending(o => o.Reference) : query.OrderBy(o => o.Reference);
+                        break;
+                    case "totalamount":
+                        query = direction == "desc" ? query.OrderByDescending(o => o.TotalAmount) : query.OrderBy(o => o.TotalAmount);
+                        break;
+                    case "totaldiscount":
+                        query = direction == "desc" ? query.OrderByDescending(o => o.TotalDiscount) : query.OrderBy(o => o.TotalDiscount);
+                        break;
+                    case "totaltax":
+                        query = direction == "desc" ? query.OrderByDescending(o => o.TotalTax) : query.OrderBy(o => o.TotalTax);
+                        break;
+                    case "totalsurcharge":
+                        query = direction == "desc" ? query.OrderByDescending(o => o.TotalSurcharge) : query.OrderBy(o => o.TotalSurcharge);
+                        break;
+                    case "orderstatus":
+                        query = direction == "desc" ? query.OrderByDescending(o => o.OrderStatus) : query.OrderBy(o => o.OrderStatus);
+                        break;
+                    case "warehouseid":
+                        query = direction == "desc" ? query.OrderByDescending(o => o.WarehouseId) : query.OrderBy(o => o.WarehouseId);
+                        break;
+                    default:
+                        query = query.OrderBy(o => o.Reference); // Default sorting by `Reference`
+                        break;
+                }
+            }
+
+            // Return the filtered and sorted orders
+            return query.ToList();
         }
+
 
         public Order? GetOrderById(int id)
         {

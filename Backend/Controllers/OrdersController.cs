@@ -28,11 +28,33 @@ namespace Backend.Controllers.Orders
             return CreatedAtAction(nameof(GetOrderById), new { id = response.Id }, response);
         }
 
-        [HttpGet]
-        public IEnumerable<Order> GetAllOrders()
+        [HttpGet(Name = "GetAllOrders")]
+        public IActionResult GetAllOrders(
+            string? sort,
+            string? direction,
+            string? reference,
+            float? totalAmount,
+            float? totalDiscount,
+            float? totalTax,
+            float? totalSurcharge,
+            string? orderStatus,
+            int? warehouseId)
         {
-            return _orderService.GetAllOrders();
+            var orders = _orderService.GetAllOrders(
+                sort,
+                direction,
+                reference,
+                totalAmount,
+                totalDiscount,
+                totalTax,
+                totalSurcharge,
+                orderStatus,
+                warehouseId
+            );
+
+            return Ok(orders);
         }
+
 
         [HttpGet("{id}")]
         public Order? GetOrderById(int id)
