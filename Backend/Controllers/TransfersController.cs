@@ -153,5 +153,29 @@ namespace Backend.Controllers.Transfers
 
             return Ok(items);
         }
+
+        [HttpPost("{id}/commit")]
+        public IActionResult CommitTransfer(int id)
+        {
+            try
+            {
+                // Call the service method to commit the transfer
+                _transferService.CommitTransfer(id);
+
+                return NoContent();  // Return 204 No Content for successful commit
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }

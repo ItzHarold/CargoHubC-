@@ -22,6 +22,7 @@ namespace Backend.Features.Transfers
         void AddTransfer(TransferRequest transferRequest);
         Task UpdateTransfer(int id, TransferRequest request);
         void DeleteTransfer(int id);
+        void CommitTransfer(int id);
     }
 
     public class TransferService : ITransferService
@@ -256,6 +257,35 @@ namespace Backend.Features.Transfers
                 _dbContext.Transfers?.Remove(transfer);
                 _dbContext.SaveChanges();
             }
+        }
+
+        public void CommitTransfer(int id)
+        {
+            // Fetch the transfer by ID
+            var transfer = _dbContext.Transfers?.FirstOrDefault(t => t.Id == id);
+
+            if (transfer == null)
+            {
+                throw new KeyNotFoundException($"Transfer with ID {id} not found.");
+            }
+
+            // Check if the transfer is already committed or canceled
+            if (transfer.TransferStatus == "Committed")
+            {
+                throw new InvalidOperationException("Transfer is already committed.");
+            }
+
+            // If transfer is in a valid state (e.g., "Pending"), commit it
+            if (transfer.TransferStatus != "Pending")
+            {
+                throw new InvalidOperationException("Transfer cannot be committed as it is not in a 'Pending' state.");
+            }
+
+            // Update the status to "Committed"
+            transfer.TransferStatus = "Committed";
+
+            // Save the changes to the database
+            _dbContext.SaveChanges();
         }
     }
 }
