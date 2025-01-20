@@ -19,12 +19,28 @@ namespace Backend.Controllers.Locations
             _locationService = locationService;
         }
 
-        [HttpGet]
-        public IActionResult GetAllLocations()
+        [HttpGet(Name = "GetAllLocations")]
+        public IActionResult GetAllLocations(
+            string? sort,
+            string? direction,
+            int? warehouseId,
+            string? code,
+            string? row,
+            string? rack,
+            string? shelf)
         {
-            var locations = _locationService.GetAllLocations();
+            var locations = _locationService.GetAllLocations(
+                sort, 
+                direction, 
+                warehouseId, 
+                code, 
+                row, 
+                rack, 
+                shelf);
+
             return Ok(locations);
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetLocationById(int id)

@@ -9,7 +9,14 @@ namespace Backend.Features.Locations
 {
     public interface ILocationService
     {
-        IEnumerable<Location> GetAllLocations();
+        IEnumerable<Location> GetAllLocations(
+            string? sort,
+            string? direction,
+            int? warehouseId,
+            string? code,
+            string? row,
+            string? rack,
+            string? shelf);
         Location? GetLocationById(int id);
         Task<Location> AddLocation(LocationRequest locationRequest);
         Task UpdateLocation(int id, LocationRequest locationRequest);
@@ -27,14 +34,78 @@ namespace Backend.Features.Locations
             _validator = validator;
         }
 
-        public IEnumerable<Location> GetAllLocations()
+        public IEnumerable<Location> GetAllLocations(
+            string? sort,
+            string? direction,
+            int? warehouseId,
+            string? code,
+            string? row,
+            string? rack,
+            string? shelf)
         {
-            if (_dbContext.Locations != null)
+            if (_dbContext.Locations == null)
             {
-                return _dbContext.Locations.ToList();
+                return new List<Location>();
             }
-            return new List<Location>();
+            // Start with a base query for locations
+            var query = _dbContext.Locations.AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (warehouseId.HasValue)
+            {
+                query = query.Where(l => l.WarehouseId == warehouseId);
+            }
+
+            if (!string.IsNullOrEmpty(code))
+            {
+                query = query.Where(l => l.Code.Contains(code));
+            }
+
+            if (!string.IsNullOrEmpty(row))
+            {
+                query = query.Where(l => l.Row.Contains(row));
+            }
+
+            if (!string.IsNullOrEmpty(rack))
+            {
+                query = query.Where(l => l.Rack.Contains(rack));
+            }
+
+            if (!string.IsNullOrEmpty(shelf))
+            {
+                query = query.Where(l => l.Shelf.Contains(shelf));
+            }
+
+            // Apply sorting based on the sort and direction parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "warehouse_id":
+                        query = direction == "desc" ? query.OrderByDescending(l => l.WarehouseId) : query.OrderBy(l => l.WarehouseId);
+                        break;
+                    case "code":
+                        query = direction == "desc" ? query.OrderByDescending(l => l.Code) : query.OrderBy(l => l.Code);
+                        break;
+                    case "row":
+                        query = direction == "desc" ? query.OrderByDescending(l => l.Row) : query.OrderBy(l => l.Row);
+                        break;
+                    case "rack":
+                        query = direction == "desc" ? query.OrderByDescending(l => l.Rack) : query.OrderBy(l => l.Rack);
+                        break;
+                    case "shelf":
+                        query = direction == "desc" ? query.OrderByDescending(l => l.Shelf) : query.OrderBy(l => l.Shelf);
+                        break;
+                    default:
+                        query = query.OrderBy(l => l.Code); // Default sorting by `code`
+                        break;
+                }
+            }
+
+            // Return the filtered and sorted locations
+            return query.ToList();
         }
+
 
         public Location? GetLocationById(int id)
         {
