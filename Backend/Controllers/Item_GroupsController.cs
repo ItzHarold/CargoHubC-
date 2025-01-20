@@ -20,9 +20,13 @@ namespace Backend.Controllers.ItemGroupsController
         }
 
         [HttpGet]
-        public IActionResult GetAllItemGroups()
+        public IActionResult GetAllItemGroups(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description)
         {
-            var itemGroups = _itemGroupService.GetAllItemGroups();
+            var itemGroups = _itemGroupService.GetAllItemGroups(sort, direction, name, description);
             return Ok(itemGroups);
         }
 

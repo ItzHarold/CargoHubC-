@@ -9,7 +9,11 @@ namespace Backend.Features.ItemGroups
 {
     public interface IItemGroupService
     {
-        IEnumerable<ItemGroup> GetAllItemGroups();
+        IEnumerable<ItemGroup> GetAllItemGroups(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description);
         ItemGroup? GetItemGroupById(int id);
         Task<int> AddItemGroup(ItemGroupRequest itemGroupRequest);
         Task UpdateItemGroup(ItemGroup itemGroup);
@@ -27,14 +31,51 @@ namespace Backend.Features.ItemGroups
             _validator = validator;
         }
 
-        public IEnumerable<ItemGroup> GetAllItemGroups()
+        public IEnumerable<ItemGroup> GetAllItemGroups(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description)
         {
-            if (_dbContext.ItemGroups != null)
+            if (_dbContext.ItemGroups == null)
             {
-                return _dbContext.ItemGroups.ToList();
+                return new List<ItemGroup>();
             }
-            return new List<ItemGroup>();
+            IQueryable<ItemGroup> query = _dbContext.ItemGroups.AsQueryable();
+
+            // Apply filtering based on query parameters
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(i => i.Name.Contains(name));
+            }
+
+            if (!string.IsNullOrEmpty(description))
+            {
+                query = query.Where(i => i.Description!.Contains(description));
+            }
+
+            // Apply sorting based on the query parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "name":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.Name) : query.OrderBy(i => i.Name);
+                        break;
+                    case "description":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.Description) : query.OrderBy(i => i.Description);
+                        break;
+                    default:
+                        // Default sorting behavior (by Name)
+                        query = query.OrderBy(i => i.Name);
+                        break;
+                }
+            }
+
+            // Return the filtered and sorted list
+            return query.ToList();
         }
+
 
         public ItemGroup? GetItemGroupById(int id)
         {
