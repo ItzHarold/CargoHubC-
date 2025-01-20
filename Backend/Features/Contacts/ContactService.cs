@@ -82,8 +82,6 @@ namespace Backend.Features.Contacts
 
         public async Task AddContact(Contact contact)
         {
-            //
-
             _dbContext.Contacts?.Add(contact);
             await _dbContext.SaveChangesAsync();
         }

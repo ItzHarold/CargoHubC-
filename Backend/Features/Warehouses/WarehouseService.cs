@@ -143,13 +143,14 @@ namespace Backend.Features.Warehouses
 
         public async Task<int> AddWarehouse(WarehouseRequest warehouseRequest)
         {
+            // Validate the request (optional, you can enable the validation as per your need)
             // var validationResult = await _validator.ValidateAsync(warehouse);
-
             // if (!validationResult.IsValid)
             // {
             //     throw new ValidationException(validationResult.Errors);
             // }
 
+            // Create the Warehouse object
             var warehouse = new Warehouse()
             {
                 Code = warehouseRequest.Code,
@@ -159,22 +160,46 @@ namespace Backend.Features.Warehouses
                 City = warehouseRequest.City,
                 Province = warehouseRequest.Province,
                 Country = warehouseRequest.Country,
-                WarehouseContacts = warehouseRequest.Contacts.Select(c => new WarehouseContact
-                {
-                    Contact = new Contact {
-                        ContactName = c.ContactName,
-                        ContactEmail = c.ContactEmail,
-                        ContactPhone = c.ContactPhone
-                    }
-                }).ToList()
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
-            warehouse.CreatedAt = DateTime.Now;
-            warehouse.UpdatedAt = warehouse.CreatedAt;
 
+            // Link existing contacts to the warehouse
+            warehouse.WarehouseContacts = new List<WarehouseContact>();
+            if (_dbContext.Contacts != null) // Check if Contacts DbSet is not null
+            {
+                foreach (var contactRequest in warehouseRequest.Contacts)
+                {
+                    // Look for an existing contact by a unique identifier (e.g., ContactId, ContactEmail)
+                    var existingContact = await _dbContext.Contacts
+                        .FirstOrDefaultAsync(c => c.ContactEmail == contactRequest.ContactEmail); // Or use ContactId if preferred
+
+                    if (existingContact != null)
+                    {
+                        // If the contact exists, link it to the warehouse contact
+                        warehouse.WarehouseContacts.Add(new WarehouseContact
+                        {
+                            Contact = existingContact
+                        });
+                    }
+                    else
+                    {
+                        throw new KeyNotFoundException($"Contact Name {contactRequest.ContactName} not found. Please ensure the contact exists in the system.");
+                    }
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Contacts DbSet is not initialized.");
+            }
+
+            // Add the warehouse to the context and save changes
             _dbContext.Warehouses?.Add(warehouse);
             await _dbContext.SaveChangesAsync();
+
             return warehouse.Id;
         }
+
 
         public async Task UpdateWarehouse(int id, WarehouseRequest request)
         {
