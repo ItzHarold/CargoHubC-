@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Backend.Features.Items;
 using Backend.Features.ShimpentItems;
+using Backend.Features.Orders;
 using Backend.Features.ShipmentOrders;
 using Backend.Features.Contacts;
 
@@ -66,10 +67,11 @@ namespace Backend.Features.Shipments
         [JsonPropertyName("total_package_weight")]
         public float? TotalPackageWeight { get; set; }
 
+        // Navigation properties
         [JsonPropertyName("shipment_orders")]
-        public ICollection<ShipmentOrder>? ShipmentOrders { get; } = new List<ShipmentOrder>();
+        public virtual ICollection<ShipmentOrder> ShipmentOrders { get; set; } = new List<ShipmentOrder>();
 
         [JsonPropertyName("shipment_items")]
-        public ICollection<ShipmentItem> ShipmentItems { get; } = new List<ShipmentItem>();
+        public virtual ICollection<ShipmentItem> ShipmentItems { get; set; } = new List<ShipmentItem>();
     }
 }

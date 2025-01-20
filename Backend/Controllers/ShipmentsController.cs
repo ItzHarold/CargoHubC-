@@ -19,6 +19,7 @@ namespace Backend.Controllers.Shipments
             _shipmentService = shipmentService;
         }
 
+
         [HttpGet(Name = "GetAllShipments")]
         public IActionResult GetAllShipments(
             string? sort,
@@ -127,6 +128,7 @@ namespace Backend.Controllers.Shipments
         {
             _shipmentService.DeleteShipment(id);
         }
+
     }
 
 }

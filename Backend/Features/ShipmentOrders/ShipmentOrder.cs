@@ -14,16 +14,18 @@ namespace Backend.Features.ShipmentOrders
         [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [ForeignKey("Shipments")]
-        [JsonPropertyName("shipmentId")]
-        public required int shipmentId { get; set; }
+        [Required]
+        [ForeignKey("Shipment")]
+        [JsonPropertyName("shipment_id")]
+        public int ShipmentId { get; set; }
 
-        [ForeignKey("Orders")]
+        [Required]
+        [ForeignKey("Order")]
         [JsonPropertyName("order_id")]
-        public required int orderId { get; set; }
+        public int OrderId { get; set; }
 
-        public Order? order { get; set; } = null!;
-        public Shipment? shipment { get; set; } = null!;
-
+        // Navigation properties
+        public virtual Order Order { get; set; } = null!;
+        public virtual Shipment Shipment { get; set; } = null!;
     }
 }

@@ -6,6 +6,7 @@ using Backend.Features.Contacts;
 using Backend.Features.Items;
 using Backend.Features.OrderItems;
 using Backend.Features.ShipmentOrders;
+using Backend.Features.Shipments;
 using Backend.Features.Suppliers;
 using Backend.Features.Warehouses;
 
@@ -19,25 +20,35 @@ namespace Backend.Features.Orders
         [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonPropertyName("request_date")] public DateTime? RequestDate { get; set; }
+        [JsonPropertyName("request_date")]
+        public DateTime? RequestDate { get; set; }
 
-        [JsonPropertyName("reference")] public string? Reference { get; set; }
+        [JsonPropertyName("reference")]
+        public string? Reference { get; set; }
 
-        [JsonPropertyName("reference_extra")] public string? ReferenceExtra { get; set; }
+        [JsonPropertyName("reference_extra")]
+        public string? ReferenceExtra { get; set; }
 
-        [JsonPropertyName("notes")] public string? Notes { get; set; }
+        [JsonPropertyName("notes")]
+        public string? Notes { get; set; }
 
-        [JsonPropertyName("shipping_notes")] public string? ShippingNotes { get; set; }
+        [JsonPropertyName("shipping_notes")]
+        public string? ShippingNotes { get; set; }
 
-        [JsonPropertyName("picking_notes")] public string? PickingNotes { get; set; }
+        [JsonPropertyName("picking_notes")]
+        public string? PickingNotes { get; set; }
 
-        [JsonPropertyName("total_amount")] public float TotalAmount { get; set; }
+        [JsonPropertyName("total_amount")]
+        public float TotalAmount { get; set; }
 
-        [JsonPropertyName("total_discount")] public float? TotalDiscount { get; set; }
+        [JsonPropertyName("total_discount")]
+        public float? TotalDiscount { get; set; }
 
-        [JsonPropertyName("total_tax")] public float? TotalTax { get; set; }
+        [JsonPropertyName("total_tax")]
+        public float? TotalTax { get; set; }
 
-        [JsonPropertyName("total_surcharge")] public float? TotalSurcharge { get; set; }
+        [JsonPropertyName("total_surcharge")]
+        public float? TotalSurcharge { get; set; }
 
         [Required]
         [JsonPropertyName("order_status")]
@@ -51,15 +62,12 @@ namespace Backend.Features.Orders
         [ForeignKey("Warehouse")]
         [JsonPropertyName("warehouse_id")]
         public int? WarehouseId { get; set; }
-
         public Warehouse Warehouse { get; set; } = null!;
 
         [Required]
         [ForeignKey("Contact")]
         [JsonPropertyName("source_id")]
         public int? SourceId { get; set; }
-
-        // Navigation property for the supplier contact
         public Contact? Contact { get; set; }
 
         public int? ShipToClientId { get; set; }
@@ -68,9 +76,12 @@ namespace Backend.Features.Orders
         public int? BillToClientId { get; set; }
         public Client? BillTo { get; set; }
 
+        // Navigation properties
+        [JsonPropertyName("order_items")]
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
-        [JsonPropertyName("order_items")] public ICollection<OrderItem>? OrderItems { get; set; } = [];
+        [JsonPropertyName("shipment_orders")]
+        public virtual ICollection<ShipmentOrder> ShipmentOrders { get; set; } = new List<ShipmentOrder>();
 
-        [JsonPropertyName("shipment_orders")] public ICollection<ShipmentOrder>? shipmentOrders { get; } = [];
     }
 }
