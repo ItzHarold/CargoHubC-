@@ -18,11 +18,27 @@ namespace Backend.Controllers.Transfers
             _transferService = transferService;
         }
 
-        [HttpGet]
-        public IEnumerable<Transfer> GetAllTransfers()
+        [HttpGet(Name = "GetAllTransfers")]
+        public IActionResult GetAllTransfers(
+            string? sort,
+            string? direction,
+            string? reference,
+            string? transferStatus,
+            int? transferToLocationId,
+            int? transferFromLocationId)
         {
-            return _transferService.GetAllTransfers();
+            var transfers = _transferService.GetAllTransfers(
+                sort,
+                direction,
+                reference,
+                transferStatus,
+                transferToLocationId,
+                transferFromLocationId
+            );
+
+            return Ok(transfers);
         }
+
 
         [HttpPost]
         public IActionResult AddTransfer([FromBody] TransferRequest transferRequest)
@@ -47,9 +63,6 @@ namespace Backend.Controllers.Transfers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-
-
-
 
         [HttpGet("{id}")]
         public IActionResult GetTransferById(int id)

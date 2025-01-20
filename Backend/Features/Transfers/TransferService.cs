@@ -11,7 +11,13 @@ namespace Backend.Features.Transfers
 {
     public interface ITransferService
     {
-        IEnumerable<Transfer> GetAllTransfers();
+        IEnumerable<Transfer> GetAllTransfers(
+            string? sort,
+            string? direction,
+            string? reference,
+            string? transferStatus,
+            int? transferToLocationId,
+            int? transferFromLocationId);
         Transfer? GetTransferById(int id);
         void AddTransfer(TransferRequest transferRequest);
         Task UpdateTransfer(int id, TransferRequest request);
@@ -31,18 +37,73 @@ namespace Backend.Features.Transfers
             _validator = validator;
         }
 
-        public IEnumerable<Transfer> GetAllTransfers()
+        public IEnumerable<Transfer> GetAllTransfers(
+            string? sort,
+            string? direction,
+            string? reference,
+            string? transferStatus,
+            int? transferToLocationId,
+            int? transferFromLocationId)
         {
-            if (_dbContext.Transfers != null)
+            if (_dbContext.Transfers == null)
             {
-                return _dbContext.Transfers
-                    .Include(t => t.TransferItems)  // Include related TransferItems
-                    .Include(t => t.TransferFrom)   // Include related TransferFrom (Location)
-                    .Include(t => t.TransferTo)     // Include related TransferTo (Location)
-                    .ToList();
+                return new List<Transfer>();
             }
-            return new List<Transfer>();
+            // Start with a base query for transfers, including related transfer items and locations
+            var query = _dbContext.Transfers
+                .Include(t => t.TransferItems)  // Include related TransferItems collection
+                .Include(t => t.TransferFrom)   // Include related TransferFrom (Location)
+                .Include(t => t.TransferTo)     // Include related TransferTo (Location)
+                .AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (!string.IsNullOrEmpty(reference))
+            {
+                query = query.Where(t => t.Reference!.Contains(reference));
+            }
+
+            if (!string.IsNullOrEmpty(transferStatus))
+            {
+                query = query.Where(t => t.TransferStatus!.Contains(transferStatus));
+            }
+
+            if (transferToLocationId.HasValue)
+            {
+                query = query.Where(t => t.TransferToLocationId == transferToLocationId);
+            }
+
+            if (transferFromLocationId.HasValue)
+            {
+                query = query.Where(t => t.TransferFromLocationId == transferFromLocationId);
+            }
+
+            // Apply sorting based on the sort and direction parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+            switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "reference":
+                        query = direction == "desc" ? query.OrderByDescending(t => t.Reference) : query.OrderBy(t => t.Reference);
+                        break;
+                    case "transferstatus":
+                        query = direction == "desc" ? query.OrderByDescending(t => t.TransferStatus) : query.OrderBy(t => t.TransferStatus);
+                        break;
+                    case "transfertolocationid":
+                        query = direction == "desc" ? query.OrderByDescending(t => t.TransferToLocationId) : query.OrderBy(t => t.TransferToLocationId);
+                        break;
+                    case "transferfromlocationid":
+                        query = direction == "desc" ? query.OrderByDescending(t => t.TransferFromLocationId) : query.OrderBy(t => t.TransferFromLocationId);
+                        break;
+                    default:
+                        query = query.OrderBy(t => t.Reference); // Default sorting by `Reference`
+                        break;
+                }
+            }
+
+            // Execute and return the filtered and sorted query, including related TransferItems, TransferFrom and TransferTo
+            return query.ToList();
         }
+
 
 
         public void AddTransfer(TransferRequest transferRequest)
