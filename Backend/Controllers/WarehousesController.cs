@@ -18,11 +18,33 @@ namespace Backend.Controllers.Warehouses
             _warehouseService = warehouseService;
         }
 
-        [HttpGet]
-        public IEnumerable<Warehouse> GetAllWarehouses()
+        [HttpGet(Name = "GetAllWarehouses")]
+        public IActionResult GetAllWarehouses(
+            string? sort,
+            string? direction,
+            string? code,
+            string? name,
+            string? address,
+            string? zip,
+            string? city,
+            string? province,
+            string? country)
         {
-            return _warehouseService.GetAllWarehouses();
+            var warehouses = _warehouseService.GetAllWarehouses(
+                sort,
+                direction,
+                code,
+                name,
+                address,
+                zip,
+                city,
+                province,
+                country
+            );
+
+            return Ok(warehouses);
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetWarehouseById(int id)

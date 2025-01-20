@@ -12,7 +12,16 @@ namespace Backend.Features.Warehouses
 {
     public interface IWarehouseService
     {
-        IEnumerable<Warehouse> GetAllWarehouses();
+        IEnumerable<Warehouse> GetAllWarehouses(
+            string? sort,
+            string? direction,
+            string? code,
+            string? name,
+            string? address,
+            string? zip,
+            string? city,
+            string? province,
+            string? country);
         Warehouse? GetWarehouseById(int id);
         Task<int> AddWarehouse(WarehouseRequest warehouseRequest);
         Task UpdateWarehouse(int id, WarehouseRequest request);
@@ -29,18 +38,99 @@ namespace Backend.Features.Warehouses
             _validator = validator;
         }
 
-        public IEnumerable<Warehouse> GetAllWarehouses()
+        public IEnumerable<Warehouse> GetAllWarehouses(
+            string? sort,
+            string? direction,
+            string? code,
+            string? name,
+            string? address,
+            string? zip,
+            string? city,
+            string? province,
+            string? country)
         {
-            if (_dbContext.Warehouses != null)
+            if (_dbContext.Warehouses == null)
             {
-                // Include WarehouseContacts and optionally Contact information
-                return _dbContext.Warehouses
-                    .Include(w => w.WarehouseContacts)    // Include WarehouseContacts
-                    .ThenInclude(wc => wc.Contact)       // Optionally include Contact if needed
-                    .ToList();
+                return new List<Warehouse>();
             }
-            return new List<Warehouse>();
+            // Start with a base query for warehouses, including related WarehouseContacts and Contact
+            var query = _dbContext.Warehouses
+                .Include(w => w.WarehouseContacts)    // Include related WarehouseContacts collection
+                .ThenInclude(wc => wc.Contact)       // Include related Contact for each WarehouseContact
+                .AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (!string.IsNullOrEmpty(code))
+            {
+                query = query.Where(w => w.Code.Contains(code));
+            }
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(w => w.Name.Contains(name));
+            }
+
+            if (!string.IsNullOrEmpty(address))
+            {
+                query = query.Where(w => w.Address.Contains(address));
+            }
+
+            if (!string.IsNullOrEmpty(zip))
+            {
+                query = query.Where(w => w.Zip.Contains(zip));
+            }
+
+            if (!string.IsNullOrEmpty(city))
+            {
+                query = query.Where(w => w.City.Contains(city));
+            }
+
+            if (!string.IsNullOrEmpty(province))
+            {
+                query = query.Where(w => w.Province.Contains(province));
+            }
+
+            if (!string.IsNullOrEmpty(country))
+            {
+                query = query.Where(w => w.Country.Contains(country));
+            }
+
+            // Apply sorting based on the sort and direction parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+            switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "code":
+                        query = direction == "desc" ? query.OrderByDescending(w => w.Code) : query.OrderBy(w => w.Code);
+                        break;
+                    case "name":
+                        query = direction == "desc" ? query.OrderByDescending(w => w.Name) : query.OrderBy(w => w.Name);
+                        break;
+                    case "address":
+                        query = direction == "desc" ? query.OrderByDescending(w => w.Address) : query.OrderBy(w => w.Address);
+                        break;
+                    case "zip":
+                        query = direction == "desc" ? query.OrderByDescending(w => w.Zip) : query.OrderBy(w => w.Zip);
+                        break;
+                    case "city":
+                        query = direction == "desc" ? query.OrderByDescending(w => w.City) : query.OrderBy(w => w.City);
+                        break;
+                    case "province":
+                        query = direction == "desc" ? query.OrderByDescending(w => w.Province) : query.OrderBy(w => w.Province);
+                        break;
+                    case "country":
+                        query = direction == "desc" ? query.OrderByDescending(w => w.Country) : query.OrderBy(w => w.Country);
+                        break;
+                    default:
+                        query = query.OrderBy(w => w.Code); // Default sorting by `Code`
+                        break;
+                }
+            }
+
+            // Execute and return the filtered and sorted query, including related WarehouseContacts and Contacts
+            return query.ToList();
         }
+
 
 
         public Warehouse? GetWarehouseById(int id)
