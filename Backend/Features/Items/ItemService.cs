@@ -8,7 +8,15 @@ namespace Backend.Features.Items
 {
     public interface IItemService
     {
-        IEnumerable<Item> GetAllItems();
+        IEnumerable<Item> GetAllItems(
+            string? sort,
+            string? direction,
+            string? code,
+            string? supplierPartNumber,
+            int? supplierId,
+            string? commodityCode,
+            string? supplierCode,
+            string? modelNumber);
         Item? GetItemById(string uid);
         void AddItem(ItemRequest itemRequest);
         void UpdateItem(string uid, ItemRequest itemRequest);
@@ -27,14 +35,87 @@ namespace Backend.Features.Items
             _dbContext = dbContext;
         }
 
-        public IEnumerable<Item> GetAllItems()
+        public IEnumerable<Item> GetAllItems(
+            string? sort,
+            string? direction,
+            string? code,
+            string? supplierPartNumber,
+            int? supplierId,
+            string? commodityCode,
+            string? supplierCode,
+            string? modelNumber)
         {
-            if (_dbContext.Items != null)
+            if (_dbContext.Items == null)
             {
-                return _dbContext.Items.ToList();
+                return new List<Item>();
             }
-            return new List<Item>();
+            IQueryable<Item> query = _dbContext.Items.AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (!string.IsNullOrEmpty(code))
+            {
+                query = query.Where(i => i.Code.Contains(code));
+            }
+
+            if (!string.IsNullOrEmpty(supplierPartNumber))
+            {
+                query = query.Where(i => i.SupplierPartNumber.Contains(supplierPartNumber));
+            }
+
+            if (supplierId.HasValue)
+            {
+                query = query.Where(i => i.SupplierId == supplierId);
+            }
+
+            if (!string.IsNullOrEmpty(commodityCode))
+            {
+                query = query.Where(i => i.CommodityCode!.Contains(commodityCode));
+            }
+
+            if (!string.IsNullOrEmpty(supplierCode))
+            {
+                query = query.Where(i => i.SupplierCode!.Contains(supplierCode));
+            }
+
+            if (!string.IsNullOrEmpty(modelNumber))
+            {
+                query = query.Where(i => i.ModelNumber!.Contains(modelNumber));
+            }
+
+            // Apply sorting based on the query parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "code":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.Code) : query.OrderBy(i => i.Code);
+                        break;
+                    case "supplierpartnumber":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.SupplierPartNumber) : query.OrderBy(i => i.SupplierPartNumber);
+                        break;
+                    case "supplierid":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.SupplierId) : query.OrderBy(i => i.SupplierId);
+                        break;
+                    case "commoditycode":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.CommodityCode) : query.OrderBy(i => i.CommodityCode);
+                        break;
+                    case "suppliercode":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.SupplierCode) : query.OrderBy(i => i.SupplierCode);
+                        break;
+                    case "modelnumber":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.ModelNumber) : query.OrderBy(i => i.ModelNumber);
+                        break;
+                    default:
+                        // Default sorting behavior (by Code)
+                        query = query.OrderBy(i => i.Code);
+                        break;
+                }
+            }
+
+            // Return the filtered and sorted list
+            return query.ToList();
         }
+
 
         public Item? GetItemById(string uid)
         {

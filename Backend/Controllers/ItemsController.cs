@@ -58,10 +58,29 @@ namespace Backend.Controllers.Items
         }
 
         [HttpGet(Name = "GetAllItems")]
-        public IActionResult GetAllItems()
+        public IActionResult GetAllItems(
+            string? sort,
+            string? direction,
+            string? code,
+            string? supplierPartNumber,
+            int? supplierId,
+            string? commodityCode,
+            string? supplierCode,
+            string? modelNumber)
         {
-            return Ok(_service.GetAllItems());
+            var items = _service.GetAllItems(
+                sort, 
+                direction, 
+                code, 
+                supplierPartNumber, 
+                supplierId, 
+                commodityCode, 
+                supplierCode, 
+                modelNumber);
+
+            return Ok(items);
         }
+
 
         [HttpDelete("{uid}", Name = "DeleteItem")]
         public IActionResult DeleteItem(string uid)
