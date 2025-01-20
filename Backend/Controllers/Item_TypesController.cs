@@ -18,9 +18,14 @@ namespace Backend.Controllers.ItemTypes
         }
 
         [HttpGet]
-        public IActionResult GetAllItemTypes()
+        public IActionResult GetAllItemTypes(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description)
         {
-            return Ok(_itemTypeService.GetAllItemTypes());
+            var itemGroups = _itemTypeService.GetAllItemTypes(sort, direction, name, description);
+            return Ok(itemGroups);
         }
 
         [HttpGet("{id}")]

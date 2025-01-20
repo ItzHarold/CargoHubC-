@@ -8,7 +8,11 @@ namespace Backend.Features.ItemTypes
 {
     public interface IItemTypeService
     {
-        IEnumerable<ItemType> GetAllItemTypes();
+        IEnumerable<ItemType> GetAllItemTypes(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description);
         ItemType? GetItemTypeById(int id);
         Task<int> AddItemType(ItemTypeRequest itemTypeRequest);
         Task UpdateItemType(ItemType itemType);
@@ -26,15 +30,49 @@ namespace Backend.Features.ItemTypes
             _validator = validator;
         }
 
-        public IEnumerable<ItemType> GetAllItemTypes()
+         public IEnumerable<ItemType> GetAllItemTypes(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description)
         {
-            if (_dbContext.ItemTypes != null)
+            if (_dbContext.ItemTypes == null)
             {
-                return _dbContext.ItemTypes.ToList();
+                return new List<ItemType>();
             }
-            return new List<ItemType>();
-        }
+            IQueryable<ItemType> query = _dbContext.ItemTypes.AsQueryable();
 
+            // Apply filtering based on query parameters
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(i => i.Name.Contains(name));
+            }
+
+            if (!string.IsNullOrEmpty(description))
+            {
+                query = query.Where(i => i.Description!.Contains(description));
+            }
+
+            // Apply sorting based on the query parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "name":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.Name) : query.OrderBy(i => i.Name);
+                        break;
+                    case "description":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.Description) : query.OrderBy(i => i.Description);
+                        break;
+                    default:
+                        // Default sorting behavior (by Name)
+                        query = query.OrderBy(i => i.Name);
+                        break;
+                }
+            }
+            // Return the filtered and sorted list
+            return query.ToList();
+        }
         public ItemType? GetItemTypeById(int id)
         {
             return _dbContext.ItemTypes?.Find(id);
