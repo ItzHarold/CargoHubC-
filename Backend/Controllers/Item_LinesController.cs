@@ -17,9 +17,14 @@ namespace Backend.Controllers.ItemLines
         }
 
         [HttpGet]
-        public IActionResult GetItemLines()
+        public IActionResult GetAllItemLines(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description)
         {
-            return Ok(_itemLineservice.GetAllItemLines());
+            var itemGroups = _itemLineservice.GetAllItemLines(sort, direction, name, description);
+            return Ok(itemGroups);
         }
 
         [HttpGet("{id}")]
