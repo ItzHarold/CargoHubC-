@@ -43,25 +43,29 @@ namespace Backend.Features.Clients
             RuleFor(client => client.ContactPhone)
                 .NotNull().WithMessage("Contact Phone is required.")
                 .NotEmpty().WithMessage("Contact Phone cannot be empty.")
-                .MustAsync(async (phone, cancellationToken) => await IsUniquePhone(phone))
+                .MustAsync(async (client, phone, cancellationToken) => await IsUniquePhone(client, phone))
                 .WithMessage("Contact Phone must be unique.");
 
             RuleFor(client => client.ContactEmail)
                 .NotNull().WithMessage("Contact Email is required.")
                 .NotEmpty().WithMessage("Contact Email cannot be empty.")
                 .EmailAddress().WithMessage("Contact Email must be a valid email address.")
-                .MustAsync(async (email, cancellationToken) => await IsUniqueEmail(email))
+                .MustAsync(async (client, email, cancellationToken) => await IsUniqueEmail(client, email))
                 .WithMessage("Contact Email must be unique.");
         }
 
-        private async Task<bool> IsUniquePhone(string phone)
+        private async Task<bool> IsUniquePhone(Client client, string phone)
         {
-            return !await _dbContext.Set<Client>().AnyAsync(c => c.ContactPhone == phone);
+            return !await _dbContext.Set<Client>()
+                .Where(c => c.Id != client.Id) // Exclude current client
+                .AnyAsync(c => c.ContactPhone == phone);
         }
 
-        private async Task<bool> IsUniqueEmail(string email)
+        private async Task<bool> IsUniqueEmail(Client client, string email)
         {
-            return !await _dbContext.Set<Client>().AnyAsync(c => c.ContactEmail == email);
+            return !await _dbContext.Set<Client>()
+                .Where(c => c.Id != client.Id) // Exclude current client
+                .AnyAsync(c => c.ContactEmail == email);
         }
     }
 }
