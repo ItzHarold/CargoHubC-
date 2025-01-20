@@ -18,12 +18,39 @@ namespace Backend.Controllers.Suppliers
             _supplierService = supplierService;
         }
 
-        [HttpGet]
-        public IActionResult GetAllSuppliers()
+        [HttpGet(Name = "GetAllSuppliers")]
+        public IActionResult GetAllSuppliers(
+            string? sort,
+            string? direction,
+            string? code,
+            string? name,
+            string? address,
+            string? city,
+            string? zipCode,
+            string? province,
+            string? country,
+            string? contactName,
+            string? phoneNumber,
+            string? reference)
         {
-            var suppliers = _supplierService.GetAllSuppliers();
+            var suppliers = _supplierService.GetAllSuppliers(
+                sort,
+                direction,
+                code,
+                name,
+                address,
+                city,
+                zipCode,
+                province,
+                country,
+                contactName,
+                phoneNumber,
+                reference
+            );
+
             return Ok(suppliers);
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetSupplierById(int id)
