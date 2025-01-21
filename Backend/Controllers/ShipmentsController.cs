@@ -105,6 +105,23 @@ namespace Backend.Controllers.Shipments
             _shipmentService.DeleteShipment(id);
         }
 
+        [HttpPut("{shipmentId}/items/{itemUid}")]
+        public async Task<IActionResult> UpdateItemInShipment(int shipmentId, string itemUid, [FromBody] ShipmentItemUpdateRequest updateRequest)
+        {
+            try
+            {
+                await _shipmentService.UpdateItemInShipment(shipmentId, itemUid, updateRequest);
+                return NoContent();  // Successfully updated
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "An error occurred while updating the shipment item.", details = ex.Message });
+            }
+        }
     }
 
 }
