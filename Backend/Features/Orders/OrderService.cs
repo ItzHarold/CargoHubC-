@@ -30,6 +30,8 @@ namespace Backend.Features.Orders
         IEnumerable<Item> GetItemsByOrderId(int orderId);
         void UpdateItemInOrder(int orderId, string itemUid, Item updatedItem);
         OrderResponse MapToResponse(Order order);
+        IEnumerable<Order> GetOrdersByClientId(int clientId);
+
     }
 
     public class OrderService : IOrderService
@@ -480,5 +482,22 @@ namespace Backend.Features.Orders
                 }).ToList()
             };
         }
+
+        public IEnumerable<Order> GetOrdersByClientId(int clientId)
+        {
+            if (_dbContext.Orders == null)
+            {
+                return Enumerable.Empty<Order>();
+            }
+
+            var orders = _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .Include(o => o.ShipmentOrders)
+                .Where(o => o.BillToClientId == clientId || o.ShipToClientId == clientId)
+                .ToList();
+
+            return orders;
+        }
+
     }
 }

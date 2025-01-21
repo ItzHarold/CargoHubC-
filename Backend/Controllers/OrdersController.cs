@@ -114,5 +114,20 @@ namespace Backend.Controllers.Orders
             }
             return NotFound("No items found for this order."); // Return NotFound if no items exist
         }
+
+        [HttpGet("client/{clientId}/orders")]
+        public IActionResult GetOrdersByClientId(int clientId)
+        {
+            var orders = _orderService.GetOrdersByClientId(clientId);
+            
+            if (!orders.Any())
+            {
+                return NotFound(new { message = "No orders found for this client." });
+            }
+
+            var orderResponses = orders.Select(o => _orderService.MapToResponse(o)).ToList();
+            return Ok(orderResponses);
+        }
+
     }
 }
