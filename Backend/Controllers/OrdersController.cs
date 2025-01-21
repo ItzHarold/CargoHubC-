@@ -2,6 +2,7 @@ using Backend.Features.Items;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Features.Orders;
 using Backend.Request;
+using Backend.Features.OrderItems;
 
 namespace Backend.Controllers.Orders
 {
@@ -88,19 +89,36 @@ namespace Backend.Controllers.Orders
         }
 
         [HttpPut("{orderId}/items/{itemUid}")]
-        public IActionResult UpdateItemInOrder(int orderId, string itemUid, [FromBody] Item item)
+        public IActionResult UpdateItemInOrder(int orderId, string itemUid, [FromBody] OrderItemUpdateRequest updateRequest)
         {
+            if (updateRequest == null)
+            {
+                return BadRequest("Invalid request data.");
+            }
+
             try
             {
-                _orderService.UpdateItemInOrder(orderId, itemUid, item);
-                return NoContent(); // Successfully updated the item
+                if (string.IsNullOrEmpty(updateRequest.ItemUid) || updateRequest.Amount <= 0)
+                {
+                    return BadRequest("ItemUid and Amount are required.");
+                }
+
+                // Call the service to handle the logic of updating the order item
+                _orderService.UpdateOrderItem(orderId, itemUid, updateRequest);
+
+                return NoContent(); // Indicate successful update with no content to return
             }
             catch (ArgumentException ex)
             {
-                // If the item or order is not found, return a NotFound response with the message
-                return NotFound(ex.Message);
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "An error occurred while updating the item.", details = ex.Message });
             }
         }
+
+
 
         [HttpGet("{id}/items")]
         public IActionResult GetItemsForOrder(int id)

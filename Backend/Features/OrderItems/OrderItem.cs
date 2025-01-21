@@ -20,7 +20,7 @@ namespace Backend.Features.OrderItems
 
         [Required]
         [JsonPropertyName("order_id")]
-        public required int OrderId { get; set; }
+        public int OrderId { get; set; }
 
         [Required]
         [JsonPropertyName("amount")]
