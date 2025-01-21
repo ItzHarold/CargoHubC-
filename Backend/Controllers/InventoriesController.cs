@@ -106,5 +106,38 @@ namespace Backend.Controllers.Inventories
             _inventoryService.DeleteInventory(id);
             return NoContent();
         }
+
+        [HttpGet("with-locations")]
+        public IActionResult GetInventoriesWithLocations([FromQuery] string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId))
+            {
+                return BadRequest(new { message = "itemId is required." });
+            }
+
+            var inventoriesWithLocations = _inventoryService.GetInventoryWithLocations(itemId);
+
+            if (!inventoriesWithLocations.Any())
+            {
+                return NotFound(new { message = $"No inventories found for itemId: {itemId}" });
+            }
+
+            return Ok(inventoriesWithLocations);
+        }
+
+        [HttpGet("total")]
+        public IActionResult GetTotalInventoryByItemId([FromQuery] string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId))
+            {
+                return BadRequest(new { message = "itemId is required." });
+            }
+
+            var totalInventory = _inventoryService.GetTotalInventoryByItemId(itemId);
+
+            return Ok(new { itemId, totalInventory });
+        }
+
+
     }
 }

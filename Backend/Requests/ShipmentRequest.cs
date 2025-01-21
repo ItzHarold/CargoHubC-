@@ -61,4 +61,14 @@ namespace Backend.Requests
         [JsonProperty("amount")]
         public required int Amount { get; set; }
     }
+
+    public class ShipmentItemUpdateRequest
+    {
+        [JsonProperty("item_uid")]
+        public required string ItemUid { get; set; }
+
+        [JsonProperty("amount")]
+        public required int Amount { get; set; }
+    }
+
 }

@@ -30,6 +30,8 @@ namespace Backend.Features.Shipments
         Task<int> AddShipment(ShipmentRequest shipmentRequest);
         Task UpdateShipment(int id, ShipmentRequest request);
         void DeleteShipment(int id);
+        ShipmentResponse MapToResponse(Shipment shipment);
+        Task UpdateItemInShipment(int shipmentId, string itemUid, ShipmentItemUpdateRequest updateRequest);
     }
 
     public class ShipmentService: IShipmentService
@@ -174,9 +176,14 @@ namespace Backend.Features.Shipments
 
         public Shipment? GetShipmentById(int id)
         {
+            if (_dbContext.Shipments == null)
+            {
+                return null;
+            }
             return _dbContext?.Shipments
                 ?.Include(s => s.ShipmentItems)
                 ?.Include(s => s.SourceContact)
+                ?.Include(s => s.ShipmentOrders)
                 ?.FirstOrDefault(s => s.Id == id);
         }
 
@@ -245,7 +252,6 @@ namespace Backend.Features.Shipments
             existingShipment.TotalPackageWeight = request.TotalPackageWeight;
             existingShipment.UpdatedAt = DateTime.Now;
 
-
             var validationResult = _validator.Validate(existingShipment);
             if (!validationResult.IsValid)
             {
@@ -256,8 +262,6 @@ namespace Backend.Features.Shipments
             await _dbContext.SaveChangesAsync();
         }
 
-
-        
         public void DeleteShipment(int id)
         {
             if (_dbContext.Shipments != null)
@@ -272,5 +276,68 @@ namespace Backend.Features.Shipments
                 }
             }
         }
+
+        public ShipmentResponse MapToResponse(Shipment shipment)
+        {
+            return new ShipmentResponse
+            {
+                SourceId = shipment.SourceId,
+                OrderDate = shipment.OrderDate,
+                RequestDate = shipment.RequestDate,
+                ShipmentDate = shipment.ShipmentDate,
+                ShipmentType = shipment.ShipmentType,
+                ShipmentStatus = shipment.ShipmentStatus,
+                Notes = shipment.Notes,
+                CarrierCode = shipment.CarrierCode,
+                CarrierDescription = shipment.CarrierDescription,
+                ServiceCode = shipment.ServiceCode,
+                PaymentType = shipment.PaymentType,
+                TransferMode = shipment.TransferMode,
+                TotalPackageCount = shipment.TotalPackageCount,
+                TotalPackageWeight = shipment.TotalPackageWeight,
+                // Mapping ShipmentItems to the response
+                ShipmentItems = shipment.ShipmentItems?.Select(item => new ShipmentItemResponse
+                {
+                    ItemId = item.ItemUid,  // Correctly use ItemUid as ItemId in the response
+                    Amount = item.Amount
+                }).ToList(),
+                OrderIds = shipment.ShipmentOrders?.Select(o => o.Id).ToList() ?? new List<int>()
+            };
+        }
+
+        public async Task UpdateItemInShipment(int shipmentId, string itemUid, ShipmentItemUpdateRequest updateRequest)
+        {
+            if (_dbContext.Shipments == null)
+            {
+                throw new InvalidOperationException("DbSets are not initialized.");
+            }
+            // Find the shipment by ID
+            var shipment = await _dbContext.Shipments
+                .Include(s => s.ShipmentItems)
+                .FirstOrDefaultAsync(s => s.Id == shipmentId);
+
+            if (shipment == null)
+            {
+                throw new KeyNotFoundException($"Shipment with ID {shipmentId} not found.");
+            }
+
+            // Find the shipment item by ItemUid
+            var shipmentItem = shipment.ShipmentItems?.FirstOrDefault(item => item.ItemUid == itemUid);
+
+            if (shipmentItem == null)
+            {
+                throw new KeyNotFoundException($"Shipment item with ItemUid {itemUid} not found in shipment {shipmentId}.");
+            }
+
+            // Update the item properties
+            shipmentItem.Amount = updateRequest.Amount;
+
+            // Save changes
+            shipment.UpdatedAt = DateTime.Now;  // Assuming you want to update the 'UpdatedAt' timestamp as well
+            _dbContext.Shipments?.Update(shipment);
+            await _dbContext.SaveChangesAsync();
+        }
+
+
     }
 }

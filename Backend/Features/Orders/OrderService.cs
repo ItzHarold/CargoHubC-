@@ -28,8 +28,10 @@ namespace Backend.Features.Orders
         Task UpdateOrder(int orderId, OrderRequest orderRequest);
         void DeleteOrder(int id);
         IEnumerable<Item> GetItemsByOrderId(int orderId);
-        void UpdateItemInOrder(int orderId, string itemUid, Item updatedItem);
+        void UpdateOrderItem(int orderId, string itemUid, OrderItemUpdateRequest updateRequest);
         OrderResponse MapToResponse(Order order);
+        IEnumerable<Order> GetOrdersByClientId(int clientId);
+
     }
 
     public class OrderService : IOrderService
@@ -421,20 +423,16 @@ namespace Backend.Features.Orders
             return new List<Item>();
         }
 
-        public void UpdateItemInOrder(int orderId, string itemUid, Item updatedItem)
+        public void UpdateOrderItem(int orderId, string itemUid, OrderItemUpdateRequest updateRequest)
         {
-            if (_dbContext.Orders == null)
+            // Ensure necessary DbSets are available
+            if (_dbContext.Orders == null || _dbContext.OrderItems == null)
             {
-                throw new InvalidOperationException("Orders DbSet is not initialized");
-            }
-
-            if (_dbContext.Items == null)
-            {
-                throw new InvalidOperationException("Items DbSet is not initialized");
+                throw new InvalidOperationException("DbSets are not initialized.");
             }
 
             var order = _dbContext.Orders
-                .Include(o => o.OrderItems)
+                .Include(o => o.OrderItems) // Make sure to include OrderItems to update it
                 .FirstOrDefault(o => o.Id == orderId);
 
             if (order == null)
@@ -442,18 +440,19 @@ namespace Backend.Features.Orders
                 throw new ArgumentException($"Order with ID {orderId} not found.");
             }
 
-            if (order.OrderItems == null)
+            var orderItem = order.OrderItems
+                .FirstOrDefault(oi => oi.ItemUid == itemUid); // Look for the item in the order
+
+            if (orderItem == null)
             {
-                throw new InvalidOperationException($"Items collection is null for order {orderId}");
+                throw new ArgumentException($"Item with UID {itemUid} not found in the order.");
             }
 
-            var item = order.OrderItems.FirstOrDefault(i => i.Item != null && i.Item.Uid == itemUid);
+            // Update the relevant fields (ItemUid and Amount)
+            orderItem.ItemUid = updateRequest.ItemUid;
+            orderItem.Amount = updateRequest.Amount;
 
-            if (item == null)
-            {
-                throw new ArgumentException($"Item with UID {itemUid} not found in order {orderId}.");
-            }
-
+            // Save changes
             _dbContext.SaveChanges();
         }
 
@@ -480,5 +479,22 @@ namespace Backend.Features.Orders
                 }).ToList()
             };
         }
+
+        public IEnumerable<Order> GetOrdersByClientId(int clientId)
+        {
+            if (_dbContext.Orders == null)
+            {
+                return Enumerable.Empty<Order>();
+            }
+
+            var orders = _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .Include(o => o.ShipmentOrders)
+                .Where(o => o.BillToClientId == clientId || o.ShipToClientId == clientId)
+                .ToList();
+
+            return orders;
+        }
+
     }
 }

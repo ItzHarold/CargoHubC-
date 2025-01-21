@@ -23,6 +23,8 @@ namespace Backend.Features.Inventories
         Task<int> AddInventory(InventoryRequest inventoryRequest);
         Task UpdateInventory(int id, InventoryRequest inventoryRequest);
         void DeleteInventory(int id);
+        IEnumerable<InventoryResponse> GetInventoryWithLocations(string itemId);
+        int GetTotalInventoryByItemId(string itemId);
     }
 
     public class InventoryService : IInventoryService
@@ -52,7 +54,7 @@ namespace Backend.Features.Inventories
                 return new List<Inventory>();
             }
 
-            var query = _dbContext.Inventories.AsQueryable();
+            IQueryable<Inventory> query = _dbContext.Inventories.Include(i => i.InventoryLocations).AsQueryable();
 
             // Apply filtering based on the query parameters
             if (!string.IsNullOrEmpty(itemId))
@@ -231,5 +233,47 @@ namespace Backend.Features.Inventories
                 _dbContext.SaveChanges();
             }
         }
+
+        public IEnumerable<InventoryResponse> GetInventoryWithLocations(string itemId)
+        {
+            if (_dbContext.Inventories == null || string.IsNullOrEmpty(itemId))
+            {
+                return new List<InventoryResponse>();
+            }
+
+            var query = _dbContext.Inventories
+                .Where(i => i.ItemId == itemId)
+                .Select(i => new InventoryResponse
+                {
+                    Id = i.Id,
+                    ItemId = i.ItemId,
+                    Description = i.Description,
+                    ItemReference = i.ItemReference,
+                    LocationId = i.InventoryLocations
+                        .Select(il => il.LocationId)
+                        .ToArray(),
+                    TotalOnHand = i.TotalOnHand,
+                    TotalExpected = i.TotalExpected,
+                    TotalOrdered = i.TotalOrdered,
+                    TotalAllocated = i.TotalAllocated,
+                    TotalAvailable = i.TotalAvailable
+                });
+
+            return query.ToList();
+        }
+
+        public int GetTotalInventoryByItemId(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId) || _dbContext.Inventories == null)
+            {
+                return 0; // Return 0 if the itemId is invalid or the database is null
+            }
+
+            return _dbContext.Inventories
+                .Where(i => i.ItemId == itemId)
+                .Sum(i => i.TotalOnHand); // Sum the TotalOnHand field across all inventories for the given itemId
+        }
+
+
     }
 }
