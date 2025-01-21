@@ -251,7 +251,6 @@ namespace Backend.Features.Shipments
             existingShipment.TotalPackageWeight = request.TotalPackageWeight;
             existingShipment.UpdatedAt = DateTime.Now;
 
-
             var validationResult = _validator.Validate(existingShipment);
             if (!validationResult.IsValid)
             {
@@ -261,6 +260,7 @@ namespace Backend.Features.Shipments
             _dbContext.Shipments?.Update(existingShipment);
             await _dbContext.SaveChangesAsync();
         }
+
 
 
         

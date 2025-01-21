@@ -17,16 +17,6 @@ namespace Backend.Features.Shipments
             RuleFor(shipment => shipment.OrderDate)
                 .NotEmpty().WithMessage("OrderDate is required.");
 
-            RuleFor(shipment => shipment.RequestDate)
-                .GreaterThanOrEqualTo(shipment => shipment.OrderDate)
-                .When(shipment => shipment.OrderDate.HasValue && shipment.RequestDate.HasValue)
-                .WithMessage("RequestDate must be on or after the OrderDate.");
-
-            RuleFor(shipment => shipment.ShipmentDate)
-                .GreaterThanOrEqualTo(shipment => shipment.RequestDate)
-                .When(shipment => shipment.RequestDate.HasValue && shipment.ShipmentDate.HasValue)
-                .WithMessage("ShipmentDate must be on or after the RequestDate.");
-
             RuleFor(shipment => shipment.ShipmentType)
                 .NotEmpty().WithMessage("ShipmentType is required.");
 
