@@ -6,6 +6,7 @@ namespace Backend.Features.Shipments
     public class ShipmentValidator : AbstractValidator<Shipment>
     {
         private readonly CargoHubDbContext _dbContext;
+
         public ShipmentValidator(CargoHubDbContext dbContext)
         {
             _dbContext = dbContext;
@@ -13,25 +14,17 @@ namespace Backend.Features.Shipments
             RuleFor(shipment => shipment.SourceId)
                 .GreaterThan(0).WithMessage("SourceId must be greater than 0.");
 
-            // Remove the future date validation for OrderDate since it might be valid in some cases
             RuleFor(shipment => shipment.OrderDate)
                 .NotEmpty().WithMessage("OrderDate is required.");
 
-            // For existing records, we'll allow any date combinations
             RuleFor(shipment => shipment.RequestDate)
                 .GreaterThanOrEqualTo(shipment => shipment.OrderDate)
-                .When(shipment => 
-                    shipment.OrderDate.HasValue && 
-                    shipment.RequestDate.HasValue && 
-                    shipment.Id == 0) // Only validate for new shipments
+                .When(shipment => shipment.OrderDate.HasValue && shipment.RequestDate.HasValue)
                 .WithMessage("RequestDate must be on or after the OrderDate.");
 
             RuleFor(shipment => shipment.ShipmentDate)
                 .GreaterThanOrEqualTo(shipment => shipment.RequestDate)
-                .When(shipment => 
-                    shipment.RequestDate.HasValue && 
-                    shipment.ShipmentDate.HasValue && 
-                    shipment.Id == 0) // Only validate for new shipments
+                .When(shipment => shipment.RequestDate.HasValue && shipment.ShipmentDate.HasValue)
                 .WithMessage("ShipmentDate must be on or after the RequestDate.");
 
             RuleFor(shipment => shipment.ShipmentType)

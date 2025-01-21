@@ -57,47 +57,23 @@ namespace Backend.Controllers.Shipments
 
 
         [HttpGet("{id}")]
-        public IActionResult GetShipmentById(int id)
+        public Shipment? GetShipmentById(int id)
         {
-            var shipment = _shipmentService.GetShipmentById(id);
-            if (shipment == null)
-            {
-                return NotFound();
-            }
-
-            var response = new ShipmentResponse
-            {
-                SourceId = shipment.SourceId,
-                OrderDate = shipment.OrderDate,
-                RequestDate = shipment.RequestDate,
-                ShipmentDate = shipment.ShipmentDate,
-                ShipmentType = shipment.ShipmentType,
-                ShipmentStatus = shipment.ShipmentStatus,
-                Notes = shipment.Notes,
-                CarrierCode = shipment.CarrierCode,
-                CarrierDescription = shipment.CarrierDescription,
-                ServiceCode = shipment.ServiceCode,
-                PaymentType = shipment.PaymentType,
-                TransferMode = shipment.TransferMode,
-                TotalPackageCount = shipment.TotalPackageCount,
-                TotalPackageWeight = shipment.TotalPackageWeight
-            };
-
-            return Ok(response);
+            return _shipmentService.GetShipmentById(id);
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> AddShipment([FromBody] ShipmentRequest shipment)
+        public async Task<IActionResult> AddShipment([FromBody] ShipmentRequest shipmentRequest)
         {
-            try
-            {
-                int newShipmentId = await _shipmentService.AddShipment(shipment);
-                return GetShipmentById(newShipmentId);
-            }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { errors = ex.Errors });
-            }
+            int newShipmentId = await _shipmentService.AddShipment(shipmentRequest);
+            var shipment = _shipmentService.GetShipmentById(newShipmentId);
+            if (shipment == null)
+                return NotFound();
+            
+            var response = _shipmentService.MapToResponse(shipment);
+            return CreatedAtAction(nameof(GetShipmentById), new { id = response.Id}, response);
+           
         }
 
         // ShipmentsController.cs
