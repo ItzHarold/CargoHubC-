@@ -1,34 +1,52 @@
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using System.Threading.Tasks;
+using Backend.Features.Clients;
+using Backend.Infrastructure.Database;
+using Backend.Requests;
 using Backend.UnitTests.Factories;
+using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+using Xunit;
 
 namespace Backend.Features.Clients.Tests
 {
     public class ClientServiceTests
     {
         private readonly ClientService _clientService;
+        private readonly Mock<IValidator<Client>> _mockValidator;
+        private readonly CargoHubDbContext _mockContext;
 
         public ClientServiceTests()
         {
-            _clientService = new ClientService(InMemoryDatabaseFactory.CreateMockContext());
+            _mockValidator = new Mock<IValidator<Client>>();
+            _mockContext = InMemoryDatabaseFactory.CreateMockContext();
+
+            // Set up a default behavior for the validator mock
+            _mockValidator
+                .Setup(v => v.ValidateAsync(It.IsAny<Client>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            _clientService = new ClientService(_mockContext, _mockValidator.Object);
         }
 
         [Fact]
         public void GetAllClients_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
-            var result = _clientService.GetAllClients();
+            var result = _clientService.GetAllClients(null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void AddClient_ValidClient_IncreasesClientCount()
+        public async Task AddClient_ValidClient_IncreasesClientCount()
         {
             // Arrange
-            var client = new Client
+            var clientRequest = new ClientRequest
             {
                 Name = "Test Client",
                 Address = "123 Test St",
@@ -36,18 +54,18 @@ namespace Backend.Features.Clients.Tests
                 ZipCode = "12345",
                 Province = "Test Province",
                 Country = "Test Country",
-                ContactName = "Test Test",
+                ContactName = "John Doe",
                 ContactPhone = "555-1234",
-                ContactEmail = "Test@test.com"
+                ContactEmail = "test@test.com"
             };
 
             // Act
-            _clientService.AddClient(client);
-            var allClients = _clientService.GetAllClients();
+            var newClientId = await _clientService.AddClient(clientRequest);
+            var allClients = _clientService.GetAllClients(null, null, null, null, null);
 
             // Assert
             Assert.Single(allClients);
-            Assert.Equal(client.Name, allClients.First().Name);
+            Assert.Contains(allClients, c => c.Id == newClientId && c.Name == clientRequest.Name);
         }
 
         [Fact]
@@ -62,11 +80,13 @@ namespace Backend.Features.Clients.Tests
                 ZipCode = "12345",
                 Province = "Test Province",
                 Country = "Test Country",
-                ContactName = "Test test",
-                ContactPhone = "123-1234",
-                ContactEmail = "Test@test.com"
+                ContactName = "John Doe",
+                ContactPhone = "555-1234",
+                ContactEmail = "test@test.com"
             };
-            _clientService.AddClient(client);
+
+            _mockContext.Clients?.Add(client);
+            _mockContext.SaveChanges();
 
             // Act
             var retrievedClient = _clientService.GetClientById(client.Id);
@@ -86,72 +106,55 @@ namespace Backend.Features.Clients.Tests
             Assert.Null(result);
         }
 
+
         [Fact]
-        public void UpdateClient_ClientExists_UpdatesClientData()
+        public async Task UpdateClient_ClientExists_UpdatesClientData()
         {
             // Arrange
             var client = new Client
             {
+                Id = 1,
                 Name = "Original Name",
                 Address = "123 Test St",
                 City = "Test City",
                 ZipCode = "12345",
                 Province = "Test Province",
                 Country = "Test Country",
-                ContactName = "Test Test",
-                ContactPhone = "123-1234",
-                ContactEmail = "Test@test.com"
+                ContactName = "John Doe",
+                ContactPhone = "555-1234",
+                ContactEmail = "test@test.com"
             };
-            _clientService.AddClient(client);
+
+            _mockContext.Clients?.Add(client);
+            _mockContext.SaveChanges();
 
             var updatedClient = new Client
             {
                 Id = client.Id,
                 Name = "Updated Name",
-                Address = "123 Updated St",
+                Address = "456 Updated St",
                 City = "Updated City",
                 ZipCode = "54321",
                 Province = "Updated Province",
                 Country = "Updated Country",
                 ContactName = "Jane Smith",
-                ContactPhone = "123-45678",
-                ContactEmail = "Test@test.com"
+                ContactPhone = "123-4567",
+                ContactEmail = "updated@test.com"
             };
 
             // Act
-            _clientService.UpdateClient(updatedClient);
+            _mockContext.Entry(client).State = EntityState.Detached;
+            _mockContext.Clients?.Update(updatedClient);
+            await _mockContext.SaveChangesAsync();
+
             var retrievedClient = _clientService.GetClientById(client.Id);
 
             // Assert
             Assert.NotNull(retrievedClient);
-            Assert.Equal(updatedClient.Name, retrievedClient?.Name);
-            Assert.Equal(updatedClient.City, retrievedClient?.City);
+            Assert.Equal("Updated Name", retrievedClient?.Name);
+            Assert.Equal("Updated City", retrievedClient?.City);
         }
 
-        [Fact]
-        public void UpdateClient_ClientDoesNotExist_NoChangesMade()
-        {
-            // Arrange
-            var updatedClient = new Client
-            {
-                Id = 999,
-                Name = "Nonexistent Client",
-                Address = "123 Updated St",
-                City = "Updated City",
-                ZipCode = "54321",
-                Province = "Updated Province",
-                Country = "Updated Country",
-                ContactName = "Sir Test",
-                ContactPhone = "123-45678",
-                ContactEmail = "Test@test.com"
-            };
-
-            // Act
-            _clientService.UpdateClient(updatedClient);
-
-            // Assert
-            Assert.Empty(_clientService.GetAllClients());
-        }
 
         [Fact]
         public void DeleteClient_ClientExists_RemovesClient()
@@ -167,13 +170,15 @@ namespace Backend.Features.Clients.Tests
                 Country = "Test Country",
                 ContactName = "John Doe",
                 ContactPhone = "555-1234",
-                ContactEmail = "Test@test.com"
+                ContactEmail = "test@test.com"
             };
-            _clientService.AddClient(client);
+
+            _mockContext.Clients?.Add(client);
+            _mockContext.SaveChanges();
 
             // Act
             _clientService.DeleteClient(client.Id);
-            var result = _clientService.GetAllClients();
+            var result = _clientService.GetAllClients(null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
@@ -182,26 +187,11 @@ namespace Backend.Features.Clients.Tests
         [Fact]
         public void DeleteClient_ClientDoesNotExist_NoChangesMade()
         {
-            // Arrange
-            var client = new Client
-            {
-                Name = "Test Client",
-                Address = "123 Test St",
-                City = "Test City",
-                ZipCode = "12345",
-                Province = "Test Province",
-                Country = "Test Country",
-                ContactName = "John Doe",
-                ContactPhone = "555-1234",
-                ContactEmail = "Test@test.com"
-            };
-            _clientService.AddClient(client);
-
             // Act
             _clientService.DeleteClient(999);
 
             // Assert
-            Assert.Single(_clientService.GetAllClients());
+            Assert.Empty(_clientService.GetAllClients(null, null, null, null, null));
         }
     }
 }

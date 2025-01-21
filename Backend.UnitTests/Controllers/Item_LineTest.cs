@@ -1,47 +1,63 @@
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using System.Threading.Tasks;
+using Backend.Features.ItemLines;
+using Backend.Infrastructure.Database;
+using Backend.Requests;
 using Backend.UnitTests.Factories;
+using FluentValidation;
+using FluentValidation.Results;
+using Moq;
+using Xunit;
 
 namespace Backend.Features.ItemLines.Tests
 {
     public class ItemLineServiceTests
     {
         private readonly ItemLineService _itemLineService;
+        private readonly Mock<IValidator<ItemLine>> _mockValidator;
+        private readonly CargoHubDbContext _mockContext;
 
         public ItemLineServiceTests()
         {
-            _itemLineService = new ItemLineService(InMemoryDatabaseFactory.CreateMockContext());
+            _mockValidator = new Mock<IValidator<ItemLine>>();
+            _mockContext = InMemoryDatabaseFactory.CreateMockContext();
+
+            // Set up default behavior for the validator mock
+            _mockValidator
+                .Setup(v => v.ValidateAsync(It.IsAny<ItemLine>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            _itemLineService = new ItemLineService(_mockContext, _mockValidator.Object);
         }
 
         [Fact]
         public void GetAllItemLines_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
-            var result = _itemLineService.GetAllItemLines();
+            var result = _itemLineService.GetAllItemLines(null, null, null, null);
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void AddItemLine_ValidItemLine_IncreasesItemLineCount()
+        public async Task AddItemLine_ValidItemLine_IncreasesItemLineCount()
         {
             // Arrange
-            var itemLine = new ItemLine
+            var itemLineRequest = new ItemLineRequest
             {
-                id = 1,
                 Name = "Test Item Line",
                 Description = "Description of test item line"
             };
 
             // Act
-            _itemLineService.AddItemLine(itemLine);
-            var allItemLines = _itemLineService.GetAllItemLines();
+            var newItemLineId = await _itemLineService.AddItemLine(itemLineRequest);
+            var allItemLines = _itemLineService.GetAllItemLines(null, null, null, null);
 
             // Assert
             Assert.Single(allItemLines);
-            Assert.Equal(itemLine.Name, allItemLines.First().Name);
+            Assert.Contains(allItemLines, il => il.id == newItemLineId && il.Name == itemLineRequest.Name);
         }
 
         [Fact]
@@ -50,11 +66,12 @@ namespace Backend.Features.ItemLines.Tests
             // Arrange
             var itemLine = new ItemLine
             {
-                id = 1,
                 Name = "Test Item Line",
                 Description = "Description of test item line"
             };
-            _itemLineService.AddItemLine(itemLine);
+
+            _mockContext.ItemLines?.Add(itemLine);
+            _mockContext.SaveChanges();
 
             // Act
             var retrievedItemLine = _itemLineService.GetItemLineById(itemLine.id);
@@ -75,32 +92,59 @@ namespace Backend.Features.ItemLines.Tests
         }
 
         [Fact]
-        public void UpdateItemLine_ItemLineExists_UpdatesItemLineData()
+        public async Task UpdateItemLine_ItemLineExists_UpdatesItemLineData()
         {
             // Arrange
             var itemLine = new ItemLine
             {
                 id = 1,
                 Name = "Original Item Line",
-                Description = "Original description"
+                Description = "Original description",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
-            _itemLineService.AddItemLine(itemLine);
 
-            var updatedItemLine = new ItemLine
-            {
-                id = itemLine.id,
-                Name = "Updated Item Line",
-                Description = "Updated description"
-            };
+            // Add the initial ItemLine to the mock context
+            _mockContext.ItemLines?.Add(itemLine);
+            _mockContext.SaveChanges();
+
+            // Mock the validator to return valid results
+            _mockValidator
+                .Setup(v => v.Validate(It.IsAny<ItemLine>()))
+                .Returns(new ValidationResult()); // No validation errors
+
+            // Modify the existing entity directly
+            itemLine.Name = "Updated Item Line";
+            itemLine.Description = "Updated description";
 
             // Act
-            _itemLineService.UpdateItemLine(itemLine.id, updatedItemLine);
+            await _itemLineService.UpdateItemLine(itemLine);
+
+            // Retrieve the updated ItemLine from the service
             var retrievedItemLine = _itemLineService.GetItemLineById(itemLine.id);
 
             // Assert
             Assert.NotNull(retrievedItemLine);
-            Assert.Equal(updatedItemLine.Name, retrievedItemLine?.Name);
-            Assert.Equal(updatedItemLine.Description, retrievedItemLine?.Description);
+            Assert.Equal("Updated Item Line", retrievedItemLine?.Name);
+            Assert.Equal("Updated description", retrievedItemLine?.Description);
+            Assert.Equal(itemLine.CreatedAt, retrievedItemLine?.CreatedAt); // Ensure CreatedAt is unchanged
+            Assert.NotEqual(itemLine.CreatedAt, retrievedItemLine?.UpdatedAt); // Ensure UpdatedAt is updated
+        }
+
+
+        [Fact]
+        public void UpdateItemLine_ItemLineDoesNotExist_ThrowsException()
+        {
+            // Arrange
+            var updatedItemLine = new ItemLine
+            {
+                id = 999,
+                Name = "Nonexistent Item Line",
+                Description = "This line does not exist"
+            };
+
+            // Act & Assert
+            Assert.ThrowsAsync<KeyNotFoundException>(async () => await _itemLineService.UpdateItemLine(updatedItemLine));
         }
 
         [Fact]
@@ -109,18 +153,29 @@ namespace Backend.Features.ItemLines.Tests
             // Arrange
             var itemLine = new ItemLine
             {
-                id = 2,
                 Name = "Test Item Line",
                 Description = "Description for deletion test"
             };
-            _itemLineService.AddItemLine(itemLine);
+
+            _mockContext.ItemLines?.Add(itemLine);
+            _mockContext.SaveChanges();
 
             // Act
             _itemLineService.DeleteItemLine(itemLine.id);
-            var result = _itemLineService.GetAllItemLines();
+            var result = _itemLineService.GetAllItemLines(null, null, null, null);
 
             // Assert
             Assert.Empty(result);
+        }
+
+        [Fact]
+        public void DeleteItemLine_ItemLineDoesNotExist_NoChangesMade()
+        {
+            // Act
+            _itemLineService.DeleteItemLine(999);
+
+            // Assert
+            Assert.Empty(_itemLineService.GetAllItemLines(null, null, null, null));
         }
     }
 }

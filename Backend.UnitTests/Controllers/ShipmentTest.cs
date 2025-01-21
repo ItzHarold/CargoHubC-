@@ -1,38 +1,46 @@
-using Backend.Features.Shipments;
 using System.Linq;
 using Xunit;
-using Backend.Features.Items;
 using Backend.UnitTests.Factories;
+using Backend.Features.Shipments;
+using Backend.Infrastructure.Database;
+using Backend.Requests;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
+using Backend.Features.Contacts;
+using FluentValidation;
+using Moq;
 
 namespace Backend.Features.Shipments.Tests
 {
     public class ShipmentServiceTests
     {
         private readonly ShipmentService _shipmentService;
+        private readonly CargoHubDbContext _mockContext;
 
         public ShipmentServiceTests()
         {
-            _shipmentService = new ShipmentService(InMemoryDatabaseFactory.CreateMockContext());
+            _mockContext = InMemoryDatabaseFactory.CreateMockContext();
+            _shipmentService = new ShipmentService(_mockContext, null!);
         }
 
         [Fact]
         public void GetAllShipments_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
-            var result = _shipmentService.GetAllShipments();
+            var result = _shipmentService.GetAllShipments(null, null, null, null, null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void AddShipment_ValidShipment_IncreasesShipmentCount()
+        public async Task AddShipment_ValidShipment_IncreasesShipmentCount()
         {
             // Arrange
-            var shipment = new Shipment
+            var shipmentRequest = new ShipmentRequest
             {
-                Id = 1,
-                OrderId = 1,
+                OrderId = 1, // Added this line
                 SourceId = 1,
                 OrderDate = DateTime.Now,
                 RequestDate = DateTime.Now.AddDays(2),
@@ -45,16 +53,16 @@ namespace Backend.Features.Shipments.Tests
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
                 TotalPackageWeight = 100,
-                Items = [] 
+                ShipmentItems = new List<ShipmentItemRequest>()
             };
 
             // Act
-            _shipmentService.AddShipment(shipment);
-            var allShipments = _shipmentService.GetAllShipments();
+            await _shipmentService.AddShipment(shipmentRequest);
+            var allShipments = _shipmentService.GetAllShipments(null, null, null, null, null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Single(allShipments);
-            Assert.Equal(shipment.Id, allShipments.First().Id);
+            Assert.Contains(allShipments, s => s.CarrierCode == shipmentRequest.CarrierCode);
         }
 
         [Fact]
@@ -64,7 +72,6 @@ namespace Backend.Features.Shipments.Tests
             var shipment = new Shipment
             {
                 Id = 1,
-                OrderId = 1,
                 SourceId = 1,
                 OrderDate = DateTime.Now,
                 RequestDate = DateTime.Now.AddDays(2),
@@ -76,18 +83,30 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Prepaid",
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
-                TotalPackageWeight = 100,
-                Items = [] 
+                TotalPackageWeight = 100
             };
-            _shipmentService.AddShipment(shipment);
+
+            var sourceContact = new Contact
+            {
+                Id = 1,
+                ContactName = "Source Contact",
+                ContactEmail = "source@example.com",
+                ContactPhone = "1234567890"
+            };
+
+            // Add source contact and shipment to the mock context
+            _mockContext.Contacts.Add(sourceContact);
+            _mockContext.Shipments.Add(shipment);
+            _mockContext.SaveChanges();
 
             // Act
             var retrievedShipment = _shipmentService.GetShipmentById(shipment.Id);
 
             // Assert
             Assert.NotNull(retrievedShipment);
-            Assert.Equal(shipment.Id, retrievedShipment?.Id);
+            Assert.Equal(shipment.CarrierCode, retrievedShipment?.CarrierCode);
         }
+
 
         [Fact]
         public void GetShipmentById_ShipmentDoesNotExist_ReturnsNull()
@@ -100,58 +119,71 @@ namespace Backend.Features.Shipments.Tests
         }
 
         [Fact]
-        public void UpdateShipment_ShipmentExists_UpdatesShipmentData()
-        {
-            // Arrange
-            var shipment = new Shipment
-            {
-                Id = 1,
-                OrderId = 1,
-                SourceId = 1,
-                OrderDate = DateTime.Now,
-                RequestDate = DateTime.Now.AddDays(2),
-                ShipmentDate = DateTime.Now.AddDays(4),
-                ShipmentType = "Air",
-                ShipmentStatus = "Shipped",
-                CarrierCode = "1",
-                ServiceCode = "1",
-                PaymentType = "Prepaid",
-                TransferMode = "Sea",
-                TotalPackageCount = 5,
-                TotalPackageWeight = 100,
-                Items = [] 
-            };
-            _shipmentService.AddShipment(shipment);
+public async Task UpdateShipment_ShipmentExists_UpdatesShipmentData()
+{
+    // Arrange
+    var validatorMock = new Mock<IValidator<Shipment>>();
+    validatorMock
+        .Setup(v => v.Validate(It.IsAny<Shipment>()))
+        .Returns(new FluentValidation.Results.ValidationResult());
 
-            var updatedShipment = new Shipment
-            {
-                Id = shipment.Id,
-                OrderId = 2,
-                SourceId = 2,
-                OrderDate = DateTime.Now,
-                RequestDate = DateTime.Now.AddDays(5),
-                ShipmentDate = DateTime.Now.AddDays(6),
-                ShipmentType = "Sea",
-                ShipmentStatus = "In Transit",
-                CarrierCode = "2",
-                ServiceCode = "2",
-                PaymentType = "Collect",
-                TransferMode = "Land",
-                TotalPackageCount = 10,
-                TotalPackageWeight = 200,
-                Items = shipment.Items
-            };
+    var shipment = new Shipment
+    {
+        Id = 1,
+        SourceId = 1,
+        OrderDate = DateTime.Now,
+        RequestDate = DateTime.Now.AddDays(2),
+        ShipmentDate = DateTime.Now.AddDays(4),
+        ShipmentType = "Air",
+        ShipmentStatus = "Shipped",
+        CarrierCode = "1",
+        ServiceCode = "1",
+        PaymentType = "Prepaid",
+        TransferMode = "Sea",
+        TotalPackageCount = 5,
+        TotalPackageWeight = 100
+    };
 
-            // Act
-            _shipmentService.UpdateShipment(updatedShipment);
-            var retrievedShipment = _shipmentService.GetShipmentById(shipment.Id);
+    var sourceContact = new Contact
+    {
+        Id = 1,
+        ContactName = "Source Contact",
+        ContactEmail = "source@example.com",
+        ContactPhone = "1234567890"
+    };
 
-            // Assert
-            Assert.NotNull(retrievedShipment);
-            Assert.Equal(updatedShipment.OrderId, retrievedShipment?.OrderId);
-            Assert.Equal(updatedShipment.TotalPackageCount, retrievedShipment?.TotalPackageCount);
-            Assert.Equal(updatedShipment.ShipmentStatus, retrievedShipment?.ShipmentStatus);
-        }
+    _mockContext.Contacts.Add(sourceContact);
+    _mockContext.Shipments.Add(shipment);
+    _mockContext.SaveChanges();
+
+    var updatedShipmentRequest = new ShipmentRequest
+    {
+        OrderId = 1,
+        SourceId = 1,
+        OrderDate = DateTime.Now,
+        RequestDate = DateTime.Now.AddDays(5),
+        ShipmentDate = DateTime.Now.AddDays(6),
+        ShipmentType = "Sea",
+        ShipmentStatus = "In Transit",
+        CarrierCode = "2",
+        ServiceCode = "2",
+        PaymentType = "Collect",
+        TransferMode = "Land",
+        TotalPackageCount = 10,
+        TotalPackageWeight = 200
+    };
+
+    // Act
+    await _shipmentService.UpdateShipment(shipment.Id, updatedShipmentRequest);
+    var retrievedShipment = _shipmentService.GetShipmentById(shipment.Id);
+
+    // Assert
+    Assert.NotNull(retrievedShipment);
+    Assert.Equal(updatedShipmentRequest.CarrierCode, retrievedShipment?.CarrierCode);
+    Assert.Equal(updatedShipmentRequest.TotalPackageCount, retrievedShipment?.TotalPackageCount);
+    Assert.Equal(updatedShipmentRequest.ShipmentStatus, retrievedShipment?.ShipmentStatus);
+}
+
 
         [Fact]
         public void DeleteShipment_ShipmentExists_RemovesShipment()
@@ -160,7 +192,6 @@ namespace Backend.Features.Shipments.Tests
             var shipment = new Shipment
             {
                 Id = 2,
-                OrderId = 2,
                 SourceId = 2,
                 OrderDate = DateTime.Now,
                 RequestDate = DateTime.Now.AddDays(2),
@@ -172,14 +203,14 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Prepaid",
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
-                TotalPackageWeight = 100,
-                Items = [] 
+                TotalPackageWeight = 100
             };
-            _shipmentService.AddShipment(shipment);
+            _mockContext.Shipments.Add(shipment);
+            _mockContext.SaveChanges();
 
             // Act
             _shipmentService.DeleteShipment(shipment.Id);
-            var result = _shipmentService.GetAllShipments();
+            var result = _shipmentService.GetAllShipments(null, null, null, null, null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
@@ -192,7 +223,6 @@ namespace Backend.Features.Shipments.Tests
             var shipment = new Shipment
             {
                 Id = 3,
-                OrderId = 3,
                 SourceId = 3,
                 OrderDate = DateTime.Now,
                 RequestDate = DateTime.Now.AddDays(2),
@@ -204,16 +234,16 @@ namespace Backend.Features.Shipments.Tests
                 PaymentType = "Prepaid",
                 TransferMode = "Sea",
                 TotalPackageCount = 5,
-                TotalPackageWeight = 100,
-                Items = []
+                TotalPackageWeight = 100
             };
-            _shipmentService.AddShipment(shipment);
+            _mockContext.Shipments.Add(shipment);
+            _mockContext.SaveChanges();
 
             // Act
             _shipmentService.DeleteShipment(999);
 
             // Assert
-            Assert.Single(_shipmentService.GetAllShipments());
+            Assert.Single(_shipmentService.GetAllShipments(null, null, null, null, null, null, null, null, null, null, null, null, null));
         }
     }
 }

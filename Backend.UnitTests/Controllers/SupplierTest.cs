@@ -1,35 +1,43 @@
-using Backend.Features.Suppliers;
+using System.Linq;
 using Xunit;
 using Backend.UnitTests.Factories;
+using Backend.Features.Suppliers;
+using Backend.Infrastructure.Database;
+using Backend.Requests;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
+using Backend.Response;
 
 namespace Backend.Features.Suppliers.Tests
 {
     public class SupplierServiceTests
     {
         private readonly SupplierService _supplierService;
+        private readonly CargoHubDbContext _mockContext;
 
         public SupplierServiceTests()
         {
-            _supplierService = new SupplierService(InMemoryDatabaseFactory.CreateMockContext());
+            _mockContext = InMemoryDatabaseFactory.CreateMockContext();
+            _supplierService = new SupplierService(_mockContext, null!);
         }
 
         [Fact]
         public void GetAllSuppliers_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
-            var result = _supplierService.GetAllSuppliers();
+            var result = _supplierService.GetAllSuppliers(null, null, null, null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void AddSupplier_ValidSupplier_IncreasesSupplierCount()
+        public async Task AddSupplier_ValidSupplier_IncreasesSupplierCount()
         {
             // Arrange
-            var supplier = new Supplier
+            var supplierRequest = new SupplierRequest
             {
-                Id = 1,
                 Code = "SUP001",
                 Name = "Supplier 1",
                 Address = "123 Wijnhaven",
@@ -37,18 +45,18 @@ namespace Backend.Features.Suppliers.Tests
                 ZipCode = "1234JK",
                 Province = "Zuid-Holland",
                 Country = "Nederland",
-                ContactName = "Test test",
+                ContactName = "Test Test",
                 PhoneNumber = "123-4567890",
                 Reference = "REF001"
             };
 
             // Act
-            _supplierService.AddSupplier(supplier);
-            var allSuppliers = _supplierService.GetAllSuppliers();
+            await _supplierService.AddSupplier(supplierRequest);
+            var allSuppliers = _supplierService.GetAllSuppliers(null, null, null, null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Single(allSuppliers);
-            Assert.Equal(supplier.Id, allSuppliers.First().Id);
+            Assert.Contains(allSuppliers, s => s.Code == supplierRequest.Code);
         }
 
         [Fact]
@@ -65,18 +73,19 @@ namespace Backend.Features.Suppliers.Tests
                 ZipCode = "1234JK",
                 Province = "Zuid-Holland",
                 Country = "Nederland",
-                ContactName = "Test test",
+                ContactName = "Test Test",
                 PhoneNumber = "123-4567890",
                 Reference = "REF001"
             };
-            _supplierService.AddSupplier(supplier);
+            _mockContext.Suppliers.Add(supplier);
+            _mockContext.SaveChanges();
 
             // Act
             var retrievedSupplier = _supplierService.GetSupplierById(supplier.Id);
 
             // Assert
             Assert.NotNull(retrievedSupplier);
-            Assert.Equal(supplier.Id, retrievedSupplier?.Id);
+            Assert.Equal(supplier.Code, retrievedSupplier?.Code);
         }
 
         [Fact]
@@ -90,7 +99,7 @@ namespace Backend.Features.Suppliers.Tests
         }
 
         [Fact]
-        public void UpdateSupplier_SupplierExists_UpdatesSupplierData()
+        public async Task UpdateSupplier_SupplierExists_UpdatesSupplierData()
         {
             // Arrange
             var supplier = new Supplier
@@ -107,11 +116,11 @@ namespace Backend.Features.Suppliers.Tests
                 PhoneNumber = "123-456789",
                 Reference = "REF001"
             };
-            _supplierService.AddSupplier(supplier);
+            _mockContext.Suppliers.Add(supplier);
+            _mockContext.SaveChanges();
 
-            var updatedSupplier = new Supplier
+            var updatedSupplierRequest = new SupplierRequest
             {
-                Id = supplier.Id,
                 Code = "SUP002",
                 Name = "Updated Supplier",
                 Address = "123 Wijnhaven",
@@ -125,14 +134,14 @@ namespace Backend.Features.Suppliers.Tests
             };
 
             // Act
-            _supplierService.UpdateSupplier(updatedSupplier);
+            await _supplierService.UpdateSupplier(supplier.Id, updatedSupplierRequest);
             var retrievedSupplier = _supplierService.GetSupplierById(supplier.Id);
 
             // Assert
             Assert.NotNull(retrievedSupplier);
-            Assert.Equal(updatedSupplier.Code, retrievedSupplier?.Code);
-            Assert.Equal(updatedSupplier.Name, retrievedSupplier?.Name);
-            Assert.Equal(updatedSupplier.PhoneNumber, retrievedSupplier?.PhoneNumber);
+            Assert.Equal(updatedSupplierRequest.Code, retrievedSupplier?.Code);
+            Assert.Equal(updatedSupplierRequest.Name, retrievedSupplier?.Name);
+            Assert.Equal(updatedSupplierRequest.PhoneNumber, retrievedSupplier?.PhoneNumber);
         }
 
         [Fact]
@@ -149,15 +158,16 @@ namespace Backend.Features.Suppliers.Tests
                 ZipCode = "1234JK",
                 Province = "Zuid-Holland",
                 Country = "Nederland",
-                ContactName = "Test test",
+                ContactName = "Test Test",
                 PhoneNumber = "123-123456789",
                 Reference = "REF002"
             };
-            _supplierService.AddSupplier(supplier);
+            _mockContext.Suppliers.Add(supplier);
+            _mockContext.SaveChanges();
 
             // Act
             _supplierService.DeleteSupplier(supplier.Id);
-            var result = _supplierService.GetAllSuppliers();
+            var result = _supplierService.GetAllSuppliers(null, null, null, null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
@@ -177,17 +187,18 @@ namespace Backend.Features.Suppliers.Tests
                 ZipCode = "5432JK",
                 Province = "Zuid-Holland",
                 Country = "Nederland",
-                ContactName = "Test test",
+                ContactName = "Test Test",
                 PhoneNumber = "123-123456789",
-                Reference = "3"
+                Reference = "REF003"
             };
-            _supplierService.AddSupplier(supplier);
+            _mockContext.Suppliers.Add(supplier);
+            _mockContext.SaveChanges();
 
             // Act
             _supplierService.DeleteSupplier(999);
 
             // Assert
-            Assert.Single(_supplierService.GetAllSuppliers());
+            Assert.Single(_supplierService.GetAllSuppliers(null, null, null, null, null, null, null, null, null, null, null, null));
         }
     }
 }
