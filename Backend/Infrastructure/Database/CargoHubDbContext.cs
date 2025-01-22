@@ -20,6 +20,7 @@ using Backend.Features.ShimpentItems;
 using Backend.Features.WarehouseContacts;
 using Backend.Features.ShipmentOrders;
 using Backend.Features.TransferItems;
+using Backend.Features.Docks;
 
 namespace Backend.Infrastructure.Database;
 
@@ -52,6 +53,7 @@ public class CargoHubDbContext(DbContextOptions<CargoHubDbContext> options) : Db
     public virtual DbSet<Log>? Logs { get; set; }
 
     public virtual DbSet<ShipmentOrder>? ShipmentOrders { get; set; }
+    public virtual DbSet<Dock>? Docks { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

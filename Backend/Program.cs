@@ -14,6 +14,7 @@ using Backend.Features.Logs;
 using Backend.Features.Warehouses;
 using Backend.Infrastructure.Database;
 using Backend.Infrastructure.Middleware;
+using Backend.Features.Docks;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ public static class Program
         builder.Services.AddDbContext<CargoHubDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-         // Registering services with Newtonsoft.Json for reference loop handling
+        // Registering services with Newtonsoft.Json for reference loop handling
         builder.Services.AddControllersWithViews()
             .AddNewtonsoftJson(options =>
             {
@@ -111,5 +112,7 @@ public static class Program
         services.AddTransient<IOrderService, OrderService>();
         services.AddTransient<ISupplierService, SupplierService>();
         services.AddTransient<ILogService, LogService>();
+        services.AddTransient<IDockService, DockService>();
+
     }
 }
