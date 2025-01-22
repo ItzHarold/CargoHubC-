@@ -9,6 +9,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+
 using Xunit;
 
 namespace Backend.Features.Clients.Tests
@@ -16,6 +17,7 @@ namespace Backend.Features.Clients.Tests
     public class ClientServiceTests
     {
         private readonly ClientService _clientService;
+
         private readonly Mock<IValidator<Client>> _mockValidator;
         private readonly CargoHubDbContext _mockContext;
 
@@ -36,6 +38,7 @@ namespace Backend.Features.Clients.Tests
         public void GetAllClients_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
+
             var result = _clientService.GetAllClients(null, null, null, null, null);
 
             // Assert
@@ -47,6 +50,7 @@ namespace Backend.Features.Clients.Tests
         {
             // Arrange
             var clientRequest = new ClientRequest
+
             {
                 Name = "Test Client",
                 Address = "123 Test St",
@@ -88,6 +92,7 @@ namespace Backend.Features.Clients.Tests
             _mockContext.Clients?.Add(client);
             _mockContext.SaveChanges();
 
+
             // Act
             var retrievedClient = _clientService.GetClientById(client.Id);
 
@@ -109,6 +114,7 @@ namespace Backend.Features.Clients.Tests
 
         [Fact]
         public async Task UpdateClient_ClientExists_UpdatesClientData()
+
         {
             // Arrange
             var client = new Client
@@ -146,7 +152,6 @@ namespace Backend.Features.Clients.Tests
             _mockContext.Entry(client).State = EntityState.Detached;
             _mockContext.Clients?.Update(updatedClient);
             await _mockContext.SaveChangesAsync();
-
             var retrievedClient = _clientService.GetClientById(client.Id);
 
             // Assert
@@ -154,7 +159,6 @@ namespace Backend.Features.Clients.Tests
             Assert.Equal("Updated Name", retrievedClient?.Name);
             Assert.Equal("Updated City", retrievedClient?.City);
         }
-
 
         [Fact]
         public void DeleteClient_ClientExists_RemovesClient()
@@ -192,6 +196,7 @@ namespace Backend.Features.Clients.Tests
 
             // Assert
             Assert.Empty(_clientService.GetAllClients(null, null, null, null, null));
+
         }
     }
 }

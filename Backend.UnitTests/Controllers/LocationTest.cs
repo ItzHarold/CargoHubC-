@@ -87,6 +87,7 @@ namespace Backend.Features.Locations.Tests
 
         [Fact]
         public async Task UpdateLocation_LocationExists_UpdatesLocationData()
+
         {
             // Arrange
             var location = new Location
@@ -162,6 +163,7 @@ namespace Backend.Features.Locations.Tests
 
             // Assert
             Assert.Single(_locationService.GetAllLocations(null, null, null, null, null, null, null));
+
         }
     }
 }

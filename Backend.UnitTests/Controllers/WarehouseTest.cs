@@ -11,6 +11,7 @@ using Backend.Features.WarehouseContacts;
 using FluentValidation;
 using Moq;
 
+
 namespace Backend.Features.Warehouses.Tests
 {
     public class WarehouseServiceTests
@@ -36,6 +37,7 @@ namespace Backend.Features.Warehouses.Tests
         {
             // Act
             var result = _warehouseService.GetAllWarehouses(null, null, null, null, null, null, null, null, null);
+
 
             // Assert
             Assert.Empty(result);
@@ -69,6 +71,7 @@ namespace Backend.Features.Warehouses.Tests
                 {
                     new ContactRequest
                     {
+
                         ContactName = "Contact 1",
                         ContactEmail = "contact1@example.com",
                         ContactPhone = "1234567890"
@@ -77,12 +80,14 @@ namespace Backend.Features.Warehouses.Tests
             };
 
             // Act
+
             await _warehouseService.AddWarehouse(warehouseRequest);
             var allWarehouses = _warehouseService.GetAllWarehouses(null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Single(allWarehouses);
             Assert.Contains(allWarehouses, w => w.Code == warehouseRequest.Code);
+
         }
 
         [Fact]
@@ -98,17 +103,21 @@ namespace Backend.Features.Warehouses.Tests
                 Zip = "1234JK",
                 City = "Rotterdam",
                 Province = "Zuid-Holland",
+
                 Country = "Nederland"
             };
             _mockContext.Warehouses.Add(warehouse);
             _mockContext.SaveChanges();
+
 
             // Act
             var retrievedWarehouse = _warehouseService.GetWarehouseById(warehouse.Id);
 
             // Assert
             Assert.NotNull(retrievedWarehouse);
+
             Assert.Equal(warehouse.Code, retrievedWarehouse?.Code);
+
         }
 
         [Fact]
@@ -120,11 +129,6 @@ namespace Backend.Features.Warehouses.Tests
             // Assert
             Assert.Null(result);
         }
-
-
-
-
-
 
         [Fact]
         public void DeleteWarehouse_WarehouseExists_RemovesWarehouse()
@@ -170,11 +174,13 @@ namespace Backend.Features.Warehouses.Tests
             _mockContext.Warehouses.Add(warehouse);
             _mockContext.SaveChanges();
 
+
             // Act
             _warehouseService.DeleteWarehouse(999);
 
             // Assert
             Assert.Single(_warehouseService.GetAllWarehouses(null, null, null, null, null, null, null, null, null));
+
         }
     }
 }

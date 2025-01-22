@@ -11,11 +11,13 @@ using Backend.Features.Contacts;
 using FluentValidation;
 using Moq;
 
+
 namespace Backend.Features.Shipments.Tests
 {
     public class ShipmentServiceTests
     {
         private readonly ShipmentService _shipmentService;
+
         private readonly CargoHubDbContext _mockContext;
 
         public ShipmentServiceTests()
@@ -29,6 +31,7 @@ namespace Backend.Features.Shipments.Tests
         {
             // Act
             var result = _shipmentService.GetAllShipments(null, null, null, null, null, null, null, null, null, null, null, null, null);
+
 
             // Assert
             Assert.Empty(result);
@@ -118,8 +121,6 @@ namespace Backend.Features.Shipments.Tests
             Assert.Null(result);
         }
 
-
-
         [Fact]
         public void DeleteShipment_ShipmentExists_RemovesShipment()
         {
@@ -179,6 +180,7 @@ namespace Backend.Features.Shipments.Tests
 
             // Assert
             Assert.Single(_shipmentService.GetAllShipments(null, null, null, null, null, null, null, null, null, null, null, null, null));
+
         }
     }
 }

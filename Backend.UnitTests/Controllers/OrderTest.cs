@@ -8,30 +8,36 @@ using Backend.Features.Warehouses;
 using Backend.Infrastructure.Database;
 using Backend.Request;
 
+
 namespace Backend.Features.Orders.Tests
 {
     public class OrderServiceTests
     {
         private readonly OrderService _orderService;
+
         private readonly CargoHubDbContext _mockContext;
 
         public OrderServiceTests()
         {
             _mockContext = InMemoryDatabaseFactory.CreateMockContext();
             _orderService = new OrderService(_mockContext);
+
         }
 
         [Fact]
         public void GetAllOrders_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
+
             var result = _orderService.GetAllOrders(null, null, null, null, null, null, null, null, null);
+
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
+
         public async Task AddOrder_ValidOrder_IncreasesOrderCount()
         {
             // Arrange
@@ -157,6 +163,7 @@ namespace Backend.Features.Orders.Tests
 
         [Fact]
         public async Task UpdateOrder_OrderExists_UpdatesOrderData()
+
         {
             // Arrange
             var order = new Order
@@ -252,6 +259,7 @@ namespace Backend.Features.Orders.Tests
 
             // Assert
             Assert.Single(_orderService.GetAllOrders(null, null, null, null, null, null, null, null, null));
+
         }
     }
 }

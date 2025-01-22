@@ -7,6 +7,7 @@ using Backend.UnitTests.Factories;
 using FluentValidation;
 using FluentValidation.Results;
 using Moq;
+
 using Xunit;
 
 namespace Backend.Features.Contacts.Tests
@@ -36,12 +37,14 @@ namespace Backend.Features.Contacts.Tests
             // Act
             var result = _contactService.GetAllContacts(null, null, null, null, null);
 
+
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
         public async Task AddContact_ValidContact_IncreasesContactCount()
+
         {
             // Arrange
             var contact = new Contact

@@ -28,6 +28,7 @@ namespace Backend.Features.Suppliers.Tests
             // Act
             var result = _supplierService.GetAllSuppliers(null, null, null, null, null, null, null, null, null, null, null, null);
 
+
             // Assert
             Assert.Empty(result);
         }
@@ -100,6 +101,7 @@ namespace Backend.Features.Suppliers.Tests
 
         [Fact]
         public async Task UpdateSupplier_SupplierExists_UpdatesSupplierData()
+
         {
             // Arrange
             var supplier = new Supplier
@@ -135,6 +137,7 @@ namespace Backend.Features.Suppliers.Tests
 
             // Act
             await _supplierService.UpdateSupplier(supplier.Id, updatedSupplierRequest);
+
             var retrievedSupplier = _supplierService.GetSupplierById(supplier.Id);
 
             // Assert
@@ -142,6 +145,7 @@ namespace Backend.Features.Suppliers.Tests
             Assert.Equal(updatedSupplierRequest.Code, retrievedSupplier?.Code);
             Assert.Equal(updatedSupplierRequest.Name, retrievedSupplier?.Name);
             Assert.Equal(updatedSupplierRequest.PhoneNumber, retrievedSupplier?.PhoneNumber);
+
         }
 
         [Fact]
@@ -194,11 +198,13 @@ namespace Backend.Features.Suppliers.Tests
             _mockContext.Suppliers.Add(supplier);
             _mockContext.SaveChanges();
 
+
             // Act
             _supplierService.DeleteSupplier(999);
 
             // Assert
             Assert.Single(_supplierService.GetAllSuppliers(null, null, null, null, null, null, null, null, null, null, null, null));
+
         }
     }
 }

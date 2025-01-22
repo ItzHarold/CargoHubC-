@@ -14,6 +14,7 @@ using Backend.Infrastructure.Database;
 using Backend.Requests;
 using Backend.Response;
 
+
 namespace Backend.Features.Transfers.Tests
 {
     public class TransferServiceTests
@@ -144,11 +145,6 @@ namespace Backend.Features.Transfers.Tests
             Assert.Single(allTransfers);
             Assert.Equal(transferRequest.Reference, allTransfers.First().Reference);
         }
-
-
-
-
-
         [Fact]
         public void GetTransferById_TransferExists_ReturnsTransfer()
         {
@@ -288,7 +284,9 @@ namespace Backend.Features.Transfers.Tests
             };
 
             // Act
+
             await _transferService.UpdateTransfer(transfer.Id, updatedTransferRequest);
+
             var retrievedTransfer = _transferService.GetTransferById(transfer.Id);
 
             // Assert
@@ -344,11 +342,13 @@ namespace Backend.Features.Transfers.Tests
             _mockContext.Transfers.Add(transfer);
             _mockContext.SaveChanges();
 
+
             // Act
             _transferService.DeleteTransfer(999);
 
             // Assert
             Assert.Single(_transferService.GetAllTransfers(null, null, null, null, null, null));
+
         }
     }
 }

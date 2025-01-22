@@ -25,6 +25,10 @@ namespace Backend.Features.Items
         IEnumerable<Item> GetItemsByItemGroupId(int itemGroupId);
         IEnumerable<Item> GetItemsByItemLineId(int itemLineId);
         IEnumerable<Item> GetItemsByItemTypeId(int itemTypeId);
+        IEnumerable<Item> GetItemsByItemType(int itemTypeId);
+        IEnumerable<Item> GetItemsByItemGroup(int itemGroupId);
+        IEnumerable<Item> GetItemsByItemLine(int itemLineId);
+
     }
 
     public class ItemService : IItemService

@@ -37,6 +37,7 @@ namespace Backend.Features.ItemGroups.Tests
             // Act
             var result = _itemGroupService.GetAllItemGroups(null, null, null, null);
 
+
             // Assert
             Assert.Empty(result);
         }
@@ -93,12 +94,14 @@ namespace Backend.Features.ItemGroups.Tests
 
         [Fact]
         public async Task UpdateItemGroup_ItemGroupExists_UpdatesItemGroupData()
+
         {
             // Arrange
             var itemGroup = new ItemGroup
             {
                 Id = 1,
                 Name = "Original Item Group",
+
                 Description = "Original description",
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
@@ -125,6 +128,7 @@ namespace Backend.Features.ItemGroups.Tests
 
             // Assert
             Assert.NotNull(retrievedItemGroup);
+
             Assert.Equal("Updated Item Group", retrievedItemGroup?.Name);
             Assert.Equal("Updated description", retrievedItemGroup?.Description);
             Assert.Equal(itemGroup.CreatedAt, retrievedItemGroup?.CreatedAt); // Ensure CreatedAt is unchanged
@@ -176,6 +180,7 @@ namespace Backend.Features.ItemGroups.Tests
 
             // Assert
             Assert.Empty(_itemGroupService.GetAllItemGroups(null, null, null, null));
+
         }
     }
 }

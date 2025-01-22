@@ -37,6 +37,7 @@ namespace Backend.Features.Inventories.Tests
             // Act
             var result = _inventoryService.GetAllInventories(null, null, null, null, null, null, null, null);
 
+
             // Assert
             Assert.Empty(result);
         }

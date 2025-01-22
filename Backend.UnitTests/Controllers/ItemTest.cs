@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,7 +38,9 @@ namespace Backend.Features.Items.Tests
         public void AddItem_ValidItem_IncreasesItemCount()
         {
             // Arrange
+
             var itemRequest = new ItemRequest
+
             {
                 Uid = "1",
                 Code = "12345",
@@ -132,6 +135,7 @@ namespace Backend.Features.Items.Tests
             Assert.NotNull(retrievedItem);
             Assert.Equal(updatedRequest.Code, retrievedItem?.Code);
             Assert.Equal(updatedRequest.Description, retrievedItem?.Description);
+
         }
 
         [Fact]

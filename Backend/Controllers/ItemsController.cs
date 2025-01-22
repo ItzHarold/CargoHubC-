@@ -145,6 +145,5 @@ namespace Backend.Controllers.Items
 
             return Ok(items);
         }
-
     }
 }
