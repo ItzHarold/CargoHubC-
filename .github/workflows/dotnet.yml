@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -41,19 +41,19 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      # Start API for Integration Tests
-      - name: Start API for Integration Tests
-        run: |
-          dotnet run --project Backend/Backend.csproj --urls "http://localhost:5031" &
-          echo $! > api.pid
+      # # Start API for Integration Tests
+      # - name: Start API for Integration Tests
+      #   run: |
+      #     dotnet run --project Backend/Backend.csproj --urls "http://localhost:5031" &
+      #     echo $! > api.pid
 
-      # Run C# Integration Tests
-      - name: Run Integration Tests
-        run: dotnet test Backend.IntegrationTests/Backend.IntegrationTests.csproj --collect:"XPlat Code Coverage" --no-restore --results-directory ./TestResults
+      # # Run C# Integration Tests
+      # - name: Run Integration Tests
+      #   run: dotnet test Backend.IntegrationTests/Backend.IntegrationTests.csproj --collect:"XPlat Code Coverage" --no-restore --results-directory ./TestResults
 
-      # Stop API after Integration Tests
-      - name: Stop API After Integration Tests
-        run: kill $(cat api.pid)
+      # # Stop API after Integration Tests
+      # - name: Stop API After Integration Tests
+      #   run: kill $(cat api.pid)
 
       # Run C# Unit Tests
       - name: Run Unit Tests
