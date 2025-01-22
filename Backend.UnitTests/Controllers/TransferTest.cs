@@ -3,6 +3,7 @@ using Xunit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using Moq;
 using Backend.Features.Transfers;
 using Backend.Features.Items;
 using Backend.Features.Locations;
@@ -85,8 +86,8 @@ namespace Backend.Features.Transfers.Tests
                 UnitPurchaseQuantity = 100,
                 UnitOrderQuantity = 50,
                 PackOrderQuantity = 10,
-                SupplierId = 1, // Added required SupplierId
-                SupplierPartNumber = "SPN001"
+                SupplierId = 1, // Ensure SupplierId is set
+                SupplierPartNumber = "SPN001" // Ensure SupplierPartNumber is set
             };
 
             var item2 = new Item
@@ -100,14 +101,25 @@ namespace Backend.Features.Transfers.Tests
                 UnitPurchaseQuantity = 200,
                 UnitOrderQuantity = 100,
                 PackOrderQuantity = 20,
-                SupplierId = 2, // Added required SupplierId
-                SupplierPartNumber = "SPN002"
+                SupplierId = 2, // Ensure SupplierId is set
+                SupplierPartNumber = "SPN002" // Ensure SupplierPartNumber is set
             };
 
             _mockContext.Warehouses.Add(warehouse);
             _mockContext.Locations.AddRange(locationFrom, locationTo);
             _mockContext.Items.AddRange(item1, item2);
             _mockContext.SaveChanges();
+
+            var mockItemService = new Mock<IItemService>();
+            mockItemService.Setup(service => service.GetItemById(It.IsAny<string>()))
+                .Returns(new Item
+                {
+                    Uid = "UID001",                  // UID is set
+                    Code = "ITEM001",                // Code is set
+                    Description = "Item 1 Description",  // Description is set
+                    SupplierId = 1,                  // SupplierId is set (required)
+                    SupplierPartNumber = "SPN001"    // SupplierPartNumber is set (required)
+                });
 
             var transferRequest = new TransferRequest
             {
@@ -116,20 +128,23 @@ namespace Backend.Features.Transfers.Tests
                 TransferTo = locationTo.Id,
                 TransferStatus = "Pending",
                 Items = new List<TransferItemRequest>
-                {
-                    new TransferItemRequest { ItemUid = item1.Uid, Amount = 10 },
-                    new TransferItemRequest { ItemUid = item2.Uid, Amount = 5 }
-                }
+            {
+                new TransferItemRequest { ItemUid = item1.Uid, Amount = 10 },
+                new TransferItemRequest { ItemUid = item2.Uid, Amount = 5 }
+            }
             };
 
+            var transferService = new TransferService(_mockContext, mockItemService.Object, null!);
+
             // Act
-            _transferService.AddTransfer(transferRequest);
-            var allTransfers = _transferService.GetAllTransfers(null, null, null, null, null, null);
+            transferService.AddTransfer(transferRequest);
+            var allTransfers = transferService.GetAllTransfers(null, null, null, null, null, null);
 
             // Assert
             Assert.Single(allTransfers);
             Assert.Equal(transferRequest.Reference, allTransfers.First().Reference);
         }
+
 
 
 
