@@ -100,7 +100,6 @@ jobs:
       - name: Write Coverage Summary
         run: cat ./TestResults/coverage-html/index.html >> $GITHUB_STEP_SUMMARY
 
-
   deploy:
     runs-on: ubuntu-latest
     environment: production
@@ -121,7 +120,12 @@ jobs:
         run: |
           git stash
 
-      # Fetch and switch to the development branch
+      # Fetch and track the workflow branch
+      - name: Fetch and Track Workflow Branch
+        run: |
+          git fetch origin workflow:workflow # Fetch and create a local tracking branch for workflow
+
+      # Switch to the development branch
       - name: Switch to Development Branch
         run: |
           git fetch origin
