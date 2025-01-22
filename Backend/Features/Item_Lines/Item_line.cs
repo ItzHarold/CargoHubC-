@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.Items;
 
 namespace Backend.Features.ItemLines
 {
@@ -10,7 +11,7 @@ namespace Backend.Features.ItemLines
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
-        public required int id { get; set; }
+        public int id { get; set; }
 
         [Required]
         [JsonPropertyName("name")]
@@ -18,5 +19,7 @@ namespace Backend.Features.ItemLines
 
         [JsonPropertyName("description")]
         public string? Description { get; set; }
+
+        public ICollection<Item>? Items {get; set;}
     }
 }

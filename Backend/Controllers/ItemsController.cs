@@ -1,4 +1,6 @@
 using Backend.Features.Items;
+using Backend.Request;
+using Backend.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Items
@@ -15,9 +17,9 @@ namespace Backend.Controllers.Items
         }
 
         [HttpPost(Name = "AddItem")]
-        public IActionResult AddItem([FromBody] Item item)
+        public IActionResult AddItem([FromBody] ItemRequest itemRequest)
         {
-            _service.AddItem(item);
+            _service.AddItem(itemRequest);
             return Ok();
         }
 
@@ -25,14 +27,60 @@ namespace Backend.Controllers.Items
         public IActionResult GetItemById(string uid)
         {
             var item = _service.GetItemById(uid);
-            return item is not null ? Ok(item) : NotFound();
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            var response = new ItemResponse
+            {
+                Uid = item.Uid,
+                Code = item.Code,
+                Description = item.Description,
+                ShortDescription = item.ShortDescription,
+                UpcCode = item.UpcCode,
+                ModelNumber = item.ModelNumber,
+                CommodityCode = item.CommodityCode,
+                ItemLineId = item.ItemLineId,
+                ItemGroupId = item.ItemGroupId,
+                ItemTypeId = item.ItemTypeId,
+                UnitPurchaseQuantity = item.UnitPurchaseQuantity,
+                UnitOrderQuantity = item.UnitOrderQuantity,
+                PackOrderQuantity = item.PackOrderQuantity,
+                SupplierId = item.SupplierId,
+                SupplierCode = item.SupplierCode,
+                SupplierPartNumber = item.SupplierPartNumber,
+                CreatedAt = item.CreatedAt,
+                UpdatedAt = item.UpdatedAt
+            };
+
+            return Ok(response);
         }
 
         [HttpGet(Name = "GetAllItems")]
-        public IActionResult GetAllItems()
+        public IActionResult GetAllItems(
+            string? sort,
+            string? direction,
+            string? code,
+            string? supplierPartNumber,
+            int? supplierId,
+            string? commodityCode,
+            string? supplierCode,
+            string? modelNumber)
         {
-            return Ok(_service.GetAllItems());
+            var items = _service.GetAllItems(
+                sort, 
+                direction, 
+                code, 
+                supplierPartNumber, 
+                supplierId, 
+                commodityCode, 
+                supplierCode, 
+                modelNumber);
+
+            return Ok(items);
         }
+
 
         [HttpDelete("{uid}", Name = "DeleteItem")]
         public IActionResult DeleteItem(string uid)
@@ -42,30 +90,59 @@ namespace Backend.Controllers.Items
         }
 
         [HttpPut("{uid}", Name = "UpdateItem")]
-        public IActionResult UpdateItem(string uid, [FromBody] Item item)
+        public IActionResult UpdateItem(string uid, [FromBody] ItemRequest itemRequest)
         {
-            _service.UpdateItem(uid, item);
+            _service.UpdateItem(uid, itemRequest);
             return NoContent();
         }
 
-        [HttpGet("by-item-type/{itemTypeId:int}")]
-        public IActionResult GetItemsByItemType(int itemTypeId)
+        [HttpGet("supplier/{supplierId}", Name = "GetItemsBySupplierId")]
+        public IActionResult GetItemsBySupplierId(int supplierId)
         {
-            var items = _service.GetItemsByItemType(itemTypeId);
+            var items = _service.GetItemsBySupplierId(supplierId);
             return Ok(items);
         }
 
-        [HttpGet("by-item-group/{itemGroupId:int}")]
-        public IActionResult GetItemsByItemGroup(int itemGroupId)
+        [HttpGet("group/{itemGroupId}", Name = "GetItemsByItemGroupId")]
+        public IActionResult GetItemsByItemGroupId(int itemGroupId)
         {
-            var items = _service.GetItemsByItemGroup(itemGroupId);
+            var items = _service.GetItemsByItemGroupId(itemGroupId);
+            if (items == null || !items.Any())
+            {
+                return NotFound();
+            }
+
             return Ok(items);
         }
 
-        [HttpGet("by-item-line/{itemLineId:int}")]
-        public IActionResult GetItemsByItemLine(int itemLineId)
+        [HttpGet("line/{itemLineId}", Name = "GetItemsByItemLineId")]
+        public IActionResult GetItemsByItemLineId(int itemLineId)
         {
-            var items = _service.GetItemsByItemLine(itemLineId);
+            var items = _service.GetItemsByItemLineId(itemLineId);
+            if (items == null || !items.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(items);
+        }
+
+        [HttpGet("type/{itemTypeId}", Name = "GetItemsByItemTypeId")]
+        public IActionResult GetItemsByItemTypeId(int itemTypeId)
+        {
+            // Debugging - log the request
+            Console.WriteLine($"Request received for ItemTypeId: {itemTypeId}");
+
+            var items = _service.GetItemsByItemTypeId(itemTypeId);
+
+            // Debugging - check if any items were returned
+            if (items == null || !items.Any())
+            {
+                // Log the result
+                Console.WriteLine($"No items found for ItemTypeId: {itemTypeId}");
+                return NotFound();
+            }
+
             return Ok(items);
         }
     }

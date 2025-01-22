@@ -10,11 +10,16 @@ using Backend.Features.Orders;
 using Backend.Features.Shipments;
 using Backend.Features.Suppliers;
 using Backend.Features.Transfers;
-
+using Backend.Features.Logs;
 using Backend.Features.Warehouses;
 using Backend.Infrastructure.Database;
 using Backend.Infrastructure.Middleware;
+using Backend.Features.Docks;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 namespace Backend;
 
@@ -29,23 +34,46 @@ public static class Program
         builder.Services.AddDbContext<CargoHubDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+        // Registering services with Newtonsoft.Json for reference loop handling
+        builder.Services.AddControllersWithViews()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore; // Optional: Avoid serializing null values
+            });
+        builder.Services.AddEndpointsApiExplorer();
+
+
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v2", new OpenApiInfo
+            {
+                Title = "CargoHub API",
+                Version = "v2"
+            });
+        });
+
+
         ConfigureServices(builder.Services);
 
         var app = builder.Build();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+
 
         app.UseHttpsRedirection();
 
         app.UseMiddleware<LoggingMiddleware>();
-        app.UseMiddleware<ApiKeyMiddleware>();
+        //app.UseMiddleware<ApiKeyMiddleware>(); //While in development Comment out! to acces swagger
         app.UseAuthorization();
 
         app.MapControllers();
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v2/swagger.json", "CargoHub API V2");
+        });
+
+        app.Urls.Add("http://localhost:5031");
 
         app.Run();
     }
@@ -53,23 +81,38 @@ public static class Program
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddAuthorization();
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
         services.AddLogging();
-        services.AddControllers();
 
-        services.AddSingleton<IClientService, ClientService>();
-        services.AddSingleton<IWarehouseService, WarehouseService>();
-        services.AddSingleton<IContactService, ContactService>();
-        services.AddSingleton<ITransferService, TransferService>();
-        services.AddSingleton<ILocationService, LocationService>();
-        services.AddSingleton<IItemService, ItemService>();
-        services.AddSingleton<IInventoryService, InventoryService>();
-        services.AddSingleton<IItemGroupService,ItemGroupService>();
-        services.AddSingleton<IItemTypeService,ItemTypeService>();
-        services.AddSingleton<IItemLineService,ItemLineService>();
-        services.AddSingleton<IShipmentService,ShipmentService>();
-        services.AddSingleton<IOrderService,OrderService>();
-        services.AddSingleton<ISupplierService,SupplierService>();
+        // FluentValidation configuration
+        services.AddValidatorsFromAssemblyContaining<ClientValidator>();
+        services.AddValidatorsFromAssemblyContaining<ContactValidator>();
+        services.AddValidatorsFromAssemblyContaining<InventoryValidator>();
+        services.AddValidatorsFromAssemblyContaining<ItemGroupValidator>();
+        services.AddValidatorsFromAssemblyContaining<ItemLineValidator>();
+        services.AddValidatorsFromAssemblyContaining<ItemTypeValidator>();
+        services.AddValidatorsFromAssemblyContaining<LocationValidator>();
+        services.AddValidatorsFromAssemblyContaining<WarehouseValidator>();
+        services.AddValidatorsFromAssemblyContaining<ShipmentValidator>();
+        services.AddValidatorsFromAssemblyContaining<TransferValidator>();
+
+
+
+
+        services.AddTransient<IClientService, ClientService>();
+        services.AddTransient<IWarehouseService, WarehouseService>();
+        services.AddTransient<IContactService, ContactService>();
+        services.AddTransient<ITransferService, TransferService>();
+        services.AddTransient<ILocationService, LocationService>();
+        services.AddTransient<IItemService, ItemService>();
+        services.AddTransient<IInventoryService, InventoryService>();
+        services.AddTransient<IItemGroupService, ItemGroupService>();
+        services.AddTransient<IItemTypeService, ItemTypeService>();
+        services.AddTransient<IItemLineService, ItemLineService>();
+        services.AddTransient<IShipmentService, ShipmentService>();
+        services.AddTransient<IOrderService, OrderService>();
+        services.AddTransient<ISupplierService, SupplierService>();
+        services.AddTransient<ILogService, LogService>();
+        services.AddTransient<IDockService, DockService>();
+
     }
 }

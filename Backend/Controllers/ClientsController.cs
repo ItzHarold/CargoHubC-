@@ -1,6 +1,10 @@
 using System.Collections.Generic;
 using Backend.Features.Clients;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Response;
+using Backend.Requests;
 
 namespace Backend.Controllers.Clients
 {
@@ -16,9 +20,9 @@ namespace Backend.Controllers.Clients
         }
 
         [HttpGet]
-        public IActionResult GetAllClients()
+        public IActionResult GetAllClients([FromQuery] string? sort, [FromQuery] string? direction, [FromQuery] string? name, [FromQuery] string? city, [FromQuery] string? country)
         {
-            var clients = _clientService.GetAllClients();
+            var clients = _clientService.GetAllClients(sort, direction, name, city, country);
             return Ok(clients);
         }
 
@@ -30,25 +34,55 @@ namespace Backend.Controllers.Clients
             {
                 return NotFound();
             }
-            return Ok(client);
+
+            var response = new ClientResponse
+            {
+                Id = client.Id,
+                Name = client.Name,
+                Address = client.Address,
+                City = client.City,
+                ZipCode = client.ZipCode,
+                Province = client.Province,
+                Country = client.Country,
+                ContactName = client.ContactName,
+                ContactPhone = client.ContactPhone,
+                ContactEmail = client.ContactEmail
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public IActionResult AddClient(Client client)
+        public async Task<IActionResult> AddClient([FromBody] ClientRequest client)
         {
-            _clientService.AddClient(client);
-            return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
+            try
+            {
+                int newClientId = await _clientService.AddClient(client);
+                return GetClientById(newClientId);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateClient(int id, Client client)
+        public async Task<IActionResult> UpdateClient(int id, [FromBody] Client client)
         {
             if (id != client.Id)
             {
-                return BadRequest();
+                return BadRequest("Client ID in the path does not match the ID in the body.");
             }
-            _clientService.UpdateClient(client);
-            return NoContent();
+
+            try
+            {
+                await _clientService.UpdateClient(client);
+                return NoContent();
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpDelete("{id}")]

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace Backend.Infrastructure.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<LoggingMiddleware> _logger;
+
         private static readonly Action<ILogger, string, string, string?, Exception?> _logExecutingAction;
         private static readonly Action<ILogger, string, string, string?, Exception?> _logExecutedAction;
 
@@ -39,12 +41,25 @@ namespace Backend.Infrastructure.Middleware
 
             if (request.Method != HttpMethods.Get)
             {
-                requestBody = " and body: " + await ReadRequestBodyAsync(request);
+                requestBody = await ReadRequestBodyAsync(request);
             }
+
+            // Extract API key from the headers
+            var apiKey = context.Request.Headers["x-api-key"].FirstOrDefault() ?? "Unknown";
+
+            // Extract action name from route data
+            var actionName = context.GetRouteData()?.Values["action"]?.ToString() ?? "Unknown";
 
             _logExecutingAction(_logger, request.Path, request.Method, requestBody ?? string.Empty, null);
 
-            await _next(context);
+            // Resolve the scoped service
+            using (var scope = context.RequestServices.CreateScope())
+            {
+                var logService = scope.ServiceProvider.GetRequiredService<Backend.Features.Logs.ILogService>();
+                await _next(context);
+                var responseType = context.Response.StatusCode.ToString(CultureInfo.InvariantCulture);
+                logService.LogRequest(apiKey, request.Method, responseType, requestBody, actionName);
+            }
 
             _logExecutedAction(_logger, request.Path, request.Method, requestBody ?? string.Empty, null);
         }

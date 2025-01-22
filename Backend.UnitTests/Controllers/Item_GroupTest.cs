@@ -1,5 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Backend.Features.ItemGroups;
+using Backend.Infrastructure.Database;
+using Backend.Requests;
+using Backend.UnitTests.Factories;
+using FluentValidation;
+using FluentValidation.Results;
+using Moq;
 using Xunit;
 
 namespace Backend.Features.ItemGroups.Tests
@@ -7,40 +15,50 @@ namespace Backend.Features.ItemGroups.Tests
     public class ItemGroupServiceTests
     {
         private readonly ItemGroupService _itemGroupService;
+        private readonly Mock<IValidator<ItemGroup>> _mockValidator;
+        private readonly CargoHubDbContext _mockContext;
 
         public ItemGroupServiceTests()
         {
-            _itemGroupService = new ItemGroupService();
+            _mockValidator = new Mock<IValidator<ItemGroup>>();
+            _mockContext = InMemoryDatabaseFactory.CreateMockContext();
+
+            // Set up default behavior for the validator mock
+            _mockValidator
+                .Setup(v => v.ValidateAsync(It.IsAny<ItemGroup>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            _itemGroupService = new ItemGroupService(_mockContext, _mockValidator.Object);
         }
 
         [Fact]
         public void GetAllItemGroups_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
-            var result = _itemGroupService.GetAllItemGroups();
+            var result = _itemGroupService.GetAllItemGroups(null, null, null, null);
+
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void AddItemGroup_ValidItemGroup_IncreasesItemGroupCount()
+        public async Task AddItemGroup_ValidItemGroup_IncreasesItemGroupCount()
         {
             // Arrange
-            var itemGroup = new ItemGroup
+            var itemGroupRequest = new ItemGroupRequest
             {
-                Id = 2,
                 Name = "Test Item Group",
                 Description = "Description of test item group"
             };
 
             // Act
-            _itemGroupService.AddItemGroup(itemGroup);
-            var allItemGroups = _itemGroupService.GetAllItemGroups();
+            var newItemGroupId = await _itemGroupService.AddItemGroup(itemGroupRequest);
+            var allItemGroups = _itemGroupService.GetAllItemGroups(null, null, null, null);
 
             // Assert
             Assert.Single(allItemGroups);
-            Assert.Equal(itemGroup.Name, allItemGroups.First().Name);
+            Assert.Contains(allItemGroups, ig => ig.Id == newItemGroupId && ig.Name == itemGroupRequest.Name);
         }
 
         [Fact]
@@ -49,11 +67,12 @@ namespace Backend.Features.ItemGroups.Tests
             // Arrange
             var itemGroup = new ItemGroup
             {
-                Id = 2,
                 Name = "Test Item Group",
                 Description = "Description of test item group"
             };
-            _itemGroupService.AddItemGroup(itemGroup);
+
+            _mockContext.ItemGroups?.Add(itemGroup);
+            _mockContext.SaveChanges();
 
             // Act
             var retrievedItemGroup = _itemGroupService.GetItemGroupById(itemGroup.Id);
@@ -74,36 +93,51 @@ namespace Backend.Features.ItemGroups.Tests
         }
 
         [Fact]
-        public void UpdateItemGroup_ItemGroupExists_UpdatesItemGroupData()
+        public async Task UpdateItemGroup_ItemGroupExists_UpdatesItemGroupData()
+
         {
             // Arrange
             var itemGroup = new ItemGroup
             {
                 Id = 1,
                 Name = "Original Item Group",
-                Description = "Original description"
-            };
-            _itemGroupService.AddItemGroup(itemGroup);
 
-            var updatedItemGroup = new ItemGroup
-            {
-                Id = itemGroup.Id,
-                Name = "Updated Item Group",
-                Description = "Updated description"
+                Description = "Original description",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
+
+            // Add the initial ItemGroup to the mock context
+            _mockContext.ItemGroups?.Add(itemGroup);
+            _mockContext.SaveChanges();
+
+            // Mock the validator to return valid results
+            _mockValidator
+                .Setup(v => v.Validate(It.IsAny<ItemGroup>()))
+                .Returns(new ValidationResult()); // No validation errors
+
+            // Modify the existing entity directly
+            itemGroup.Name = "Updated Item Group";
+            itemGroup.Description = "Updated description";
 
             // Act
-            _itemGroupService.UpdateItemGroup(updatedItemGroup);
+            await _itemGroupService.UpdateItemGroup(itemGroup);
+
+            // Retrieve the updated ItemGroup from the service
             var retrievedItemGroup = _itemGroupService.GetItemGroupById(itemGroup.Id);
 
             // Assert
             Assert.NotNull(retrievedItemGroup);
-            Assert.Equal(updatedItemGroup.Name, retrievedItemGroup?.Name);
-            Assert.Equal(updatedItemGroup.Description, retrievedItemGroup?.Description);
+
+            Assert.Equal("Updated Item Group", retrievedItemGroup?.Name);
+            Assert.Equal("Updated description", retrievedItemGroup?.Description);
+            Assert.Equal(itemGroup.CreatedAt, retrievedItemGroup?.CreatedAt); // Ensure CreatedAt is unchanged
+            Assert.NotEqual(itemGroup.CreatedAt, retrievedItemGroup?.UpdatedAt); // Ensure UpdatedAt is updated
         }
 
+
         [Fact]
-        public void UpdateItemGroup_ItemGroupDoesNotExist_NoChangesMade()
+        public void UpdateItemGroup_ItemGroupDoesNotExist_ThrowsException()
         {
             // Arrange
             var updatedItemGroup = new ItemGroup
@@ -113,11 +147,8 @@ namespace Backend.Features.ItemGroups.Tests
                 Description = "This group does not exist"
             };
 
-            // Act
-            _itemGroupService.UpdateItemGroup(updatedItemGroup);
-
-            // Assert
-            Assert.Empty(_itemGroupService.GetAllItemGroups());
+            // Act & Assert
+            Assert.ThrowsAsync<KeyNotFoundException>(async () => await _itemGroupService.UpdateItemGroup(updatedItemGroup));
         }
 
         [Fact]
@@ -126,15 +157,16 @@ namespace Backend.Features.ItemGroups.Tests
             // Arrange
             var itemGroup = new ItemGroup
             {
-                Id = 1,
                 Name = "Test Item Group",
                 Description = "Description for deletion test"
             };
-            _itemGroupService.AddItemGroup(itemGroup);
+
+            _mockContext.ItemGroups?.Add(itemGroup);
+            _mockContext.SaveChanges();
 
             // Act
             _itemGroupService.DeleteItemGroup(itemGroup.Id);
-            var result = _itemGroupService.GetAllItemGroups();
+            var result = _itemGroupService.GetAllItemGroups(null, null, null, null);
 
             // Assert
             Assert.Empty(result);
@@ -143,20 +175,12 @@ namespace Backend.Features.ItemGroups.Tests
         [Fact]
         public void DeleteItemGroup_ItemGroupDoesNotExist_NoChangesMade()
         {
-            // Arrange
-            var itemGroup = new ItemGroup
-            {
-                Id = 1,
-                Name = "Test Item Group",
-                Description = "Description for deletion test"
-            };
-            _itemGroupService.AddItemGroup(itemGroup);
-
             // Act
             _itemGroupService.DeleteItemGroup(999);
 
             // Assert
-            Assert.Single(_itemGroupService.GetAllItemGroups());
+            Assert.Empty(_itemGroupService.GetAllItemGroups(null, null, null, null));
+
         }
     }
 }

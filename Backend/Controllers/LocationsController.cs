@@ -1,5 +1,9 @@
 using System.Collections.Generic;
 using Backend.Features.Locations;
+using Backend.Request;
+using Backend.Response;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Locations
@@ -15,34 +19,106 @@ namespace Backend.Controllers.Locations
             _locationService = locationService;
         }
 
-        [HttpGet]
-        public IEnumerable<Location> GetAllLocations()
+        [HttpGet(Name = "GetAllLocations")]
+        public IActionResult GetAllLocations(
+            string? sort,
+            string? direction,
+            int? warehouseId,
+            string? code,
+            string? row,
+            string? rack,
+            string? shelf)
         {
-            return _locationService.GetAllLocations();
+            var locations = _locationService.GetAllLocations(
+                sort, 
+                direction, 
+                warehouseId, 
+                code, 
+                row, 
+                rack, 
+                shelf);
+
+            return Ok(locations);
         }
+
 
         [HttpGet("{id}")]
-        public Location? GetLocationById(int id)
+        public IActionResult GetLocationById(int id)
         {
-            return _locationService.GetLocationById(id);
-        }
+            var location = _locationService.GetLocationById(id);
+            if (location == null)
+            {
+                return NotFound(new { message = "Location not found." });
+            }
 
-        [HttpPut]
-        public void UpdateLocation([FromBody] Location location)
-        {
-            _locationService.UpdateLocation(location);
+            var response = new LocationResponse
+            {
+                Id = location.Id,
+                WarehouseId = location.WarehouseId,
+                Code = location.Code,
+                Name = $"Row: {location.Row}, Rack: {location.Rack}, Shelf: {location.Shelf}",
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public void AddLocation([FromBody] Location location)
+        public async Task<IActionResult> AddLocation([FromBody] LocationRequest locationRequest)
         {
-            _locationService.AddLocation(location);
+            try
+            {
+                var createdLocation = await _locationService.AddLocation(locationRequest);
+                var response = new LocationResponse
+                {
+                    Id = createdLocation.Id,
+                    WarehouseId = createdLocation.WarehouseId,
+                    Code = createdLocation.Code,
+                    Name = $"Row: {createdLocation.Row}, Rack: {createdLocation.Rack}, Shelf: {createdLocation.Shelf}",
+                };
+
+                return CreatedAtAction(nameof(GetLocationById), new { id = response.Id }, response);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateLocation(int id, [FromBody] LocationRequest locationRequest)
+        {
+            try
+            {
+                await _locationService.UpdateLocation(id, locationRequest);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpDelete("{id}")]
-        public void DeleteLocation(int id)
+        public IActionResult DeleteLocation(int id)
         {
             _locationService.DeleteLocation(id);
+            return NoContent();
+        }
+
+        private static object FormatValidationErrors(IEnumerable<ValidationFailure> errors)
+        {
+            return new
+            {
+                errors = errors.Select(e => new
+                {
+                    field = e.PropertyName,
+                    message = e.ErrorMessage
+                })
+            };
         }
     }
 }

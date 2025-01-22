@@ -1,51 +1,127 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
+using Backend.Infrastructure.Database;
+using Backend.Requests;
+using FluentValidation;
 
 namespace Backend.Features.ItemTypes
 {
     public interface IItemTypeService
     {
-        IEnumerable<ItemType> GetAllItemTypes();
+        IEnumerable<ItemType> GetAllItemTypes(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description);
         ItemType? GetItemTypeById(int id);
-        void AddItemType(ItemType itemType);
-        void UpdateItemType(int id, ItemType itemType);
+        Task<int> AddItemType(ItemTypeRequest itemTypeRequest);
+        Task UpdateItemType(ItemType itemType);
         void DeleteItemType(int id);
     }
 
     public class ItemTypeService : IItemTypeService
     {
-        public List<ItemType> Context { get; set; } = [];
+        private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<ItemType> _validator;
 
-        public IEnumerable<ItemType> GetAllItemTypes()
+        public ItemTypeService(CargoHubDbContext dbContext, IValidator<ItemType> validator)
         {
-            return Context;
+            _dbContext = dbContext;
+            _validator = validator;
         }
 
+         public IEnumerable<ItemType> GetAllItemTypes(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description)
+        {
+            if (_dbContext.ItemTypes == null)
+            {
+                return new List<ItemType>();
+            }
+            IQueryable<ItemType> query = _dbContext.ItemTypes.AsQueryable();
+
+            // Apply filtering based on query parameters
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(i => i.Name.Contains(name));
+            }
+
+            if (!string.IsNullOrEmpty(description))
+            {
+                query = query.Where(i => i.Description!.Contains(description));
+            }
+
+            // Apply sorting based on the query parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "name":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.Name) : query.OrderBy(i => i.Name);
+                        break;
+                    case "description":
+                        query = direction == "desc" ? query.OrderByDescending(i => i.Description) : query.OrderBy(i => i.Description);
+                        break;
+                    default:
+                        // Default sorting behavior (by Name)
+                        query = query.OrderBy(i => i.Name);
+                        break;
+                }
+            }
+            // Return the filtered and sorted list
+            return query.ToList();
+        }
         public ItemType? GetItemTypeById(int id)
         {
-            return Context.FirstOrDefault(i => i.Id == id);
+            return _dbContext.ItemTypes?.Find(id);
         }
 
-        public void AddItemType(ItemType itemType)
+        public async Task<int> AddItemType(ItemTypeRequest itemTypeRequest)
         {
-            Context.Add(itemType);
+            // var validationResult = _validator.Validate(itemGroup);
+
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            var itemType = new ItemType()
+            {
+                Name = itemTypeRequest.Name,
+                Description = itemTypeRequest.Description
+            };
+
+            itemType.CreatedAt = DateTime.Now;
+            itemType.UpdatedAt = itemType.CreatedAt;
+
+            _dbContext.ItemTypes?.Add(itemType);
+            await _dbContext.SaveChangesAsync();
+            return itemType.Id;
         }
 
-        public void UpdateItemType(int id, ItemType itemType)
+        public async Task UpdateItemType(ItemType itemType)
         {
-            if (id != itemType.Id) return;
+            var validationResult = _validator.Validate(itemType);
 
-            int index = Context.FindIndex(i => i.Id == id);
-            Context[index] = itemType;
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
+            itemType.UpdatedAt = DateTime.Now;
+            _dbContext.ItemTypes?.Update(itemType);
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteItemType(int id)
         {
-            int index = Context.FindIndex(i => i.Id == id);
-            if (index >= 0)
+            var itemType = _dbContext.ItemTypes?.FirstOrDefault(c => c.Id == id);
+            if (itemType != null)
             {
-                Context.RemoveAt(index);
+                _dbContext.ItemTypes?.Remove(itemType);
+                _dbContext.SaveChanges();
             }
         }
     }

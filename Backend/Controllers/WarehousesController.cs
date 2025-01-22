@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Backend.Features.Warehouses;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Requests;
+using Backend.Response;
 
 namespace Backend.Controllers.Warehouses
 {
@@ -15,34 +18,106 @@ namespace Backend.Controllers.Warehouses
             _warehouseService = warehouseService;
         }
 
-        [HttpGet]
-        public IEnumerable<Warehouse> GetAllWarehouses()
+        [HttpGet(Name = "GetAllWarehouses")]
+        public IActionResult GetAllWarehouses(
+            string? sort,
+            string? direction,
+            string? code,
+            string? name,
+            string? address,
+            string? zip,
+            string? city,
+            string? province,
+            string? country)
         {
-            return _warehouseService.GetAllWarehouses();
+            var warehouses = _warehouseService.GetAllWarehouses(
+                sort,
+                direction,
+                code,
+                name,
+                address,
+                zip,
+                city,
+                province,
+                country
+            );
+
+            return Ok(warehouses);
         }
 
+
         [HttpGet("{id}")]
-        public Warehouse? GetWarehouseById(int id)
+        public IActionResult GetWarehouseById(int id)
         {
-            return _warehouseService.GetWarehouseById(id);
+            var warehouse = _warehouseService.GetWarehouseById(id);
+            if (warehouse == null)
+            {
+                return NotFound(new { message = "Warehouse not found." });
+            }
+
+            var response = new WarehouseResponse
+            {
+                Code = warehouse.Code,
+                Name = warehouse.Name,
+                City = warehouse.City,
+                Zip = warehouse.Zip,
+                Country = warehouse.Country,
+                Id = warehouse.Id,
+                Province = warehouse.Province,
+                Address = warehouse.Address,
+                Contacts = warehouse.WarehouseContacts.Select(c => new ContactRequest
+                {
+                    ContactName = c.Contact.ContactName,
+                    ContactEmail = c.Contact.ContactEmail,
+                    ContactPhone = c.Contact.ContactPhone,
+                }).ToList(),
+            };
+
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public void AddWarehouse([FromBody] Warehouse warehouse)
+        public async Task<IActionResult> AddWarehouse([FromBody] WarehouseRequest warehouse)
         {
-            _warehouseService.AddWarehouse(warehouse);
+            try
+            {
+                int newWarehouseId = await _warehouseService.AddWarehouse(warehouse);
+                return GetWarehouseById(newWarehouseId);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
-        [HttpPut]
-        public void UpdateWarehouse([FromBody] Warehouse warehouse)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateWarehouse(int id, [FromBody] WarehouseRequest request)
         {
-            _warehouseService.UpdateWarehouse(warehouse);
+            try
+            {
+                await _warehouseService.UpdateWarehouse(id, request);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
-        public void DeleteWarehouse(int id)
+        public IActionResult DeleteWarehouse(int id)
         {
             _warehouseService.DeleteWarehouse(id);
+            return NoContent();
         }
     }
 }

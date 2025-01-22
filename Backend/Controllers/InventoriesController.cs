@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Backend.Features.Inventories;
+using Backend.Response;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Inventories
@@ -16,11 +18,29 @@ namespace Backend.Controllers.Inventories
         }
 
         [HttpGet]
-        public IActionResult GetAllInventories()
+        public IActionResult GetAllInventories(
+            string? sort,
+            string? direction,
+            string? itemId,
+            int? totalOnHand,
+            int? totalExpected,
+            int? totalOrdered,
+            int? totalAllocated,
+            int? totalAvailable)
         {
-            var inventory = _inventoryService.GetAllInventories();
-            return Ok(inventory);
+            var inventories = _inventoryService.GetAllInventories(
+                sort,
+                direction,
+                itemId,
+                totalOnHand,
+                totalExpected,
+                totalOrdered,
+                totalAllocated,
+                totalAvailable);
+
+            return Ok(inventories);
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetInventoryById(int id)
@@ -30,24 +50,54 @@ namespace Backend.Controllers.Inventories
             {
                 return NotFound();
             }
-            return Ok(inventory);
+
+            var response = new InventoryResponse
+            {
+                Id = inventory.Id,
+                ItemId = inventory.ItemId,
+                Description = inventory.Description,
+                ItemReference = inventory.ItemReference,
+                LocationId = inventory.LocationId,
+                TotalOnHand = inventory.TotalOnHand,
+                TotalExpected = inventory.TotalExpected,
+                TotalOrdered = inventory.TotalOrdered,
+                TotalAllocated = inventory.TotalAllocated,
+                TotalAvailable = inventory.TotalAvailable
+            };
+
+            return Ok(response);
         }
 
-        public IActionResult AddInventory(Inventory inventory)
+        [HttpPost]
+        public async Task<IActionResult> AddInventory([FromBody] InventoryRequest inventoryRequest)
         {
-            _inventoryService.AddInventory(inventory);
-            return CreatedAtAction(nameof(GetInventoryById), new { id = inventory.Id }, inventory);
+            try
+            {
+                int newInventoryId = await _inventoryService.AddInventory(inventoryRequest);
+                return GetInventoryById(newInventoryId);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateInventory(int id, Inventory inventory)
+        public async Task<IActionResult> UpdateInventory(int id, [FromBody] InventoryRequest inventoryRequest)
         {
-            if (id != inventory.Id)
+            try
             {
-                return BadRequest();
+                await _inventoryService.UpdateInventory(id, inventoryRequest);
+                return NoContent();
             }
-            _inventoryService.UpdateInventory(inventory);
-            return NoContent();
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpDelete("{id}")]
@@ -56,5 +106,38 @@ namespace Backend.Controllers.Inventories
             _inventoryService.DeleteInventory(id);
             return NoContent();
         }
+
+        [HttpGet("with-locations")]
+        public IActionResult GetInventoriesWithLocations([FromQuery] string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId))
+            {
+                return BadRequest(new { message = "itemId is required." });
+            }
+
+            var inventoriesWithLocations = _inventoryService.GetInventoryWithLocations(itemId);
+
+            if (!inventoriesWithLocations.Any())
+            {
+                return NotFound(new { message = $"No inventories found for itemId: {itemId}" });
+            }
+
+            return Ok(inventoriesWithLocations);
+        }
+
+        [HttpGet("total")]
+        public IActionResult GetTotalInventoryByItemId([FromQuery] string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId))
+            {
+                return BadRequest(new { message = "itemId is required." });
+            }
+
+            var totalInventory = _inventoryService.GetTotalInventoryByItemId(itemId);
+
+            return Ok(new { itemId, totalInventory });
+        }
+
+
     }
 }

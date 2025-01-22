@@ -1,6 +1,9 @@
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
 using Backend.Features.Suppliers;
+using Backend.Response;
+using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.Suppliers
 {
@@ -15,18 +18,39 @@ namespace Backend.Controllers.Suppliers
             _supplierService = supplierService;
         }
 
-        [HttpGet]
-        public IEnumerable<Supplier> GetAllSuppliers()
+        [HttpGet(Name = "GetAllSuppliers")]
+        public IActionResult GetAllSuppliers(
+            string? sort,
+            string? direction,
+            string? code,
+            string? name,
+            string? address,
+            string? city,
+            string? zipCode,
+            string? province,
+            string? country,
+            string? contactName,
+            string? phoneNumber,
+            string? reference)
         {
-            return _supplierService.GetAllSuppliers();
+            var suppliers = _supplierService.GetAllSuppliers(
+                sort,
+                direction,
+                code,
+                name,
+                address,
+                city,
+                zipCode,
+                province,
+                country,
+                contactName,
+                phoneNumber,
+                reference
+            );
+
+            return Ok(suppliers);
         }
 
-        [HttpPost]
-        public IActionResult AddSupplier([FromBody]Supplier supplier)
-        {
-            _supplierService.AddSupplier(supplier);
-            return Ok();
-        }
 
         [HttpGet("{id}")]
         public IActionResult GetSupplierById(int id)
@@ -34,29 +58,92 @@ namespace Backend.Controllers.Suppliers
             var supplier = _supplierService.GetSupplierById(id);
             if (supplier == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Supplier not found." });
             }
-            return Ok(supplier);
+
+            // Convert Supplier entity to SupplierResponse
+            var response = new SupplierResponse
+            {
+                Id = supplier.Id,
+                Code = supplier.Code,
+                Name = supplier.Name,
+                Address = supplier.Address,
+                AddressExtra = supplier.AddressExtra,
+                City = supplier.City,
+                ZipCode = supplier.ZipCode,
+                Province = supplier.Province,
+                Country = supplier.Country,
+                ContactName = supplier.ContactName,
+                PhoneNumber = supplier.PhoneNumber,
+                Reference = supplier.Reference,
+                // Convert Items to ItemResponse
+                Items = supplier.Items?.Select(item => new ItemResponse
+                {
+                    Uid = item.Uid,
+                    Code = item.Code,
+                    Description = item.Description,
+                    ShortDescription = item.ShortDescription,
+                    UpcCode = item.UpcCode,
+                    ModelNumber = item.ModelNumber,
+                    CommodityCode = item.CommodityCode,
+                    SupplierId = item.SupplierId,
+                    SupplierPartNumber = item.SupplierPartNumber
+                }).ToList() ?? new List<ItemResponse>() // Ensure an empty list if no items are present
+            };
+
+            return Ok(response);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> AddSupplier([FromBody] SupplierRequest supplierRequest)
+        {
+            try
+            {
+                var createdSupplier = await _supplierService.AddSupplier(supplierRequest);
+                return CreatedAtAction(nameof(GetSupplierById), new { id = createdSupplier.Id }, createdSupplier);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateSupplier(int id, [FromBody]Supplier supplier)
+        public async Task<IActionResult> UpdateSupplier(int id, [FromBody] SupplierRequest supplierRequest)
         {
-            var existingSupplier = _supplierService.GetSupplierById(id);
-            if (existingSupplier == null)
+            try
             {
-                return NotFound();
+                await _supplierService.UpdateSupplier(id, supplierRequest);
+                return NoContent();
             }
-            supplier.Id = id;
-            _supplierService.UpdateSupplier(supplier);
-            return Ok();
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteSupplier(int id)
         {
             _supplierService.DeleteSupplier(id);
-            return Ok();
+            return NoContent();
+        }
+
+        private static object FormatValidationErrors(IEnumerable<ValidationFailure> errors)
+        {
+            return new
+            {
+                errors = errors.Select(e => new
+                {
+                    field = e.PropertyName,
+                    message = e.ErrorMessage
+                })
+            };
         }
     }
 }

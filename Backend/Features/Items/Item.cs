@@ -1,6 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Backend.Features.ItemLines;
+using Backend.Features.ItemGroups;
+using Backend.Features.ItemTypes;
+using Backend.Features.Suppliers;
+using Backend.Features.Inventories;
+using Backend.Features.TransferItems;
+using Backend.Features.OrderItems;
+using Backend.Features.ShimpentItems;
 
 namespace Backend.Features.Items
 {
@@ -33,23 +41,55 @@ namespace Backend.Features.Items
         public string? CommodityCode { get; set; }
 
         [Required]
-        [ForeignKey("ItemLine")]
         [JsonPropertyName("item_line")]
-        public required int ItemLine { get; set; }
+        public int? ItemLineId { get; set; }
 
         [Required]
-        [ForeignKey("ItemGroup")]
         [JsonPropertyName("item_group")]
-        public required int ItemGroup { get; set; }
+        public int? ItemGroupId { get; set; }
 
         [Required]
-        [ForeignKey("ItemType")]
         [JsonPropertyName("item_type")]
-        public required int ItemType { get; set; }
+        public int? ItemTypeId { get; set; }
 
         [Required]
-        [ForeignKey("Supplier")]
+        [JsonPropertyName("unit_purchase_quantity")]
+        public int UnitPurchaseQuantity { get; set; }
+
+        [Required]
+        [JsonPropertyName("unit_order_quantity")]
+        public int UnitOrderQuantity { get; set; }
+
+        [Required]
+        [JsonPropertyName("pack_order_quantity")]
+        public int PackOrderQuantity { get; set; }
+
+        [Required]
         [JsonPropertyName("supplier_id")]
         public required int SupplierId { get; set; }
+
+        [JsonPropertyName("supplier_code")]
+        public string? SupplierCode { get; set; }
+
+        [Required]
+        [JsonPropertyName("supplier_part_number")]
+        public required string SupplierPartNumber { get; set; }
+
+        [JsonPropertyName("transfer_items")]
+        public ICollection<TransferItem>? TransferItems { get; set; } = new List<TransferItem>();
+
+        [JsonPropertyName("order_items")]
+        public ICollection<OrderItem>? OrderItems { get; set; }  = null!;
+
+        [JsonPropertyName("shipment_items")]
+        public ICollection<ShipmentItem>? ShipmentItems { get; } = [];
+
+
+        // NAVIGATION PRINCEPLES
+        public ItemGroup? ItemGroup { get; set; }
+        public ItemLine? ItemLine { get; set; }
+        public ItemType? ItemType { get; set; }
+        public Supplier? Supplier { get; set; }
+        public Inventory? Inventory { get; set; }
     }
 }

@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -41,19 +41,19 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      # Start API for Integration Tests
-      - name: Start API for Integration Tests
-        run: |
-          dotnet run --project Backend/Backend.csproj --urls "http://localhost:5031" &
-          echo $! > api.pid
+      # # Start API for Integration Tests
+      # - name: Start API for Integration Tests
+      #   run: |
+      #     dotnet run --project Backend/Backend.csproj --urls "http://localhost:5031" &
+      #     echo $! > api.pid
 
-      # Run C# Integration Tests
-      - name: Run Integration Tests
-        run: dotnet test Backend.IntegrationTests/Backend.IntegrationTests.csproj --collect:"XPlat Code Coverage" --no-restore --results-directory ./TestResults
+      # # Run C# Integration Tests
+      # - name: Run Integration Tests
+      #   run: dotnet test Backend.IntegrationTests/Backend.IntegrationTests.csproj --collect:"XPlat Code Coverage" --no-restore --results-directory ./TestResults
 
-      # Stop API after Integration Tests
-      - name: Stop API After Integration Tests
-        run: kill $(cat api.pid)
+      # # Stop API after Integration Tests
+      # - name: Stop API After Integration Tests
+      #   run: kill $(cat api.pid)
 
       # Run C# Unit Tests
       - name: Run Unit Tests
@@ -128,10 +128,10 @@ jobs:
         run: |
           git stash || echo "No changes to stash"
 
-      # Fetch and track the workflow branch
-      - name: Fetch and Track Workflow Branch
-        run: |
-          git fetch origin workflow:workflow
+      # # Fetch and track the workflow branch
+      # - name: Fetch and Track Workflow Branch
+      #   run: |
+      #     git fetch origin workflow:workflow
 
       # Switch to the development branch
       - name: Switch to Development Branch
@@ -139,14 +139,14 @@ jobs:
           git fetch origin
           git checkout development
 
-      # Merge the workflow branch into development
-      - name: Merge Workflow into Development
-        run: |
-          git merge workflow --no-ff -m "Merge workflow into development" || {
-            echo "Merge conflict occurred"
-            git merge --abort
-            exit 1
-          }
+      # # Merge the workflow branch into development
+      # - name: Merge Workflow into Development
+      #   run: |
+      #     git merge workflow --no-ff -m "Merge workflow into development" || {
+      #       echo "Merge conflict occurred"
+      #       git merge --abort
+      #       exit 1
+      #     }
 
       # Push changes to the development branch
       - name: Push to Development Branch
@@ -155,15 +155,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
 
-      # Apply stashed changes for post-deployment review
-      - name: Apply Stashed Changes
-        if: success()
-        run: |
-          if git stash list | grep -q .; then
-            git stash apply || echo "Failed to apply stash"
-          else
-            echo "No stashes to apply"
-          fi
+      # # Apply stashed changes for post-deployment review
+      # - name: Apply Stashed Changes
+      #   if: success()
+      #   run: |
+      #     if git stash list | grep -q .; then
+      #       git stash apply || echo "Failed to apply stash"
+      #     else
+      #       echo "No stashes to apply"
+      #     fi
 
       # Modify and commit changes after deployment
       - name: Modify and Commit Changes

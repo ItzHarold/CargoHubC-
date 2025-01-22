@@ -1,5 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Backend.Features.Inventories;
+using Backend.Infrastructure.Database;
+using Backend.Response;
+using Backend.UnitTests.Factories;
+using FluentValidation;
+using FluentValidation.Results;
+using Moq;
 using Xunit;
 
 namespace Backend.Features.Inventories.Tests
@@ -7,45 +15,56 @@ namespace Backend.Features.Inventories.Tests
     public class InventoryServiceTests
     {
         private readonly InventoryService _inventoryService;
+        private readonly Mock<IValidator<Inventory>> _mockValidator;
+        private readonly CargoHubDbContext _mockContext;
 
         public InventoryServiceTests()
         {
-            _inventoryService = new InventoryService();
+            _mockValidator = new Mock<IValidator<Inventory>>();
+            _mockContext = InMemoryDatabaseFactory.CreateMockContext();
+
+            // Set up a default behavior for the validator mock
+            _mockValidator
+                .Setup(v => v.ValidateAsync(It.IsAny<Inventory>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            _inventoryService = new InventoryService(_mockContext, _mockValidator.Object);
         }
 
         [Fact]
         public void GetAllInventories_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
-            var result = _inventoryService.GetAllInventories();
+            var result = _inventoryService.GetAllInventories(null, null, null, null, null, null, null, null);
+
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void AddInventory_ValidInventory_IncreasesInventoryCount()
+        public async Task AddInventory_ValidInventory_IncreasesInventoryCount()
         {
             // Arrange
-            var inventory = new Inventory
+            var inventoryRequest = new InventoryRequest
             {
-                Id = 1,
-                ItemId = "P00001",
+                ItemId = "Item1",
                 TotalOnHand = 10,
                 TotalExpected = 20,
                 TotalOrdered = 15,
                 TotalAllocated = 5,
                 TotalAvailable = 10,
-                Description = "Test inventory"
+                Description = "Test inventory",
+                LocationId = new[] { 1, 2, 3 }
             };
 
             // Act
-            _inventoryService.AddInventory(inventory);
-            var allInventories = _inventoryService.GetAllInventories();
+            var newInventoryId = await _inventoryService.AddInventory(inventoryRequest);
+            var allInventories = _inventoryService.GetAllInventories(null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Single(allInventories);
-            Assert.Equal(inventory.ItemId, allInventories.First().ItemId);
+            Assert.Contains(allInventories, i => i.Id == newInventoryId && i.ItemId == inventoryRequest.ItemId);
         }
 
         [Fact]
@@ -54,16 +73,18 @@ namespace Backend.Features.Inventories.Tests
             // Arrange
             var inventory = new Inventory
             {
-                Id = 1,
-                ItemId = "P00002",
+                ItemId = "Item2",
                 TotalOnHand = 30,
                 TotalExpected = 50,
                 TotalOrdered = 20,
                 TotalAllocated = 10,
                 TotalAvailable = 20,
-                Description = "Another test inventory"
+                Description = "Another test inventory",
+                LocationId = new[] { 1, 2, 3 }
             };
-            _inventoryService.AddInventory(inventory);
+
+            _mockContext.Inventories?.Add(inventory);
+            _mockContext.SaveChanges();
 
             // Act
             var retrievedInventory = _inventoryService.GetInventoryById(inventory.Id);
@@ -84,65 +105,64 @@ namespace Backend.Features.Inventories.Tests
         }
 
         [Fact]
-        public void UpdateInventory_InventoryExists_UpdatesInventoryData()
+        public async Task UpdateInventory_InventoryExists_UpdatesInventoryData()
         {
             // Arrange
             var inventory = new Inventory
             {
-                Id = 1,
-                ItemId = "P0003",
+                ItemId = "Item3",
                 TotalOnHand = 50,
                 TotalExpected = 70,
                 TotalOrdered = 30,
                 TotalAllocated = 20,
                 TotalAvailable = 30,
-                Description = "Original inventory"
+                Description = "Original inventory",
+                LocationId = new[] { 1, 2, 3 }
             };
-            _inventoryService.AddInventory(inventory);
 
-            var updatedInventory = new Inventory
+            _mockContext.Inventories?.Add(inventory);
+            _mockContext.SaveChanges();
+
+            var updatedRequest = new InventoryRequest
             {
-                Id = inventory.Id,
-                ItemId = "P0003",
+                ItemId = "UpdatedItem3",
                 TotalOnHand = 60,
                 TotalExpected = 80,
                 TotalOrdered = 40,
                 TotalAllocated = 30,
                 TotalAvailable = 50,
-                Description = "Updated inventory"
+                Description = "Updated inventory",
+                LocationId = new[] { 1, 2, 4 }
             };
 
             // Act
-            _inventoryService.UpdateInventory(updatedInventory);
+            await _inventoryService.UpdateInventory(inventory.Id, updatedRequest);
             var retrievedInventory = _inventoryService.GetInventoryById(inventory.Id);
 
             // Assert
             Assert.NotNull(retrievedInventory);
-            Assert.Equal(updatedInventory.TotalOnHand, retrievedInventory?.TotalOnHand);
-            Assert.Equal(updatedInventory.Description, retrievedInventory?.Description);
+            Assert.Equal(updatedRequest.TotalOnHand, retrievedInventory?.TotalOnHand);
+            Assert.Equal(updatedRequest.Description, retrievedInventory?.Description);
         }
 
         [Fact]
-        public void UpdateInventory_InventoryDoesNotExist_NoChangesMade()
+        public void UpdateInventory_InventoryDoesNotExist_ThrowsException()
         {
             // Arrange
-            var updatedInventory = new Inventory
+            var updatedRequest = new InventoryRequest
             {
-                Id = 999,
-                ItemId = "P0999",
+                ItemId = "NonexistentItem",
                 TotalOnHand = 0,
                 TotalExpected = 0,
                 TotalOrdered = 0,
                 TotalAllocated = 0,
                 TotalAvailable = 0,
-                Description = "Nonexistent inventory"
+                Description = "Nonexistent inventory",
+                LocationId = new[] { 1, 2, 3 }
             };
 
-            // Act
-            _inventoryService.UpdateInventory(updatedInventory);
-
-            // Assert
-            Assert.Empty(_inventoryService.GetAllInventories());
+            // Act & Assert
+            Assert.ThrowsAsync<KeyNotFoundException>(async () => await _inventoryService.UpdateInventory(999, updatedRequest));
         }
 
         [Fact]
@@ -151,20 +171,22 @@ namespace Backend.Features.Inventories.Tests
             // Arrange
             var inventory = new Inventory
             {
-                Id = 1,
-                ItemId = "P0004",
+                ItemId = "Item4",
                 TotalOnHand = 40,
                 TotalExpected = 60,
                 TotalOrdered = 30,
                 TotalAllocated = 10,
                 TotalAvailable = 30,
-                Description = "Test inventory for deletion"
+                Description = "Test inventory for deletion",
+                LocationId = new[] { 1, 2, 3 }
             };
-            _inventoryService.AddInventory(inventory);
+
+            _mockContext.Inventories?.Add(inventory);
+            _mockContext.SaveChanges();
 
             // Act
             _inventoryService.DeleteInventory(inventory.Id);
-            var result = _inventoryService.GetAllInventories();
+            var result = _inventoryService.GetAllInventories(null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
@@ -173,25 +195,11 @@ namespace Backend.Features.Inventories.Tests
         [Fact]
         public void DeleteInventory_InventoryDoesNotExist_NoChangesMade()
         {
-            // Arrange
-            var inventory = new Inventory
-            {
-                Id = 1,
-                ItemId = "P0005",
-                TotalOnHand = 20,
-                TotalExpected = 30,
-                TotalOrdered = 15,
-                TotalAllocated = 5,
-                TotalAvailable = 10,
-                Description = "Test inventory"
-            };
-            _inventoryService.AddInventory(inventory);
-
             // Act
             _inventoryService.DeleteInventory(999);
 
             // Assert
-            Assert.Single(_inventoryService.GetAllInventories());
+            Assert.Empty(_inventoryService.GetAllInventories(null, null, null, null, null, null, null, null));
         }
     }
 }

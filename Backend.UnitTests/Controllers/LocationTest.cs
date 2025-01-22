@@ -1,5 +1,11 @@
-using Backend.Features.Locations;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Backend.Features.Locations;
+using Backend.Infrastructure.Database;
+using Backend.Request;
+using Backend.UnitTests.Factories;
+using FluentValidation;
 using Xunit;
 
 namespace Backend.Features.Locations.Tests
@@ -7,41 +13,42 @@ namespace Backend.Features.Locations.Tests
     public class LocationServiceTests
     {
         private readonly LocationService _locationService;
+        private readonly CargoHubDbContext _mockContext;
 
         public LocationServiceTests()
         {
-            _locationService = new LocationService();
+            _mockContext = InMemoryDatabaseFactory.CreateMockContext();
+            _locationService = new LocationService(_mockContext, new LocationValidator(_mockContext));
         }
 
         [Fact]
         public void GetAllLocations_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
-            var result = _locationService.GetAllLocations();
+            var result = _locationService.GetAllLocations(null, null, null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void AddLocation_ValidLocation_IncreasesLocationCount()
+        public async Task AddLocation_ValidLocation_IncreasesLocationCount()
         {
             // Arrange
-            var location = new Location
+            var locationRequest = new LocationRequest
             {
-                Id = 1,
                 WarehouseId = 1,
-                Code = "1",
-                Name = "Test Location"
+                Code = "3",
+                Name = "Row: 1, Rack: 1, Shelf: A"
             };
 
             // Act
-            _locationService.AddLocation(location);
-            var allLocations = _locationService.GetAllLocations();
+            await _locationService.AddLocation(locationRequest);
+            var allLocations = _locationService.GetAllLocations(null, null, null, null, null, null, null);
 
             // Assert
             Assert.Single(allLocations);
-            Assert.Equal(location.Name, allLocations.First().Name);
+            Assert.Contains(allLocations, l => l.Code == locationRequest.Code);
         }
 
         [Fact]
@@ -52,17 +59,20 @@ namespace Backend.Features.Locations.Tests
             {
                 Id = 1,
                 WarehouseId = 1,
-                Code = "2",
-                Name = "Test Location"
+                Code = "3",
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
-            _locationService.AddLocation(location);
+            _mockContext.Locations?.Add(location);
+            _mockContext.SaveChanges();
 
             // Act
             var retrievedLocation = _locationService.GetLocationById(location.Id);
 
             // Assert
             Assert.NotNull(retrievedLocation);
-            Assert.Equal(location.Name, retrievedLocation?.Name);
+            Assert.Equal(location.Code, retrievedLocation?.Code);
         }
 
         [Fact]
@@ -76,7 +86,8 @@ namespace Backend.Features.Locations.Tests
         }
 
         [Fact]
-        public void UpdateLocation_LocationExists_UpdatesLocationData()
+        public async Task UpdateLocation_LocationExists_UpdatesLocationData()
+
         {
             // Arrange
             var location = new Location
@@ -84,26 +95,27 @@ namespace Backend.Features.Locations.Tests
                 Id = 1,
                 WarehouseId = 1,
                 Code = "3",
-                Name = "Original Location"
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
-            _locationService.AddLocation(location);
+            _mockContext.Locations?.Add(location);
+            _mockContext.SaveChanges();
 
-            var updatedLocation = new Location
+            var updatedRequest = new LocationRequest
             {
-                Id = location.Id,
                 WarehouseId = location.WarehouseId,
                 Code = "Updated Code",
-                Name = "Updated Location"
+                Name = "Row: 1, Rack: 1, Shelf: A"
             };
 
             // Act
-            _locationService.UpdateLocation(updatedLocation);
+            await _locationService.UpdateLocation(location.Id, updatedRequest);
             var retrievedLocation = _locationService.GetLocationById(location.Id);
 
             // Assert
             Assert.NotNull(retrievedLocation);
-            Assert.Equal(updatedLocation.Code, retrievedLocation?.Code);
-            Assert.Equal(updatedLocation.Name, retrievedLocation?.Name);
+            Assert.Equal(updatedRequest.Code, retrievedLocation?.Code);
         }
 
         [Fact]
@@ -112,16 +124,19 @@ namespace Backend.Features.Locations.Tests
             // Arrange
             var location = new Location
             {
-                Id = 2,
+                Id = 3,
                 WarehouseId = 1,
                 Code = "12345",
-                Name = "Location to Delete"
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
-            _locationService.AddLocation(location);
+            _mockContext.Locations?.Add(location);
+            _mockContext.SaveChanges();
 
             // Act
             _locationService.DeleteLocation(location.Id);
-            var result = _locationService.GetAllLocations();
+            var result = _locationService.GetAllLocations(null, null, null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
@@ -136,15 +151,19 @@ namespace Backend.Features.Locations.Tests
                 Id = 3,
                 WarehouseId = 1,
                 Code = "12345",
-                Name = "Location Stay"
+                Row = "1",
+                Rack = "1",
+                Shelf = "A"
             };
-            _locationService.AddLocation(location);
+            _mockContext.Locations?.Add(location);
+            _mockContext.SaveChanges();
 
             // Act
             _locationService.DeleteLocation(999);
 
             // Assert
-            Assert.Single(_locationService.GetAllLocations());
+            Assert.Single(_locationService.GetAllLocations(null, null, null, null, null, null, null));
+
         }
     }
 }

@@ -1,6 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Backend.Features.Clients;
+using Backend.Features.Contacts;
 using Backend.Features.Items;
+using Backend.Features.OrderItems;
+using Backend.Features.ShipmentOrders;
+using Backend.Features.Shipments;
+using Backend.Features.Suppliers;
+using Backend.Features.Warehouses;
 
 namespace Backend.Features.Orders
 {
@@ -9,56 +17,71 @@ namespace Backend.Features.Orders
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public required int Id { get; set; }
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
-        [Required]
-        [ForeignKey("Supplier")]
-        public required int SourceId { get; set; }
+        [JsonPropertyName("request_date")]
+        public DateTime? RequestDate { get; set; }
 
-        [Required]
-        public required DateTime OrderDate { get; set; }
+        [JsonPropertyName("reference")]
+        public string? Reference { get; set; }
 
-        [Required]
-        public required DateTime RequestDate { get; set; }
-
-        [Required]
-        public required string Reference { get; set; }
-
+        [JsonPropertyName("reference_extra")]
         public string? ReferenceExtra { get; set; }
 
-        [Required]
-        public required string OrderStatus { get; set; }
-
+        [JsonPropertyName("notes")]
         public string? Notes { get; set; }
 
+        [JsonPropertyName("shipping_notes")]
         public string? ShippingNotes { get; set; }
 
+        [JsonPropertyName("picking_notes")]
         public string? PickingNotes { get; set; }
+
+        [JsonPropertyName("total_amount")]
+        public float TotalAmount { get; set; }
+
+        [JsonPropertyName("total_discount")]
+        public float? TotalDiscount { get; set; }
+
+        [JsonPropertyName("total_tax")]
+        public float? TotalTax { get; set; }
+
+        [JsonPropertyName("total_surcharge")]
+        public float? TotalSurcharge { get; set; }
+
+        [Required]
+        [JsonPropertyName("order_status")]
+        public string? OrderStatus { get; set; }
+
+        [Required]
+        [JsonPropertyName("order_date")]
+        public DateTime? OrderDate { get; set; }
 
         [Required]
         [ForeignKey("Warehouse")]
-        public required int WarehouseId { get; set; }
+        [JsonPropertyName("warehouse_id")]
+        public int? WarehouseId { get; set; }
+        public Warehouse Warehouse { get; set; } = null!;
 
         [Required]
-        [ForeignKey("Client")]
-        public required string ShipTo { get; set; }
+        [ForeignKey("Contact")]
+        [JsonPropertyName("source_id")]
+        public int? SourceId { get; set; }
+        public Contact? Contact { get; set; }
 
-        [Required]
-        [ForeignKey("Client")]
-        public required string BillTo { get; set; }
+        public int? ShipToClientId { get; set; }
+        public Client? ShipTo { get; set; }
 
-        [ForeignKey("Shipment")]
-        public int? ShipmentId { get; set; }
+        public int? BillToClientId { get; set; }
+        public Client? BillTo { get; set; }
 
-        [Required]
-        public required decimal TotalAmount { get; set; }
+        // Navigation properties
+        [JsonPropertyName("order_items")]
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
-        public decimal? TotalDiscount { get; set; }
+        [JsonPropertyName("shipment_orders")]
+        public virtual ICollection<ShipmentOrder> ShipmentOrders { get; set; } = new List<ShipmentOrder>();
 
-        public decimal? TotalTax { get; set; }
-
-        public decimal? TotalSurcharge { get; set; }
-
-        public required List<Item> Items { get; set; }
     }
 }

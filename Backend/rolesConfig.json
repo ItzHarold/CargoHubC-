@@ -74,9 +74,15 @@
             "GetItemLineById",
             "DeleteItemLine",
             "UpdateItemLine",
-            "GetItemsByItemType",
-            "GetItemsByItemGroup",
-            "GetItemsByItemLine"
+            "GetAllLocations",
+            "GetLocationById",
+            "UpdateLocation",
+            "AddLocation",
+            "DeleteLocation",
+            "GetItemsBySupplierId",
+            "GetItemsInTransfer",
+            "GetItemsForOrder",
+            "UpdateItemInOrder"
         ],
         "WarehouseManager": [
             "HealthCheck",

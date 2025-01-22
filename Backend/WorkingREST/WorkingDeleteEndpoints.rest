@@ -31,7 +31,7 @@ DELETE http://localhost:5031/api/item_groups/1
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Delete for item_types by ID
-DELETE http://localhost:5031/api/item_types/1
+DELETE http://localhost:5031/api/item_types/3
 X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Delete for inventories by ID
@@ -44,7 +44,7 @@ X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Delete for orders by ID
 DELETE http://localhost:5031/api/orders/1
-X-API-KEY: 3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
+X-API-KEY:  3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f
 
 ### Delete for clients by ID
 DELETE http://localhost:5031/api/clients/1

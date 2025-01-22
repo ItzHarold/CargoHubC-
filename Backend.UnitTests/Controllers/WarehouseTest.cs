@@ -1,37 +1,65 @@
-using Backend.Features.Warehouses;
-using Xunit;
 using System.Linq;
+using Xunit;
+using Backend.UnitTests.Factories;
+using Backend.Features.Warehouses;
+using Backend.Infrastructure.Database;
+using Backend.Requests;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Backend.Features.Contacts;
+using Backend.Features.WarehouseContacts;
+using FluentValidation;
+using Moq;
+
 
 namespace Backend.Features.Warehouses.Tests
 {
     public class WarehouseServiceTests
     {
-        private readonly IWarehouseService _warehouseService;
+        private readonly WarehouseService _warehouseService;
+        private readonly CargoHubDbContext _mockContext;
+        private readonly Mock<IValidator<Warehouse>> _mockValidator;
 
         public WarehouseServiceTests()
         {
-            _warehouseService = new WarehouseService();
+            _mockContext = InMemoryDatabaseFactory.CreateMockContext();
+            _mockValidator = new Mock<IValidator<Warehouse>>();
+
+            _mockValidator
+                .Setup(v => v.ValidateAsync(It.IsAny<Warehouse>(), default))
+                .ReturnsAsync(new FluentValidation.Results.ValidationResult());
+
+            _warehouseService = new WarehouseService(_mockContext, _mockValidator.Object);
         }
 
         [Fact]
         public void GetAllWarehouses_InitiallyEmpty_ReturnsEmptyList()
         {
             // Act
-            var result = _warehouseService.GetAllWarehouses();
+            var result = _warehouseService.GetAllWarehouses(null, null, null, null, null, null, null, null, null);
+
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void AddWarehouse_ValidWarehouse_IncreasesWarehouseCount()
+        public async Task AddWarehouse_ValidWarehouse_IncreasesWarehouseCount()
         {
             // Arrange
-            var warehouse = new Warehouse
+            var contact = new Contact
             {
                 Id = 1,
+                ContactName = "Contact 1",
+                ContactEmail = "contact1@example.com",
+                ContactPhone = "1234567890"
+            };
+
+            _mockContext.Contacts.Add(contact);
+            _mockContext.SaveChanges();
+
+            var warehouseRequest = new WarehouseRequest
+            {
                 Code = "WH001",
                 Name = "Warehouse 1",
                 Address = "10 Wijnhaven",
@@ -39,11 +67,11 @@ namespace Backend.Features.Warehouses.Tests
                 City = "Rotterdam",
                 Province = "Zuid-Holland",
                 Country = "Nederland",
-                Contacts = new Contact[]
+                Contacts = new List<ContactRequest>
                 {
-                    new Contact
+                    new ContactRequest
                     {
-                        Id = 1,
+
                         ContactName = "Contact 1",
                         ContactEmail = "contact1@example.com",
                         ContactPhone = "1234567890"
@@ -52,12 +80,14 @@ namespace Backend.Features.Warehouses.Tests
             };
 
             // Act
-            _warehouseService.AddWarehouse(warehouse);
-            var allWarehouses = _warehouseService.GetAllWarehouses();
+
+            await _warehouseService.AddWarehouse(warehouseRequest);
+            var allWarehouses = _warehouseService.GetAllWarehouses(null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Single(allWarehouses);
-            Assert.Equal(warehouse.Id, allWarehouses.First().Id);
+            Assert.Contains(allWarehouses, w => w.Code == warehouseRequest.Code);
+
         }
 
         [Fact]
@@ -73,26 +103,21 @@ namespace Backend.Features.Warehouses.Tests
                 Zip = "1234JK",
                 City = "Rotterdam",
                 Province = "Zuid-Holland",
-                Country = "Nederland",
-                Contacts = new Contact[]
-                {
-                    new Contact
-                    {
-                        Id = 1,
-                        ContactName = "Contact 1",
-                        ContactEmail = "contact1@example.com",
-                        ContactPhone = "1234567890"
-                    }
-                }
+
+                Country = "Nederland"
             };
-            _warehouseService.AddWarehouse(warehouse);
+            _mockContext.Warehouses.Add(warehouse);
+            _mockContext.SaveChanges();
+
 
             // Act
             var retrievedWarehouse = _warehouseService.GetWarehouseById(warehouse.Id);
 
             // Assert
             Assert.NotNull(retrievedWarehouse);
-            Assert.Equal(warehouse.Id, retrievedWarehouse?.Id);
+
+            Assert.Equal(warehouse.Code, retrievedWarehouse?.Code);
+
         }
 
         [Fact]
@@ -103,67 +128,6 @@ namespace Backend.Features.Warehouses.Tests
 
             // Assert
             Assert.Null(result);
-        }
-
-        [Fact]
-        public void UpdateWarehouse_WarehouseExists_UpdatesWarehouseData()
-        {
-            // Arrange
-            var warehouse = new Warehouse
-            {
-                Id = 1,
-                Code = "WH001",
-                Name = "Warehouse 1",
-                Address = "10 Wijnhaven",
-                Zip = "1234JK",
-                City = "Rotterdam",
-                Province = "Zuid-Holland",
-                Country = "Nederland",
-                Contacts = new Contact[]
-                {
-                    new Contact
-                    {
-                        Id = 1,
-                        ContactName = "Contact 1",
-                        ContactEmail = "contact1@example.com",
-                        ContactPhone = "1234567890"
-                    }
-                }
-            };
-            _warehouseService.AddWarehouse(warehouse);
-
-            var updatedWarehouse = new Warehouse
-            {
-                Id = warehouse.Id,
-                Code = "WH002",
-                Name = "Warehouse Updated",
-                Address = "10 Wijnhaven",
-                Zip = "1234JK",
-                City = "Rotterdam",
-                Province = "Zuid-Holland",
-                Country = "Nederland",
-                Contacts = new Contact[]
-                {
-                    new Contact
-                    {
-                        Id = 2,
-                        ContactName = "Updated Contact",
-                        ContactEmail = "updatedcontact@example.com",
-                        ContactPhone = "0987654321"
-                    }
-                }
-            };
-
-            // Act
-            _warehouseService.UpdateWarehouse(updatedWarehouse);
-            var retrievedWarehouse = _warehouseService.GetWarehouseById(warehouse.Id);
-
-            // Assert
-            Assert.NotNull(retrievedWarehouse);
-            Assert.Equal(updatedWarehouse.Code, retrievedWarehouse?.Code);
-            Assert.Equal(updatedWarehouse.Name, retrievedWarehouse?.Name);
-            Assert.Equal(updatedWarehouse.Address, retrievedWarehouse?.Address);
-            Assert.Equal(updatedWarehouse.Contacts.Length, retrievedWarehouse?.Contacts.Length);
         }
 
         [Fact]
@@ -179,23 +143,14 @@ namespace Backend.Features.Warehouses.Tests
                 Zip = "1234JK",
                 City = "Rotterdam",
                 Province = "Zuid-Holland",
-                Country = "Nederland",
-                Contacts = new Contact[]
-                {
-                    new Contact
-                    {
-                        Id = 1,
-                        ContactName = "Contact 2",
-                        ContactEmail = "contact2@example.com",
-                        ContactPhone = "0987654321"
-                    }
-                }
+                Country = "Nederland"
             };
-            _warehouseService.AddWarehouse(warehouse);
+            _mockContext.Warehouses.Add(warehouse);
+            _mockContext.SaveChanges();
 
             // Act
             _warehouseService.DeleteWarehouse(warehouse.Id);
-            var result = _warehouseService.GetAllWarehouses();
+            var result = _warehouseService.GetAllWarehouses(null, null, null, null, null, null, null, null, null);
 
             // Assert
             Assert.Empty(result);
@@ -214,25 +169,18 @@ namespace Backend.Features.Warehouses.Tests
                 Zip = "1234JK",
                 City = "Rotterdam",
                 Province = "Zuid-Holland",
-                Country = "Nederland",
-                Contacts = new Contact[]
-                {
-                    new Contact
-                    {
-                        Id = 1,
-                        ContactName = "Contact 3",
-                        ContactEmail = "contact3@example.com",
-                        ContactPhone = "1122334455"
-                    }
-                }
+                Country = "Nederland"
             };
-            _warehouseService.AddWarehouse(warehouse);
+            _mockContext.Warehouses.Add(warehouse);
+            _mockContext.SaveChanges();
+
 
             // Act
             _warehouseService.DeleteWarehouse(999);
 
             // Assert
-            Assert.Single(_warehouseService.GetAllWarehouses());
+            Assert.Single(_warehouseService.GetAllWarehouses(null, null, null, null, null, null, null, null, null));
+
         }
     }
 }

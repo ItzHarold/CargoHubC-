@@ -1,66 +1,143 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
+using Backend.Infrastructure.Database;
+using Backend.Response;
+using Backend.Requests;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Features.Clients
 {
     public interface IClientService
     {
-        IEnumerable<Client> GetAllClients();
+        IEnumerable<Client> GetAllClients(string? sort, string? direction, string? name, string? city, string? country);
         Client? GetClientById(int id);
-        void AddClient(Client client);
-        void UpdateClient(Client client);
+        Task<int> AddClient(ClientRequest clientRequest);
+        Task UpdateClient(Client client);
         void DeleteClient(int id);
     }
 
     public class ClientService : IClientService
     {
-        private readonly List<Client> _clients = new();
+        private readonly CargoHubDbContext _dbContext;
+        private readonly IValidator<Client> _validator;
 
-        public IEnumerable<Client> GetAllClients()
+        public ClientService(CargoHubDbContext dbContext, IValidator<Client> validator)
         {
-            return _clients;
+            _dbContext = dbContext;
+            _validator = validator;
         }
 
+        public IEnumerable<Client> GetAllClients(string? sort, string? direction, string? name, string? city, string? country)
+        {
+            // Check if _dbContext.Clients is null
+            if (_dbContext.Clients == null)
+            {
+                // Return an empty list if Clients is null
+                return new List<Client>();
+            }
+
+            IQueryable<Client> query = _dbContext.Clients.AsQueryable();
+
+            // Apply filtering based on the query parameters
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(c => c.Name.Contains(name));
+            }
+            if (!string.IsNullOrEmpty(city))
+            {
+                query = query.Where(c => c.City.Contains(city));
+            }
+            if (!string.IsNullOrEmpty(country))
+            {
+                query = query.Where(c => c.Country.Contains(country));
+            }
+
+            // Apply sorting based on the query parameters
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "name":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name);
+                        break;
+                    case "address":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.Address) : query.OrderBy(c => c.Address);
+                        break;
+                    case "city":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.City) : query.OrderBy(c => c.City);
+                        break;
+                    case "country":
+                        query = direction == "desc" ? query.OrderByDescending(c => c.Country) : query.OrderBy(c => c.Country);
+                        break;
+                    // Add more cases as needed for other properties
+                    default:
+                        // Default sorting (you can choose any default behavior here)
+                        query = query.OrderBy(c => c.Name);
+                        break;
+                }
+            }
+
+            // Return the filtered and sorted result as a list
+            return query.ToList();
+        }
+        
         public Client? GetClientById(int id)
         {
-            return _clients.FirstOrDefault(c => c.Id == id);
+            return _dbContext.Clients?.Find(id);
         }
 
-        public void AddClient(Client client)
+        public async Task<int> AddClient(ClientRequest clientRequest)
         {
-            client.Id = _clients.Count > 0 ? _clients.Max(c => c.Id) + 1 : 1;
-            _clients.Add(client);
-        }
+            // var validationResult = await _validator.ValidateAsync(client);
 
-        public void UpdateClient(Client client)
-        {
-            var existingClient = GetClientById(client.Id);
-            if (existingClient != null)
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            var client = new Client()
             {
-                var updatedClient = new Client
-                {
-                    Id = existingClient.Id,
-                    Name = client.Name,
-                    Address = client.Address,
-                    City = client.City,
-                    ZipCode = client.ZipCode,
-                    Province = client.Province,
-                    Country = client.Country,
-                    ContactName = client.ContactName,
-                    ContactPhone = client.ContactPhone,
-                    ContactEmail = client.ContactEmail
-                };
-                _clients[_clients.IndexOf(existingClient)] = updatedClient;
-            }
+                Name = clientRequest.Name,
+                Address = clientRequest.Address,
+                City = clientRequest.City,
+                ZipCode = clientRequest.ZipCode,
+                Province = clientRequest.Province,
+                Country = clientRequest.Country,
+                ContactName = clientRequest.ContactName,
+                ContactPhone = clientRequest.ContactPhone,
+                ContactEmail = clientRequest.ContactEmail
+            };
+
+            client.CreatedAt = DateTime.Now;
+            client.UpdatedAt = client.CreatedAt;
+
+            _dbContext.Clients?.Add(client);
+            await _dbContext.SaveChangesAsync();
+            return client.Id;
+        }
+
+        public async Task UpdateClient(Client client)
+        {
+            // var validationResult = await _validator.ValidateAsync(client);
+
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
+
+            client.UpdatedAt = DateTime.Now;
+            _dbContext.Clients?.Update(client);
+            await _dbContext.SaveChangesAsync();
         }
 
         public void DeleteClient(int id)
         {
-            var client = GetClientById(id);
+            var client = _dbContext.Clients?.Find(id);
             if (client != null)
             {
-                _clients.Remove(client);
+                _dbContext.Clients?.Remove(client);
+                _dbContext.SaveChanges();
             }
         }
     }

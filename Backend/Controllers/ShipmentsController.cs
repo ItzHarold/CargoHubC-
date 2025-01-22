@@ -1,6 +1,10 @@
 using System.Collections.Generic;
 using Backend.Features.Shipments;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
+using Backend.Requests;
+using Backend.Response;
+using Backend.Features.Orders;
 
 namespace Backend.Controllers.Shipments
 {
@@ -15,11 +19,42 @@ namespace Backend.Controllers.Shipments
             _shipmentService = shipmentService;
         }
 
-        [HttpGet]
-        public IEnumerable<Shipment> GetAllShipments()
+
+        [HttpGet(Name = "GetAllShipments")]
+        public IActionResult GetAllShipments(
+            string? sort,
+            string? direction,
+            int? sourceId,
+            DateTime? orderDate,
+            DateTime? requestDate,
+            DateTime? shipmentDate,
+            string? shipmentType,
+            string? shipmentStatus,
+            string? carrierCode,
+            string? paymentType,
+            string? transferMode,
+            int? totalPackageCount,
+            float? totalPackageWeight)
         {
-            return _shipmentService.GetAllShipments();
+            var shipments = _shipmentService.GetAllShipments(
+                sort,
+                direction,
+                sourceId,
+                orderDate,
+                requestDate,
+                shipmentDate,
+                shipmentType,
+                shipmentStatus,
+                carrierCode,
+                paymentType,
+                transferMode,
+                totalPackageCount,
+                totalPackageWeight
+            );
+
+            return Ok(shipments);
         }
+
 
         [HttpGet("{id}")]
         public Shipment? GetShipmentById(int id)
@@ -27,20 +62,65 @@ namespace Backend.Controllers.Shipments
             return _shipmentService.GetShipmentById(id);
         }
 
+
         [HttpPost]
-        public void AddShipment([FromBody] Shipment shipment)
+        public async Task<IActionResult> AddShipment([FromBody] ShipmentRequest shipmentRequest)
         {
-            _shipmentService.AddShipment(shipment);
+            int newShipmentId = await _shipmentService.AddShipment(shipmentRequest);
+            var shipment = _shipmentService.GetShipmentById(newShipmentId);
+            if (shipment == null)
+                return NotFound();
+            
+            var response = _shipmentService.MapToResponse(shipment);
+            return CreatedAtAction(nameof(GetShipmentById), new { id = response.Id}, response);
+           
         }
-        [HttpPut]
-        public void UpdateShipment([FromBody] Shipment shipment)
+
+        // ShipmentsController.cs
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateShipment(int id, [FromBody] ShipmentRequest request)
         {
-            _shipmentService.UpdateShipment(shipment);
+            try
+            {
+                await _shipmentService.UpdateShipment(id, request);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { errors = ex.Errors });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
+
         [HttpDelete("{id}")]
         public void DeleteShipment(int id)
         {
             _shipmentService.DeleteShipment(id);
+        }
+
+        [HttpPut("{shipmentId}/items/{itemUid}")]
+        public async Task<IActionResult> UpdateItemInShipment(int shipmentId, string itemUid, [FromBody] ShipmentItemUpdateRequest updateRequest)
+        {
+            try
+            {
+                await _shipmentService.UpdateItemInShipment(shipmentId, itemUid, updateRequest);
+                return NoContent();  // Successfully updated
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "An error occurred while updating the shipment item.", details = ex.Message });
+            }
         }
     }
 

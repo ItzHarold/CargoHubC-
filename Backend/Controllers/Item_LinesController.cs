@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Backend.Features.ItemLines;
+using Backend.Requests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.ItemLines
@@ -8,45 +9,81 @@ namespace Backend.Controllers.ItemLines
     [Route("api/item_lines")]
     public class ItemLinesController : ControllerBase
     {
-        private IItemLineService _service { get; set; }
+        private IItemLineService _itemLineservice { get; set; }
 
-        public ItemLinesController(IItemLineService service)
+        public ItemLinesController(IItemLineService itemLineservice)
         {
-            _service = service;
+            _itemLineservice = itemLineservice;
         }
 
         [HttpGet]
-        public IActionResult GetItemLines()
+        public IActionResult GetAllItemLines(
+            string? sort,
+            string? direction,
+            string? name,
+            string? description)
         {
-            return Ok(_service.GetAllItemLines());
+            var itemGroups = _itemLineservice.GetAllItemLines(sort, direction, name, description);
+            return Ok(itemGroups);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         public IActionResult GetItemLineById(int id)
         {
-            var line = _service.GetItemLineById(id);
-            return line is not null ? Ok(line) : NotFound();
+            var itemLine = _itemLineservice.GetItemLineById(id);
+            if (itemLine == null)
+            {
+                return NotFound();
+            }
+
+            var response = new ItemLineResponse
+            {
+                id = itemLine.id,
+                Name = itemLine.Name,
+                Description = itemLine.Description
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public IActionResult AddItemLine([FromBody] ItemLine itemLine)
+        public async Task<IActionResult> AddItemLine(ItemLineRequest itemLine)
         {
-            _service.AddItemLine(itemLine);
-            return Ok();
+            try
+            {
+                int newItemLineId = await _itemLineservice.AddItemLine(itemLine);
+                return GetItemLineById(newItemLineId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult DeleteItemLine(int id)
         {
-            _service.DeleteItemLine(id);
+            _itemLineservice.DeleteItemLine(id);
             return NoContent();
         }
 
-        [HttpPut("{id:int}")]
-        public IActionResult UpdateItemLine(int id, [FromBody] ItemLine itemLine)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateItemLine(int id, [FromBody] ItemLine itemLine)
         {
-            _service.UpdateItemLine(id, itemLine);
-            return NoContent();
+            if (id != itemLine.id)
+            {
+                return BadRequest("Item Group does not match the ID");
+            }
+            try
+            {
+                await _itemLineservice.UpdateItemLine(itemLine);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+            
         }
     }
 }
