@@ -115,6 +115,12 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      # Configure Git User
+      - name: Configure Git User
+        run: |
+          git config --global charriexx "GitHub Actions"
+          git config --global charlotte.e.kwok@gmail.com "actions@github.com"
+
       # Stash any uncommitted changes
       - name: Stash Uncommitted Changes
         run: |
