@@ -105,9 +105,11 @@ jobs:
     environment: production
 
     steps:
-      # Checkout the repository
+      # Checkout the repository with token
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEPLOY_TOKEN }}
 
       # Setup .NET
       - name: Setup .NET
@@ -124,12 +126,12 @@ jobs:
       # Stash any uncommitted changes
       - name: Stash Uncommitted Changes
         run: |
-          git stash
+          git stash || echo "No changes to stash"
 
       # Fetch and track the workflow branch
       - name: Fetch and Track Workflow Branch
         run: |
-          git fetch origin workflow:workflow # Fetch and create a local tracking branch for workflow
+          git fetch origin workflow:workflow
 
       # Switch to the development branch
       - name: Switch to Development Branch
@@ -140,26 +142,38 @@ jobs:
       # Merge the workflow branch into development
       - name: Merge Workflow into Development
         run: |
-          git merge workflow --no-ff -m "Merge workflow into development"
+          git merge workflow --no-ff -m "Merge workflow into development" || {
+            echo "Merge conflict occurred"
+            git merge --abort
+            exit 1
+          }
 
       # Push changes to the development branch
       - name: Push to Development Branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
         run: |
           git push origin development
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
 
-      # Apply stashed changes for post-deployment review (optional)
+      # Apply stashed changes for post-deployment review
       - name: Apply Stashed Changes
-        if: always() # Always run this step, even if previous steps fail
+        if: success()
         run: |
-          git stash apply || echo "No stashed changes to apply"
+          if git stash list | grep -q .; then
+            git stash apply || echo "Failed to apply stash"
+          else
+            echo "No stashes to apply"
+          fi
 
-      # Modify and commit changes after deployment (optional)
+      # Modify and commit changes after deployment
       - name: Modify and Commit Changes
-        if: always()
+        if: success()
         run: |
-          # Perform necessary edits here if needed
-          git add .
-          git commit -m "Post-deployment changes" || echo "No changes to commit"
-          git push origin development || echo "No changes to push"
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add .
+            git commit -m "Post-deployment changes" && \
+            git push origin development || echo "Failed to push changes"
+          fi
+
