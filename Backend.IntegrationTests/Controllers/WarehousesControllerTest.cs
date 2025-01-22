@@ -1,114 +1,182 @@
 using System.Net;
-using Backend.Features.Contacts;
-using Backend.Features.Warehouses;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Xunit;
+using Backend.Requests;
 
 namespace Backend.IntegrationTests.Controllers
 {
-    public class WarehousesControllerTest
+    public class ClientsControllerTest
     {
-        [Fact]
-        public async Task GetAllWarehousesOnSuccessReturns200()
+        private readonly string _baseUrl = "http://localhost:5031/api/clients";
+        private readonly HttpClient _client;
+
+        public ClientsControllerTest()
         {
-            // Arrange
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-API-KEY", "3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f");
-            // Check out options TODO
-
-            // Act
-            var result = await client.GetAsync("http://localhost:5031/api/warehouses");
-
-            // Assert
-            result.StatusCode.Should().Be(HttpStatusCode.OK);
+            _client = new HttpClient();
+            _client.DefaultRequestHeaders.Add("X-API-KEY", "3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f");
         }
 
         [Fact]
-        public async Task GetWarehouseByIdOnSuccessReturns204()
+        public async Task GetAllClients_Returns200Ok()
         {
-            // Arrange
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-API-KEY", "3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f");
-            // Check out options TODO
-
             // Act
-            var result = await client.GetAsync("http://localhost:5031/api/warehouses/1");
+            var response = await _client.GetAsync(_baseUrl);
 
             // Assert
-            result.StatusCode.Should().Be(HttpStatusCode.NoContent);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         [Fact]
-        public async Task AddWarehouseOnSuccessReturns200()
+        public async Task GetClientById_ValidId_Returns200Ok()
         {
             // Arrange
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-API-KEY", "3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f");
+            var clientId = 1;
 
+            // Act
+            var response = await _client.GetAsync($"{_baseUrl}/{clientId}");
 
-            var warehouse = new Warehouse
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        [Fact]
+        public async Task GetClientById_InvalidId_Returns404NotFound()
+        {
+            // Arrange
+            var invalidClientId = 9999;
+
+            // Act
+            var response = await _client.GetAsync($"{_baseUrl}/{invalidClientId}");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task AddClient_ValidClient_Returns200Ok()
+        {
+            // Arrange
+            var clientRequest = new ClientRequest
             {
-                Id = 1,
-                Code = "WH001",
-                Name = "Main Warehouse",
-                Address = "123 Main St",
-                Zip = "12345",
-                City = "Metropolis",
-                Province = "Central",
-                Country = "Countryland",
-                Contacts = new Contact[]
-                {
-                    new Contact { Id = 1, ContactName = "John Doe", ContactEmail = "john.doe@example.com", ContactPhone = "123-456-7890" }
-                },
-                CreatedAt = DateTime.Now
+                Name = "Test Client",
+                Address = "123 Test Street",
+                City = "Test City",
+                ZipCode = "12345",
+                Province = "Test Province",
+                Country = "Test Country",
+                ContactName = "Test Contact",
+                ContactPhone = "123-456-7890",
+                ContactEmail = "test@example.com"
             };
 
-            var content = JsonContent.Create(warehouse);
-            // Check out options TODO
-
             // Act
-            var result = await client.PostAsync("http://localhost:5031/api/warehouses", content);
+            var response = await _client.PostAsJsonAsync(_baseUrl, clientRequest);
 
             // Assert
-            result.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         [Fact]
-        public async Task UpdateWarehouseOnSuccessReturns200()
+        public async Task AddClient_InvalidClient_Returns400BadRequest()
         {
             // Arrange
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-API-KEY", "3f5e8b9c-2d4a-4b6a-8f3e-1a2b3c4d5e6f");
-
-            var warehouse = new Warehouse
+            var invalidClientRequest = new ClientRequest
             {
-                Id = 1,
-                Code = "WH001",
-                Name = "Main Warehouse",
-                Address = "123 Main St",
-                Zip = "12345",
-                City = "Metropolis",
-                Province = "Central",
-                Country = "Countryland",
-                Contacts = new Contact[]
-                {
-                    new Contact { Id = 1, ContactName = "John Doe", ContactEmail = "", ContactPhone = "123-456-7890" }
-                },
-                CreatedAt = DateTime.Now,
-                UpdatedAt = null
-
+                Name = "", // Invalid: Name cannot be empty
+                Address = "", // Invalid: Address cannot be empty
+                City = "", // Invalid: City cannot be empty
+                ZipCode = "", // Invalid: ZipCode cannot be empty
+                Province = "", // Invalid: Province cannot be empty
+                Country = "", // Invalid: Country cannot be empty
+                ContactName = "", // Invalid: ContactName cannot be empty
+                ContactPhone = "", // Invalid: ContactPhone cannot be empty
+                ContactEmail = "invalid-email-format" // Invalid: Incorrect email format
             };
 
-            var content = JsonContent.Create(warehouse);
-            // Check out options TODO
-
             // Act
-            var result = await client.PutAsync("http://localhost:5031/api/warehouses", content);
+            var response = await _client.PostAsJsonAsync(_baseUrl, invalidClientRequest);
 
             // Assert
-            result.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
 
+
+        [Fact]
+        public async Task UpdateClient_ValidClient_Returns204NoContent()
+        {
+            // Arrange
+            var clientId = 1;
+            var clientUpdateRequest = new ClientRequest
+            {
+                Name = "Updated Client",
+                Address = "456 Updated Street",
+                City = "Updated City",
+                ZipCode = "67890",
+                Province = "Updated Province",
+                Country = "Updated Country",
+                ContactName = "Updated Contact",
+                ContactPhone = "098-765-4321",
+                ContactEmail = "updated@example.com"
+            };
+
+            // Act
+            var response = await _client.PutAsJsonAsync($"{_baseUrl}/{clientId}", clientUpdateRequest);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
+
+        [Fact]
+        public async Task UpdateClient_InvalidClient_Returns400BadRequest()
+        {
+            // Arrange
+            var clientId = 1;
+            var invalidClientUpdateRequest = new ClientRequest
+            {
+                Name = "", // Invalid: Name cannot be empty
+                Address = "", // Invalid: Address cannot be empty
+                City = "", // Invalid: City cannot be empty
+                ZipCode = "", // Invalid: ZipCode cannot be empty
+                Province = "", // Invalid: Province cannot be empty
+                Country = "", // Invalid: Country cannot be empty
+                ContactName = "", // Invalid: ContactName cannot be empty
+                ContactPhone = "", // Invalid: ContactPhone cannot be empty
+                ContactEmail = "invalid-email-format" // Invalid: Incorrect email format
+            };
+
+            // Act
+            var response = await _client.PutAsJsonAsync($"{_baseUrl}/{clientId}", invalidClientUpdateRequest);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+
+        [Fact]
+        public async Task DeleteClient_ValidId_Returns204NoContent()
+        {
+            // Arrange
+            var clientId = 1;
+
+            // Act
+            var response = await _client.DeleteAsync($"{_baseUrl}/{clientId}");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
+
+        [Fact]
+        public async Task DeleteClient_InvalidId_Returns404NotFound()
+        {
+            // Arrange
+            var invalidClientId = 9999;
+
+            // Act
+            var response = await _client.DeleteAsync($"{_baseUrl}/{invalidClientId}");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
     }
 }
