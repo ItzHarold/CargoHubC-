@@ -125,6 +125,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add ./publish
-          git commit -m "Deploy application"
-          git push origin main
+          git fetch origin # Fetch the latest changes
+          git checkout development # Switch to the development branch
+          git merge workflow --no-ff -m "Merge workflow branch into development"
+          git push origin development
