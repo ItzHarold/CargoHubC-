@@ -119,12 +119,12 @@ namespace Backend.Features.Clients
 
         public async Task UpdateClient(Client client)
         {
-            var validationResult = await _validator.ValidateAsync(client);
+            // var validationResult = await _validator.ValidateAsync(client);
 
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
+            // if (!validationResult.IsValid)
+            // {
+            //     throw new ValidationException(validationResult.Errors);
+            // }
 
             client.UpdatedAt = DateTime.Now;
             _dbContext.Clients?.Update(client);
